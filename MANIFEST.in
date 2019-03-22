@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include ashbee *.css
+recursive-include ashbee *.csv
+recursive-include ashbee *.html
+recursive-include ashbee *.ico
+recursive-include ashbee *.js
+recursive-include ashbee *.json
+recursive-include ashbee *.md
+recursive-include ashbee *.png
+recursive-include ashbee *.py
+recursive-include ashbee *.svg
+recursive-include ashbee *.txt
+recursive-exclude ashbee *.pyc
