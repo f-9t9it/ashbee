@@ -3,13 +3,26 @@ import frappe
 from frappe.utils import flt
 from erpnext.controllers.item_variant import get_variant, create_variant
 
-def printmsg(msglist):
-	print("=="*8)
-	print("\n"*8)
-	for i in msglist:
-		print(i)
-	print("\n"*8)
-	print("=="*8)
+
+
+# def printmsg(msglist):
+# 	print("=="*8)
+# 	print("\n"*8)
+# 	for i in msglist:
+# 		print(i)
+# 	print("\n"*8)
+# 	print("=="*8)
+
+def check_and_create_attribute(item):
+	item = frappe.get_doc("Item", item)
+	return item
+
+def get_variant_attribute_args(item, _args):
+	args = {}
+	for attr in item.attributes:
+		args[attr.attribute] = attr.attribute_value
+	args.update(_args)
+	return _args
 
 @frappe.whitelist()
 def create_multiple_variants(**filters):
@@ -34,11 +47,14 @@ def create_variant_item(**filters):
 	if not item.variant_of:
 		return
 	args = {filters.get('attr_type'):filters.get("attr_value")}
+	args = get_variant_attribute_args(item, args)
 	variant = get_variant(item.variant_of, args)
 	if variant:
 		variant = frappe.get_doc("Item", variant)
 	else:
-		variant = create_variant(item.variant_of, args)
+		template = check_and_create_attribute(item.variant_of)
+		variant = create_variant(template.name, args)
+		make_variant_item_code(template.item_code, template.item_name, variant)
 		variant.valuation_rate = 0.0
 	if filters.get('valuation_rate'):
 		variant.valuation_rate = filters.get('valuation_rate')
@@ -121,6 +137,32 @@ def get_issue_items(**kwargs):
 		data.append(new_entry_item)
 	return data
 
-@frappe.whitelist()
-def stock_entry_validate(doc, method):
-	doc.ashbee_issue_items = ""
+
+def make_variant_item_code(template_item_code, template_item_name, variant):
+	"""Uses template's item code and abbreviations to make variant's item code"""
+	if variant.item_code:
+		return
+
+	abbreviations = []
+	for attr in variant.attributes:
+		item_attribute = frappe.db.sql("""select i.numeric_values, v.abbr
+			from `tabItem Attribute` i left join `tabItem Attribute Value` v
+				on (i.name=v.parent)
+			where i.name=%(attribute)s and (v.attribute_value=%(attribute_value)s or i.numeric_values = 1)""", {
+				"attribute": attr.attribute,
+				"attribute_value": attr.attribute_value
+			}, as_dict=True)
+
+		if not item_attribute:
+			continue
+			# frappe.throw(_('Invalid attribute {0} {1}').format(frappe.bold(attr.attribute),
+			# 	frappe.bold(attr.attribute_value)), title=_('Invalid Attribute'),
+			# 	exc=InvalidItemAttributeValueError)
+
+		abbr_or_value = cstr(attr.attribute_value) if item_attribute[0].numeric_values else item_attribute[0].abbr
+		abbreviations.append(abbr_or_value)
+
+	if abbreviations:
+		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
+		variant.item_name = "{0}-{1}".format(template_item_name, "-".join(abbreviations))
+
