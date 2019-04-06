@@ -13,6 +13,18 @@ from erpnext.controllers.item_variant import get_variant, create_variant
 # 	print("\n"*8)
 # 	print("=="*8)
 
+@frappe.whitelist()
+def get_all_variant_attributes_and_rate(item_code):
+	item = frappe.get_doc("Item", item_code)
+	attrs = {}
+	if not item.attributes:
+		return None
+	for attr in item.attributes:
+		attrs[attr.attribute] = attr.attribute_value 
+	attrs['rate'] = item.valuation_rate
+	return attrs
+
+
 def check_and_create_attribute(item):
 	item = frappe.get_doc("Item", item)
 	return item
@@ -53,13 +65,31 @@ def create_variant_item(**filters):
 		variant = frappe.get_doc("Item", variant)
 	else:
 		template = check_and_create_attribute(item.variant_of)
+		args = update_missing_variant_attrs(item, template, args)
 		variant = create_variant(template.name, args)
-		make_variant_item_code(template.item_code, template.item_name, variant)
-		variant.valuation_rate = 0.0
+		size = get_size_from_item(item)
+		variant.valuation_rate = (size * 1.5*0.250) + item.valuation_rate
 	if filters.get('valuation_rate'):
 		variant.valuation_rate = filters.get('valuation_rate')
 	variant.save();
 	return variant
+
+def update_missing_variant_attrs(item, template, args):
+	template_attrs = {attr.attribute:attr.attribute_value for attr in template.attributes}
+	item_attrs = {attr.attribute:attr.attribute_value for attr in item.attributes}
+	_args = {}
+	for attr in template_attrs.keys():
+		if attr not in args.keys():
+			_args[attr] = item_attrs[attr]
+		else:
+			_args[attr] = args[attr]
+	return _args
+
+def get_size_from_item(item):
+	for attr in item.attributes:
+		if attr.attribute == "Size":
+			return flt(attr.attribute_value)
+	return 0.0
 
 
 @frappe.whitelist()
@@ -69,7 +99,9 @@ def get_finished_variant_item(**filters):
 	item = frappe.get_doc("Item", filters.get("item_code"))
 	if not item.variant_of:
 		return
-	variant = get_variant(item.variant_of, {filters.get("attr_type"):filters.get("attr_value")})
+	template = frappe.get_doc("Item",item.variant_of)
+	args = update_missing_variant_attrs(item, template, {filters.get("attr_type"):filters.get("attr_value")})
+	variant = get_variant(item.variant_of, args)
 	if variant:
 		variant = frappe.get_doc("Item", variant)
 		return {'name':variant.name, 'rate':variant.valuation_rate}
@@ -136,33 +168,3 @@ def get_issue_items(**kwargs):
 		new_entry_item.basic_rate = new_entry_item.valuation_rate * new_entry_item.qty
 		data.append(new_entry_item)
 	return data
-
-
-def make_variant_item_code(template_item_code, template_item_name, variant):
-	"""Uses template's item code and abbreviations to make variant's item code"""
-	if variant.item_code:
-		return
-
-	abbreviations = []
-	for attr in variant.attributes:
-		item_attribute = frappe.db.sql("""select i.numeric_values, v.abbr
-			from `tabItem Attribute` i left join `tabItem Attribute Value` v
-				on (i.name=v.parent)
-			where i.name=%(attribute)s and (v.attribute_value=%(attribute_value)s or i.numeric_values = 1)""", {
-				"attribute": attr.attribute,
-				"attribute_value": attr.attribute_value
-			}, as_dict=True)
-
-		if not item_attribute:
-			continue
-			# frappe.throw(_('Invalid attribute {0} {1}').format(frappe.bold(attr.attribute),
-			# 	frappe.bold(attr.attribute_value)), title=_('Invalid Attribute'),
-			# 	exc=InvalidItemAttributeValueError)
-
-		abbr_or_value = cstr(attr.attribute_value) if item_attribute[0].numeric_values else item_attribute[0].abbr
-		abbreviations.append(abbr_or_value)
-
-	if abbreviations:
-		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
-		variant.item_name = "{0}-{1}".format(template_item_name, "-".join(abbreviations))
-

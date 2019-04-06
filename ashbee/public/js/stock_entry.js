@@ -57,10 +57,29 @@ var set_ashbee_finished_item = function(frm, cdt, cdn){
 
 var ash_create_variant = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
+	frappe.call({
+		method:"ashbee.ashbee.customs.stock_entry.get_all_variant_attributes_and_rate",
+		args:{"item_code":child.item_code},
+		callback:function(r){
+			if(r && r.message){
+				var rate = 0.0;
+				var size = r.message["Size"] == undefined ? 0.0 : r.message["Size"];
+				if(child.ashbee_attribute_type == "Colour" || child.ashbee_attribute_type == "Color"){
+					rate = (size * 1.5*0.250) + r.message.rate;
+				}
+				confirm_variant_create_with_rate(frm, child, rate, r.message);
+			}
+		}
+	});
+}
+
+
+
+var confirm_variant_create_with_rate = function(frm, child, rate, attrs_and_valuation){
 	var d = new frappe.ui.Dialog({
 		title: "Create Variant",
 		fields: [
-			{fieldname: "valuation_rate", label: __('Valuation Rate'), fieldtype:"Currency", default:0.0},
+			{fieldname: "valuation_rate", label: __('Valuation Rate'), fieldtype:"Currency", default:rate},
 		],
 		primary_action_label: __('Create Variant'),
 		primary_action: () => {
