@@ -85,9 +85,9 @@ doc_events = {
 	"Item":{
 		"validate":"ashbee.ashbee.customs.items.item_save"
 	},
-	"Stock Entry":{
-		"validate":"ashbee.ashbee.customs.stock_entry.stock_entry_validate"
-	}
+	# "Stock Entry":{
+	# 	"validate":"ashbee.ashbee.customs.stock_entry.stock_entry_validate"
+	# }
 
 	# "*": {
 	# 	"on_update": "method",

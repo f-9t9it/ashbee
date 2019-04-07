@@ -3,13 +3,38 @@ import frappe
 from frappe.utils import flt
 from erpnext.controllers.item_variant import get_variant, create_variant
 
-def printmsg(msglist):
-	print("=="*8)
-	print("\n"*8)
-	for i in msglist:
-		print(i)
-	print("\n"*8)
-	print("=="*8)
+
+
+# def printmsg(msglist):
+# 	print("=="*8)
+# 	print("\n"*8)
+# 	for i in msglist:
+# 		print(i)
+# 	print("\n"*8)
+# 	print("=="*8)
+
+@frappe.whitelist()
+def get_all_variant_attributes_and_rate(item_code):
+	item = frappe.get_doc("Item", item_code)
+	attrs = {}
+	if not item.attributes:
+		return None
+	for attr in item.attributes:
+		attrs[attr.attribute] = attr.attribute_value 
+	attrs['rate'] = item.valuation_rate
+	return attrs
+
+
+def check_and_create_attribute(item):
+	item = frappe.get_doc("Item", item)
+	return item
+
+def get_variant_attribute_args(item, _args):
+	args = {}
+	for attr in item.attributes:
+		args[attr.attribute] = attr.attribute_value
+	args.update(_args)
+	return _args
 
 @frappe.whitelist()
 def create_multiple_variants(**filters):
@@ -34,16 +59,37 @@ def create_variant_item(**filters):
 	if not item.variant_of:
 		return
 	args = {filters.get('attr_type'):filters.get("attr_value")}
+	args = get_variant_attribute_args(item, args)
 	variant = get_variant(item.variant_of, args)
 	if variant:
 		variant = frappe.get_doc("Item", variant)
 	else:
-		variant = create_variant(item.variant_of, args)
-		variant.valuation_rate = 0.0
+		template = check_and_create_attribute(item.variant_of)
+		args = update_missing_variant_attrs(item, template, args)
+		variant = create_variant(template.name, args)
+		size = get_size_from_item(item)
+		variant.valuation_rate = (size * 1.5*0.250) + item.valuation_rate
 	if filters.get('valuation_rate'):
 		variant.valuation_rate = filters.get('valuation_rate')
 	variant.save();
 	return variant
+
+def update_missing_variant_attrs(item, template, args):
+	template_attrs = {attr.attribute:attr.attribute_value for attr in template.attributes}
+	item_attrs = {attr.attribute:attr.attribute_value for attr in item.attributes}
+	_args = {}
+	for attr in template_attrs.keys():
+		if attr not in args.keys():
+			_args[attr] = item_attrs[attr]
+		else:
+			_args[attr] = args[attr]
+	return _args
+
+def get_size_from_item(item):
+	for attr in item.attributes:
+		if attr.attribute == "Size":
+			return flt(attr.attribute_value)
+	return 0.0
 
 
 @frappe.whitelist()
@@ -53,7 +99,9 @@ def get_finished_variant_item(**filters):
 	item = frappe.get_doc("Item", filters.get("item_code"))
 	if not item.variant_of:
 		return
-	variant = get_variant(item.variant_of, {filters.get("attr_type"):filters.get("attr_value")})
+	template = frappe.get_doc("Item",item.variant_of)
+	args = update_missing_variant_attrs(item, template, {filters.get("attr_type"):filters.get("attr_value")})
+	variant = get_variant(item.variant_of, args)
 	if variant:
 		variant = frappe.get_doc("Item", variant)
 		return {'name':variant.name, 'rate':variant.valuation_rate}
@@ -120,7 +168,3 @@ def get_issue_items(**kwargs):
 		new_entry_item.basic_rate = new_entry_item.valuation_rate * new_entry_item.qty
 		data.append(new_entry_item)
 	return data
-
-@frappe.whitelist()
-def stock_entry_validate(doc, method):
-	doc.ashbee_issue_items = ""
