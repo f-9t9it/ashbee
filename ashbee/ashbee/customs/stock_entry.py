@@ -5,13 +5,6 @@ from erpnext.controllers.item_variant import get_variant, create_variant
 
 
 
-# def printmsg(msglist):
-# 	print("=="*8)
-# 	print("\n"*8)
-# 	for i in msglist:
-# 		print(i)
-# 	print("\n"*8)
-# 	print("=="*8)
 
 @frappe.whitelist()
 def get_all_variant_attributes_and_rate(item_code):
