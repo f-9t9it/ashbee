@@ -138,11 +138,19 @@ def get_labour_sum(project, fiscal_year, month):
 	return amount
 
 def get_central_labour_sum(project,fiscal_year, month):
+	'''Sum of Costing amount on Timesheet for related Project.'''
 	amount = 0.0
 	found = False
-
-	# TODO Pending confirmation
-	return None
+	filters = {"docstatus":1, "project":project.name}
+	timesheet_details = frappe.get_all("Timesheet Detail", filters=filters, fields="*")
+	for timesheet_detail in timesheet_details:
+		if not date_match_month(timesheet_detail.to_time, fiscal_year, month):
+			continue
+		found = True
+		amount += timesheet_detail.costing_amount
+	if found == False:
+		return None
+	return amount
 
 def get_central_expenses_sum(direct_expense_accounts, journal_entries, fiscal_year, month):
 	'''Sum of Journal entry which is not against any project but have direct expense debit'''
