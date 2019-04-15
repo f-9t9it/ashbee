@@ -64,8 +64,9 @@ var ash_create_variant = function(frm, cdt, cdn){
 			if(r && r.message){
 				var rate = 0.0;
 				var size = r.message["Size"] == undefined ? 0.0 : r.message["Size"];
+				var weight = r.message['weight'] == undefined ? 0.0: r.message['weight'];
 				if(child.ashbee_attribute_type == "Colour" || child.ashbee_attribute_type == "Color"){
-					rate = (size * 1.5*0.250) + r.message.rate;
+					rate = (size * weight *0.250) + r.message.rate;
 				}
 				confirm_variant_create_with_rate(frm, child, rate, r.message);
 			}
