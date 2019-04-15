@@ -8,17 +8,17 @@ var months = "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptem
 frappe.query_reports["Ashbee Project Report"] = {
 	"filters": [
 		{
-			"fieldname":"fiscal_year",
-			"label": __("Select Fiscal Year"),
-			"fieldtype": "Link",
-			"options":"Fiscal Year",
-			//"default": frappe.datetime.get_today()
+			"fieldname":"from_date",
+			"label": __("From Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
+			"reqd": 1
 		},
 		{
-			"fieldname":"month",
-			"label": __("Select Month"),
-			"fieldtype": "Select",
-			"options":months,
+			"fieldname":"to_date",
+			"label": __("To Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
 			"reqd": 1
 		},
 		{

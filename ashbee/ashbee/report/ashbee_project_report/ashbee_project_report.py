@@ -3,17 +3,18 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt
+from datetime import datetime
+from frappe.utils import flt, getdate
 from frappe import _
 
 
-# def printmsg(msglist):
-# 	print("=="*8)
-# 	print("\n"*8)
-# 	for i in msglist:
-# 		print(i)
-# 	print("\n"*8)
-# 	print("=="*8)
+def printmsg(msglist):
+	print("=="*8)
+	print("\n"*8)
+	for i in msglist:
+		print(i)
+	print("\n"*8)
+	print("=="*8)
 
 def execute(filters=None):
 	columns, data = get_columns(filters), get_data(filters)
@@ -21,29 +22,31 @@ def execute(filters=None):
 
 
 def get_data(filters):
-	fiscal_year = filters.get("fiscal_year")
-	month = filters.get("month")
-	overhead_percent = filters.get("overhead_percent")
-	if None in [fiscal_year,month]:
+	from_date = filters.get("from_date")
+	to_date = filters.get("to_date")
+
+	timespan = [from_date, to_date]
+
+	if None in timespan:
 		return []
+	overhead_percent = filters.get("overhead_percent")
 	direct_expense_accounts = get_all_direct_expense_accounts()
 	indirect_expense_accounts = get_all_indirect_expense_accounts()
-	fiscal_year = frappe.get_doc("Fiscal Year", fiscal_year)
-	journal_entries = get_all_journal_entries(fiscal_year, month)
+	journal_entries = get_all_journal_entries(timespan)
 	data = []
 	projects = frappe.get_all("Project", fields="*")
-	central_expense = get_central_expenses_sum(direct_expense_accounts, journal_entries, fiscal_year, month)
-	indirect_expense = get_indirect_expenses_sum(indirect_expense_accounts,journal_entries, fiscal_year, month)
+	central_expense = get_central_expenses_sum(direct_expense_accounts, journal_entries, timespan)
+	indirect_expense = get_indirect_expenses_sum(indirect_expense_accounts,journal_entries, timespan)
 	
 	for project in projects:
 		should_append = False
 		row = {}
-		row['material_issue'] = get_material_issue_sum(project,fiscal_year,month)
-		row['direct_cost'] = get_direct_cost_sum(journal_entries, project,fiscal_year,month)
-		row['labour'] = get_labour_sum(project, fiscal_year, month)
-		row['central_labour'] = get_central_labour_sum(project,fiscal_year, month)
+		row['material_issue'] = get_material_issue_sum(project,timespan)
+		row['direct_cost'] = get_direct_cost_sum(journal_entries, project,timespan)
+		row['labour'] = get_labour_sum(project, timespan)
+		row['central_labour'] = get_central_labour_sum(project,timespan)
 		row['overhead_charges'] = get_overhead_charges_sum(row, overhead_percent)
-		row['material_return'] = get_material_return_sum(project, fiscal_year, month)
+		row['material_return'] = get_material_return_sum(project, timespan)
 
 		row['central_expenses'], central_expense = each_central_expense(row,central_expense)
 		row['indirect_expenses'], indirect_expense = each_indirect_expense(row,indirect_expense)
@@ -87,14 +90,14 @@ def each_indirect_expense(row, indirect_expense):
 	return (cost, indirect_expense)
 
 
-def get_material_issue_sum(project, fiscal_year, month):
+def get_material_issue_sum(project, timespan):
 	'''Sum of Total Outgoing Value on Materials Issued for related Project.'''
 	amount = 0.0
 	found = False
 	filters = {"purpose":"Material Issue", "docstatus":1,"project":project.name}
 	stock_entries = frappe.get_all("Stock Entry", filters=filters, fields="*")
 	for stock_entry in stock_entries:
-		if date_match_month(stock_entry.posting_date,fiscal_year,month):
+		if date_match_month(stock_entry.posting_date,timespan):
 			found = True
 			amount += stock_entry.total_outgoing_value
 	if found is False:
@@ -104,7 +107,7 @@ def get_material_issue_sum(project, fiscal_year, month):
 
 
 
-def get_direct_cost_sum(journal_entries, project, fiscal_year, month):
+def get_direct_cost_sum(journal_entries, project, timespan):
 	'''Sum of Debit amount on Journal Entry Accounts for related Project.'''
 	amount = 0.0
 	found = False
@@ -122,14 +125,14 @@ def get_direct_cost_sum(journal_entries, project, fiscal_year, month):
 
 
 
-def get_labour_sum(project, fiscal_year, month):
+def get_labour_sum(project,timespan):
 	'''Sum of Costing amount on Timesheet for related Project.'''
 	amount = 0.0
 	found = False
 	filters = {"docstatus":1, "project":project.name}
 	timesheet_details = frappe.get_all("Timesheet Detail", filters=filters, fields="*")
 	for timesheet_detail in timesheet_details:
-		if not date_match_month(timesheet_detail.to_time, fiscal_year, month):
+		if not date_match_month(timesheet_detail.to_time, timespan):
 			continue
 		found = True
 		amount += timesheet_detail.costing_amount
@@ -137,14 +140,14 @@ def get_labour_sum(project, fiscal_year, month):
 		return None
 	return amount
 
-def get_central_labour_sum(project,fiscal_year, month):
+def get_central_labour_sum(project,timespan):
 	'''Sum of Costing amount on Timesheet for related Project.'''
 	amount = 0.0
 	found = False
 	filters = {"docstatus":1, "project":project.name}
 	timesheet_details = frappe.get_all("Timesheet Detail", filters=filters, fields="*")
 	for timesheet_detail in timesheet_details:
-		if not date_match_month(timesheet_detail.to_time, fiscal_year, month):
+		if not date_match_month(timesheet_detail.to_time, timespan):
 			continue
 		found = True
 		amount += timesheet_detail.costing_amount
@@ -152,7 +155,7 @@ def get_central_labour_sum(project,fiscal_year, month):
 		return None
 	return amount
 
-def get_central_expenses_sum(direct_expense_accounts, journal_entries, fiscal_year, month):
+def get_central_expenses_sum(direct_expense_accounts, journal_entries, timespan):
 	'''Sum of Journal entry which is not against any project but have direct expense debit'''
 	amount = 0.0
 	found = False
@@ -165,7 +168,7 @@ def get_central_expenses_sum(direct_expense_accounts, journal_entries, fiscal_ye
 		return None
 	return amount
 
-def get_indirect_expenses_sum(indirect_expense_accounts, journal_entries, fiscal_year, month):
+def get_indirect_expenses_sum(indirect_expense_accounts, journal_entries, timespan):
 	'''Sum of Journal entry which is not against any project but have indirect expense debit'''
 	amount = 0.0
 	found = False
@@ -187,14 +190,14 @@ def get_overhead_charges_sum(row, overhead_percent):
 	j = sum([row.get(i,0) or 0 for i in ['material_issue','labour','indirect_expenses','direct_cost']])
 	return j * (flt(overhead_percent)/100)
 
-def get_material_return_sum(project,fiscal_year, month):
+def get_material_return_sum(project,timespan):
 	'''Sum of Total Incoming Value on Materials Returned for related Project.'''
 	amount = 0.0
 	found = False
 	filters = {"purpose":"Material Receipt", "docstatus":1,"project":project.name}
 	stock_entries = frappe.get_all("Stock Entry", filters=filters, fields="*")
 	for stock_entry in stock_entries:
-		if date_match_month(stock_entry.posting_date,fiscal_year,month):
+		if date_match_month(stock_entry.posting_date,timespan):
 			found = True
 			amount += stock_entry.total_incoming_value
 	if found is False:
@@ -202,23 +205,23 @@ def get_material_return_sum(project,fiscal_year, month):
 	return amount
 
 
-def get_all_journal_entries(fiscal_year, month):
+def get_all_journal_entries(timespan):
 	je_s = []
 	filters = {'docstatus':1}
 	journal_entries = frappe.get_all("Journal Entry", filters=filters, fields=["name","posting_date"])
 	for je in journal_entries:
-		if date_match_month(je.posting_date, fiscal_year, month):
+		if date_match_month(je.posting_date, timespan):
 			je = frappe.get_doc("Journal Entry", je.name)
 			je_s.append(je)
 	return je_s
 		
 
-def date_match_month(posting_date,fiscal_year, month):
-	months = {'January':1,'February':2,'March':3,'April':4,'May':5,
-				'June':6,'July':7,'August':8, 'September':9, 'October':10,
-				'November':11,'December':12}
-	if (int(posting_date.month) == int(months[month])) and (int(posting_date.year) == int(fiscal_year.year)):
-		return True
+def date_match_month(posting_date,timespan):
+	from_date, to_date = timespan
+	if isinstance(posting_date, datetime):
+		posting_date = posting_date.date()
+	if posting_date > getdate(from_date) and posting_date < getdate(to_date):
+		return True 
 	return False
 
 def get_all_direct_expense_accounts():
