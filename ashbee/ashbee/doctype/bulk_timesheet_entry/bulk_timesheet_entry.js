@@ -47,8 +47,8 @@ var calculate_end_time = function(frm, cdt, cdn) {
 var calculate_ots = function(frm, cdt, cdn){
 	let child = locals[cdt][cdn];
 
-	child.ot1 = child.ot1_hours * child.hourly_cost * 1.25;
-	child.ot2 = child.ot2_hours * child.hourly_cost * 1.50;
+	child.ot1 = parseFloat(child.ot1_hours * child.hourly_cost * 1.25) || 0.0;
+	child.ot2 = parseFloat(child.ot2_hours * child.hourly_cost * 1.50) || 0.0;
 
 	refresh_field("ot1", child.name, "details");
 	refresh_field("ot2", child.name, "details");
@@ -56,6 +56,7 @@ var calculate_ots = function(frm, cdt, cdn){
 
 var calculate_total_cost = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
+	console.log(child.normal_hours)
 	var normal_hours = child.normal_hours == undefined ? 0 : child.normal_hours; 
 	var hourly_cost = child.hourly_cost == undefined ? 0 : child.hourly_cost;
 	child.normal_cost = normal_hours * hourly_cost
