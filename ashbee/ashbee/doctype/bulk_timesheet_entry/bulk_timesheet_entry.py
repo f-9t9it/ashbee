@@ -33,7 +33,29 @@ class BulkTimesheetEntry(Document):
 		return salary_structure.hour_rate
 
 	def validate(self):
+		self.bulk_delete()
 		self.update_timesheet()
+
+	def bulk_delete(self):
+		filters = {"parent":self.name}
+		to_delete = []
+		timesheet_details = frappe.get_all("Bulk Timesheet Details",filters={"parent":self.name}, fields=["name","timesheet"])
+		for detail in timesheet_details:
+			if not self.details or detail.name not in [i.name for i in self.details]:
+				to_delete.append(detail.timesheet)
+		for d in to_delete:
+			self.delete_timesheet(d)
+
+
+
+	def delete_timesheet(self, timesheet):
+		if not timesheet:
+			return
+		if isinstance(timesheet, str) or isinstance(timesheet, unicode):
+			timesheet = frappe.get_doc("Timesheet", timesheet)
+		timesheet.cancel()
+		timesheet.delete()
+
 
 
 	def update_timesheet(self):
