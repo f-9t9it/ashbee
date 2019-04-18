@@ -58,8 +58,10 @@ var calculate_total_cost = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
 	var normal_hours = child.normal_hours == undefined ? 0 : child.normal_hours; 
 	var hourly_cost = child.hourly_cost == undefined ? 0 : child.hourly_cost;
+	child.normal_cost = normal_hours * hourly_cost
+	refresh_field("normal_cost", child.name, "details");
 	calculate_ots(frm, cdt, cdn);
-	child.total_cost = (normal_hours * hourly_cost) + child.ot1 + child.ot2;
+	child.total_cost = child.normal_cost + child.ot1 + child.ot2;
 	refresh_field("total_cost", child.name, "details");
 
 }
@@ -111,6 +113,14 @@ frappe.ui.form.on('Bulk Timesheet Details', {
 	},
 
 	hourly_cost:function(frm, cdt, cdn){
+		calculate_total_cost(frm, cdt, cdn);
+	},
+
+	ot1_hours:function(frm, cdt, cdn){
+		calculate_total_cost(frm, cdt, cdn);
+	},
+
+	ot2_hours:function(frm, cdt, cdn){
 		calculate_total_cost(frm, cdt, cdn);
 	},
 

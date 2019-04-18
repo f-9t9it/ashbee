@@ -34,7 +34,16 @@ class BulkTimesheetEntry(Document):
 
 	def validate(self):
 		self.bulk_delete()
+		self.validate_costs()
 		self.update_timesheet()
+
+	def validate_costs(self):
+		for detail in self.details:
+			detail.normal_cost = detail.hourly_cost * detail.normal_hours
+			detail.ot1 = detail.hourly_cost * detail.ot1_hours
+			detail.ot2 = detail.hourly_cost * detail.ot2_hours
+			detail.total_cost = detail.ot1 + detail.ot2 + detail.normal_cost
+
 
 	def bulk_delete(self):
 		filters = {"parent":self.name}
