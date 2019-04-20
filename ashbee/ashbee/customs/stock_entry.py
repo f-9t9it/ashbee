@@ -120,9 +120,12 @@ def get_attribute_values(**filters):
 	if not item.variant_of:
 		return []
 	attr_type = filters.get("attr_type")
-	return frappe.db.sql('''select attribute_value from `tabItem Attribute Value`
+	retVal = frappe.db.sql('''select abbr, attribute_value from `tabItem Attribute Value`
 							where parent = '{parent}' and parenttype = 'Item Attribute'; '''
 							.format(parent=attr_type),as_list = 1)
+	print("bomsy")
+	print(retVal)
+	return retVal
 
 @frappe.whitelist()
 def get_variant_items(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
