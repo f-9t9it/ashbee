@@ -69,11 +69,8 @@ class BulkTimesheetEntry(Document):
 
 	def update_timesheet(self):
 		for detail in self.details:
-			timesheet = detail.timesheet
-			if not timesheet:
-				timesheet = frappe.new_doc("Timesheet")
-			else:
-				timesheet = frappe.get_doc("Timesheet", timesheet)
+			self.delete_timesheet(detail.timesheet)
+			timesheet = frappe.new_doc("Timesheet")
 			timesheet.company = self.company
 			timesheet.employee = detail.employee
 			timesheet.time_logs = self.get_timesheet_timelogs(timesheet, detail)
@@ -100,6 +97,8 @@ class BulkTimesheetEntry(Document):
 		detail.costing_rate = entry_detail.hourly_cost
 		detail.costing_amount = entry_detail.total_cost
 		detail.project = entry_detail.project
+		detail.ashbee_ot = entry_detail.ot1
+		detail.ashbee_ot2 = entry_detail.ot2
 
 		timesheet_details.append(detail)
 		return timesheet_details
