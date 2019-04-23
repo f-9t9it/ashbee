@@ -21,12 +21,19 @@ var ashbee_attribute_values_populate = function(frm, cdt, cdn){
 			args:{'item_code':child.item_code, 'attr_type':child.ashbee_attribute_type},
 			callback:function(r){
 				var m = [];
-				$(r.message).each(function(i,v){m.push(v[0])});
+				$(r.message).each(function(i,v){
+					m.push(v[0] + " | " +v[1]);
+				});
 				frm.set_df_property("ashbee_attribute_value", "options", m.join("\n"), child.name, "items");
 				refresh_field("ashbee_attribute_value",child.name, "items");
 			}
 		});
 	}	
+}
+
+var extract_ashbee_attribute_value = function(ashbee_attribute_value){
+	ashbee_attribute_value = ashbee_attribute_value.split("|")[1];
+	return ashbee_attribute_value.trim();
 }
 
 var set_ashbee_finished_item = function(frm, cdt, cdn){
@@ -36,7 +43,7 @@ var set_ashbee_finished_item = function(frm, cdt, cdn){
 	if(child.ashbee_recipient_task != ""){
 		var _args = {
 					'item_code':child.item_code,
-					'attr_value':child.ashbee_attribute_value,
+					'attr_value':extract_ashbee_attribute_value(child.ashbee_attribute_value),
 					'attr_type':child.ashbee_attribute_type
 				}
 		frappe.call({
@@ -64,8 +71,9 @@ var ash_create_variant = function(frm, cdt, cdn){
 			if(r && r.message){
 				var rate = 0.0;
 				var size = r.message["Size"] == undefined ? 0.0 : r.message["Size"];
+				var weight = r.message['weight'] == undefined ? 0.0: r.message['weight'];
 				if(child.ashbee_attribute_type == "Colour" || child.ashbee_attribute_type == "Color"){
-					rate = (size * 1.5*0.250) + r.message.rate;
+					rate = (size * weight *0.250) + r.message.rate;
 				}
 				confirm_variant_create_with_rate(frm, child, rate, r.message);
 			}
@@ -87,7 +95,7 @@ var confirm_variant_create_with_rate = function(frm, child, rate, attrs_and_valu
 			var _args = {
 							'item_code':child.item_code,
 							'valuation_rate':d.get_values().valuation_rate,
-							'attr_value':child.ashbee_attribute_value,
+							'attr_value':extract_ashbee_attribute_value(child.ashbee_attribute_value),
 							'attr_type':child.ashbee_attribute_type
 						}
 			if(_args) {
@@ -138,7 +146,7 @@ var create_variants_and_save = function(frm){
 						'cdn':v.name,
 						'item_code':v.item_code, 
 						'attr_type':v.ashbee_attribute_type, 
-						'attr_value':v.ashbee_attribute_value
+						'attr_value':extract_ashbee_attribute_value(v.ashbee_attribute_value)
 					});
 		}
 		if((i+1) >= frm.doc.items.length && attrs.length > 0){
@@ -189,6 +197,16 @@ var empty_child_fields = function(frm, cdt, cdn){
 	refresh_field("ashbee_attribute_value", child.name, "items");
 }
 
+
+var set_color_coating_select = function(frm, cdt, cdn){
+	var child = locals[cdt][cdn];
+	if(child.ashbee_recipient_task == "Color Coating"){
+		child.ashbee_attribute_type = "Colour";
+		refresh_field("ashbee_attribute_type", child.name, "items");
+		ashbee_attribute_values_populate(frm, cdt, cdn);
+	}
+}
+
 frappe.ui.form.on('Stock Entry Detail',{
 
 	ashbee_attribute_type:function(frm, cdt, cdn){
@@ -199,6 +217,7 @@ frappe.ui.form.on('Stock Entry Detail',{
 	},
 	ashbee_recipient_task:function(frm, cdt, cdn){
 		empty_child_fields(frm, cdt, cdn);
+		set_color_coating_select(frm, cdt, cdn);
 	},
 
 	item_code:function(frm, cdt, cdn){

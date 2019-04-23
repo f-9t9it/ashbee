@@ -12,5 +12,4 @@ def timesheet_save(doc, d):
 		doc.total_costing_amount = flt(doc.total_costing_amount) or 0.0
 
 		detail.costing_amount += detail.ashbee_ot + detail.ashbee_ot2
-		doc.total_costing_amount += detail.ashbee_ot + detail.ashbee_ot2
-		
+		doc.total_costing_amount += detail.ashbee_ot + detail.ashbee_ot2 	

@@ -15,6 +15,7 @@ def get_all_variant_attributes_and_rate(item_code):
 	for attr in item.attributes:
 		attrs[attr.attribute] = attr.attribute_value 
 	attrs['rate'] = item.valuation_rate
+	attrs['weight'] = get_weight_from_item(item)
 	return attrs
 
 
@@ -61,7 +62,8 @@ def create_variant_item(**filters):
 		args = update_missing_variant_attrs(item, template, args)
 		variant = create_variant(template.name, args)
 		size = get_size_from_item(item)
-		variant.valuation_rate = (size * 1.5*0.250) + item.valuation_rate
+		weight = get_weight_from_item(item)
+		variant.valuation_rate = (size * weight *0.250) + item.valuation_rate
 	if filters.get('valuation_rate'):
 		variant.valuation_rate = filters.get('valuation_rate')
 	variant.save();
@@ -83,6 +85,14 @@ def get_size_from_item(item):
 		if attr.attribute == "Size":
 			return flt(attr.attribute_value)
 	return 0.0
+
+def get_weight_from_item(item):
+	if isinstance(item ,str):
+		item = frappe.get_doc("Item", item)
+	if item.ashbee_bar:
+		return item.ashbee_weight
+	return item.weight_per_unit
+
 
 
 @frappe.whitelist()
@@ -110,9 +120,12 @@ def get_attribute_values(**filters):
 	if not item.variant_of:
 		return []
 	attr_type = filters.get("attr_type")
-	return frappe.db.sql('''select attribute_value from `tabItem Attribute Value`
+	retVal = frappe.db.sql('''select abbr, attribute_value from `tabItem Attribute Value`
 							where parent = '{parent}' and parenttype = 'Item Attribute'; '''
 							.format(parent=attr_type),as_list = 1)
+	print("bomsy")
+	print(retVal)
+	return retVal
 
 @frappe.whitelist()
 def get_variant_items(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
