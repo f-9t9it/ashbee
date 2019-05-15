@@ -4,6 +4,13 @@ from frappe.utils import flt
 from erpnext.controllers.item_variant import get_variant, create_variant
 
 
+def stock_entry_save(doc, method):
+	if doc.naming_series == "SE-PI-.#####":
+		any(_set_item_recipient_task_color_coating(item) for item in doc.items)
+
+
+def _set_item_recipient_task_color_coating(item):
+	item.ashbee_recipient_task = "Color Coating"
 
 
 @frappe.whitelist()
