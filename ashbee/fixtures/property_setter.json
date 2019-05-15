@@ -1,0 +1,22 @@
+[
+ {
+  "_assign": null, 
+  "_comments": null, 
+  "_liked_by": null, 
+  "_user_tags": null, 
+  "default_value": null, 
+  "doc_type": "Stock Entry", 
+  "docstatus": 0, 
+  "doctype": "Property Setter", 
+  "doctype_or_field": "DocField", 
+  "field_name": "naming_series", 
+  "modified": "2019-05-15 17:19:43.835766", 
+  "name": "Stock Entry-naming_series-options", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "property": "options", 
+  "property_type": "Text", 
+  "value": "SE-PI-.#####\nSE-MI-.#####\nMAT-STE-.YYYY.-"
+ }
+]

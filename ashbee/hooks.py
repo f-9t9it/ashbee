@@ -27,14 +27,28 @@ app_license = "MIT"
 
 # include js in doctype views
 doctype_js = {
-				"Stock Entry" : "public/js/stock_entry.js",
-				"Timesheet" : "public/js/timesheet.js"
-			}
+	"Stock Entry": "public/js/stock_entry.js",
+	"Timesheet": "public/js/timesheet.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-fixtures=["Custom Field"]
+fixtures = [
+	"Custom Field",
+	{
+		"doctype": "Property Setter",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Stock Entry-naming_series-options"
+				]
+			]
+		]
+	}
+]
 
 # Home Pages
 # ----------
@@ -85,11 +99,11 @@ fixtures=["Custom Field"]
 # Hook on document methods and events
 
 doc_events = {
-	"Item":{
-		"validate":"ashbee.ashbee.customs.items.item_save"
+	"Item": {
+		"validate": "ashbee.ashbee.customs.items.item_save"
 	},
-	"Timesheet":{
-		"validate":"ashbee.ashbee.customs.timesheet.timesheet_save"
+	"Timesheet": {
+		"validate": "ashbee.ashbee.customs.timesheet.timesheet_save"
 	}
 	# "Stock Entry":{
 	# 	"validate":"ashbee.ashbee.customs.stock_entry.stock_entry_validate"
