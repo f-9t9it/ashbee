@@ -9,7 +9,16 @@ from frappe import _
 def execute(filters=None):
 	columns = get_columns()
 	items = get_items(filters)
-	data = get_stock_ledger_entries(filters, items)
+	color_variants = get_color_variants()
+	sl_entries = get_stock_ledger_entries(filters, items)
+
+	data = []
+	for sl_entry in sl_entries:
+		color = None
+		if sl_entry.item_code in color_variants.keys():
+			color = color_variants[sl_entry.item_code]
+		sl_entry.update({'variant_color': color})
+		data.append(sl_entry)
 
 	return columns, data
 
@@ -23,7 +32,7 @@ def get_stock_ledger_entries(filters, items):
 	return frappe.db.sql("""
 				SELECT CONCAT_WS(" ", posting_date, posting_time) as date,
 					item_code, warehouse, actual_qty, qty_after_transaction, voucher_type, voucher_no
-				FROM `tabStock Ledger Entry` sle 
+				FROM `tabStock Ledger Entry` sle
 				WHERE company=%(company)s 
 					AND posting_date BETWEEN %(from_date)s 
 					AND %(to_date)s {item_conditions}
@@ -38,10 +47,17 @@ def get_items(filters):
 	return items
 
 
+def get_color_variants():
+	filters = {'attribute': 'Colour'}
+	variants = frappe.get_all('Item Variant Attribute', filters=filters, fields=['parent', 'attribute_value'])
+	return {variant['parent']: variant['attribute_value'] for variant in variants}
+
+
 def get_columns():
 	return [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
 		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 130},
+		{"label": _("Variant Colour"), "fieldname": "variant_color", "fieldtype": "Data", "width": 95},
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 50, "convertible": "qty"},
