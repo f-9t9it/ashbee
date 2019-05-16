@@ -35,7 +35,61 @@ doctype_js = {
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
 fixtures = [
-    "Custom Field",
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            [
+                "name",
+                "in",
+                [
+                    "Material Request Item-ashbee_attribute_type",
+                    "Material Request Item-ashbee_attribute_value",
+                    "Material Request-ashbee_production_issue",
+                    "Material Request-project",
+                    "Stock Entry Detail-ashbee_recipient_task",
+                    "Employee-nationality",
+                    "Employee-rp_expiry",
+                    "Employee-cpr_expiry",
+                    "Employee-cpr",
+                    "Timesheet Detail-ashbee_ot",
+                    "Timesheet Detail-ashbee_ot2",
+                    "Timesheet Detail-ashbee_ot_col_brk",
+                    "Timesheet Detail-ashbee_ot_sec_break",
+                    "Project-ashbee_job_amount",
+                    "Project-ashbee_job_col_brk1",
+                    "Stock Entry Detail-ashbee_finished_item_valuation",
+                    "Stock Entry Detail-ashbee_attribute_value",
+                    "Stock Entry Detail-ashbee_create_variant",
+                    "Stock Entry Detail-ashbee_finished_item",
+                    "Stock Entry Detail-ashbee_col_1",
+                    "Stock Entry Detail-ashbee_finished_sec",
+                    "Print Settings-print_taxes_with_zero_amount",
+                    "Print Settings-compact_item_print",
+                    "Deleted Document-hub_sync_id",
+                    "Item-hub_sync_id",
+                    "Deleted Document-github_sync_id",
+                    "Task-github_sync_id",
+                    "Project-github_sync_id",
+                    "Deleted Document-gcalendar_sync_id",
+                    "Event-gcalendar_sync_id",
+                    "Stock Entry Detail-ashbee_attribute_type",
+                    "Stock Entry Detail-ashbee__sec_attr",
+                    "Timesheet-ashbee_ot2",
+                    "Timesheet-ashbee_col_1",
+                    "Timesheet-ashbee_ot1",
+                    "Project-ashbee_job_detail",
+                    "Project-ashbee_job_col_brk",
+                    "Project-ashbee_job_intercharge",
+                    "Project-ashbee_project_job",
+                    "Project-ashbee_salesman",
+                    "Project-ashbee_project_code",
+                    "Stock Entry-ashbee_issue_items",
+                    "Item-ashbee_weight",
+                    "Item-ashbee_bar"
+                ]
+            ]
+        ]
+    },
     {
         "doctype": "Property Setter",
         "filters": [
