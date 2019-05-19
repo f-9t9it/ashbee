@@ -35,9 +35,17 @@ def get_stock_ledger_entries(filters, items):
 				FROM `tabStock Ledger Entry` sle
 				WHERE company=%(company)s 
 					AND posting_date BETWEEN %(from_date)s 
-					AND %(to_date)s {item_conditions}
+					AND %(to_date)s {item_conditions} {warehouse_conditions}
 				ORDER BY posting_date ASC, posting_time ASC, creation ASC
-			""".format(item_conditions=item_conditions), filters, as_dict=1)
+			""".format(item_conditions=item_conditions, warehouse_conditions=get_warehouse_conditions(filters)), filters, as_dict=1)
+
+
+def get_warehouse_conditions(filters):
+	warehouse_conditions = ''
+	if filters.get('warehouse'):
+		warehouse_conditions = 'AND sle.warehouse = \'{}\''\
+			.format(filters.get('warehouse'))
+	return warehouse_conditions
 
 
 def get_items(filters):
