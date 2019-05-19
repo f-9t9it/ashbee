@@ -67,9 +67,9 @@ def create_variant_item(**filters):
 		template = check_and_create_attribute(item.variant_of)
 		args = update_missing_variant_attrs(item, template, args)
 		variant = create_variant(template.name, args)
-		size = get_size_from_item(item)
+		length = get_length_from_item(item)
 		weight = get_weight_from_item(item)
-		variant.valuation_rate = (size * weight * 0.250) + item.valuation_rate
+		variant.valuation_rate = (length * weight * 0.250) + item.valuation_rate
 		variant.ashbee_weight = weight
 	if filters.get('valuation_rate'):
 		variant.valuation_rate = filters.get('valuation_rate')
@@ -101,7 +101,11 @@ def get_weight_from_item(item):
 		return item.ashbee_weight
 	return item.weight_per_unit
 
-
+def get_length_from_item(item):
+	for attr in item.attributes:
+		if attr.attribute == "Length":
+			return flt(attr.attribute_value)
+	return 0.0
 
 @frappe.whitelist()
 def get_finished_variant_item(**filters):
