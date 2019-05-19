@@ -51,7 +51,6 @@ def create_multiple_variants(**filters):
 	return variants
 
 
-
 @frappe.whitelist()
 def create_variant_item(**filters):
 	if not filters.get("item_code") or not filters.get("attr_type") or not filters.get("attr_value"):
@@ -70,11 +69,13 @@ def create_variant_item(**filters):
 		variant = create_variant(template.name, args)
 		size = get_size_from_item(item)
 		weight = get_weight_from_item(item)
-		variant.valuation_rate = (size * weight *0.250) + item.valuation_rate
+		variant.valuation_rate = (size * weight * 0.250) + item.valuation_rate
+		variant.ashbee_weight = weight
 	if filters.get('valuation_rate'):
 		variant.valuation_rate = filters.get('valuation_rate')
-	variant.save();
+	variant.save()
 	return variant
+
 
 def update_missing_variant_attrs(item, template, args):
 	template_attrs = {attr.attribute:attr.attribute_value for attr in template.attributes}
