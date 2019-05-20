@@ -69,7 +69,8 @@ def create_variant_item(**filters):
 		variant = create_variant(template.name, args)
 		length = get_length_from_item(item)
 		weight = get_weight_from_item(item)
-		variant.valuation_rate = (length * weight * 0.250) + item.valuation_rate
+		added_value = flt(filters.get('added_value'))
+		variant.valuation_rate = (length * weight * added_value) + item.valuation_rate
 		variant.ashbee_weight = weight
 	if filters.get('valuation_rate'):
 		variant.valuation_rate = filters.get('valuation_rate')

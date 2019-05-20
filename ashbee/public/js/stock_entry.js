@@ -84,30 +84,32 @@ var confirm_variant_create_with_rate = function(frm, child, rate, attrs_and_valu
 	var d = new frappe.ui.Dialog({
 		title: "Create Variant",
 		fields: [
-			{fieldname: "valuation_rate", label: __('Valuation Rate'), fieldtype:"Currency", default:rate},
+			{ fieldname: "valuation_rate", label: __('Valuation Rate'), fieldtype: "Currency", default: rate },
+			{ fieldname: "added_value", label: __('Added Value'), fieldtype: "Currency", default: 0.250, reqd: 1 }
 		],
 		primary_action_label: __('Create Variant'),
 		primary_action: () => {
 			d.get_primary_btn().attr('disabled', true);
+
 			var _args = {
-							'item_code':child.item_code,
-							'valuation_rate':d.get_values().valuation_rate,
-							'attr_value':extract_ashbee_attribute_value(child.ashbee_attribute_value),
-							'attr_type':child.ashbee_attribute_type
-						}
+				"item_code": child.item_code,
+				"added_value": d.get_values().added_value,
+				"valuation_rate": d.get_values().valuation_rate,
+				"attr_value": extract_ashbee_attribute_value(child.ashbee_attribute_value),
+				"attr_type": child.ashbee_attribute_type
+			};
+
 			if(_args) {
 				frappe.call({
-					method:"ashbee.ashbee.customs.stock_entry.create_variant_item",
-					args:_args,
-					callback:function(r){
+					method: "ashbee.ashbee.customs.stock_entry.create_variant_item",
+					args: _args,
+					callback: function(r){
 						if(r.message){
 							d.hide();
-							frappe.show_alert("Items Updated!")
+							frappe.show_alert("Items Updated!");
 							child.ashbee_attribute_value = "";
 							refresh_field("ashbee_attribute_value", child.name, "items");
-
 						}
-						
 					}
 				});
 			}
