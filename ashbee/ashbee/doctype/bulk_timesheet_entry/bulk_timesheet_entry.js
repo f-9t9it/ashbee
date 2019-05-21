@@ -2,16 +2,44 @@
 // For license information, please see license.txt
 
 
-var set_start_date_time = function(frm, cdt, cdn){
+var _set_default_start_datetime = function(datetime) {
+	datetime.setHours(5);
+	datetime.setMinutes(30);
+	datetime.setSeconds(0);
+	datetime.setMilliseconds(0);
+};
+
+var _set_default_end_datetime = function(datetime) {
+	datetime.setHours(23);
+	datetime.setMinutes(59);
+	datetime.setSeconds(0);
+	datetime.setMilliseconds(0);
+};
+
+var set_start_date_time = function(frm, cdt, cdn) {
 	let child = locals[cdt][cdn];
 
 	if(!child.start_date_time) {
 		// if from_time value is not available then set the current datetime
-		frappe.model.set_value(cdt, cdn, "start_date_time", frappe.datetime.get_datetime_as_string());
-	}
-}
+		let start_date_time = new Date(frm.doc.posting_date);
+		_set_default_start_datetime(start_date_time);
 
-var calculate_end_date_time = function(frm, cdt, cdn){
+		frappe.model.set_value(cdt, cdn, "start_date_time", frappe.datetime.get_datetime_as_string(start_date_time));
+	}
+};
+
+var set_end_date_time = function(frm, cdt, cdn) {
+	let child = locals[cdt][cdn];
+
+	if(!child.end_date_time) {
+		let end_date_time = new Date(frm.doc.posting_date);
+		_set_default_end_datetime(end_date_time);
+
+		frappe.model.set_value(cdt, cdn, "end_date_time", frappe.datetime.get_datetime_as_string(end_date_time));
+	}
+};
+
+var calculate_end_date_time = function(frm, cdt, cdn) {
 	let child = locals[cdt][cdn];
 	let d = moment(child.start_date_time);
 	var time_diff = (moment(child.end_time).diff(moment(child.start_date_time),"seconds")) / (60 * 60 * 24);
@@ -35,7 +63,6 @@ var calculate_end_date_time = function(frm, cdt, cdn){
 
 
 var calculate_end_time = function(frm, cdt, cdn) {
-
 	let child = locals[cdt][cdn];
 
 	set_start_date_time (frm, cdt, cdn);
@@ -69,13 +96,17 @@ var calculate_total_cost = function(frm, cdt, cdn){
 
 
 frappe.ui.form.on('Bulk Timesheet Details', {
+	details_add: function(frm, cdt, cdn) {
+		set_start_date_time(frm, cdt, cdn);
+		set_end_date_time(frm, cdt, cdn);
+	},
 
-	start_date_time:function(frm, cdt, cdn){
+	start_date_time: function(frm, cdt, cdn) {
 		// calculate_hrs(frm, cdt, cdn);
 		calculate_end_time(frm, cdt, cdn);
 	},
 
-	end_date_time:function(frm, cdt, cdn){
+	end_date_time: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var time_diff = (moment(child.end_date_time).diff(moment(child.start_date_time),"seconds")) / ( 60 * 60 * 24);
 		var std_working_hours = 0;
@@ -92,19 +123,19 @@ frappe.ui.form.on('Bulk Timesheet Details', {
 		}
 	},
 
-	normal_hours:function(frm, cdt, cdn){
+	normal_hours: function(frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn);
 		calculate_total_cost(frm, cdt, cdn);
-
 	},
 
-	employee:function(frm, cdt, cdn){
+	employee: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
+
 		frm.call({
-			method:"get_employee_details",
-			args:{"employee":child.employee},
-			doc:frm.doc,
-			callback:function(r){
+			method: "get_employee_details",
+			args: { "employee": child.employee },
+			doc: frm.doc,
+			callback: function(r) {
 				child.employee_name = r.message.name;
 				child.hourly_cost = r.message.rate;
 				refresh_field("employee_name",child.name, "details");
@@ -113,26 +144,26 @@ frappe.ui.form.on('Bulk Timesheet Details', {
 		});
 	},
 
-	hourly_cost:function(frm, cdt, cdn){
+	hourly_cost: function(frm, cdt, cdn) {
 		calculate_total_cost(frm, cdt, cdn);
 	},
 
-	ot1_hours:function(frm, cdt, cdn){
+	ot1_hours: function(frm, cdt, cdn) {
 		calculate_total_cost(frm, cdt, cdn);
 	},
 
-	ot2_hours:function(frm, cdt, cdn){
+	ot2_hours: function(frm, cdt, cdn) {
 		calculate_total_cost(frm, cdt, cdn);
 	},
 
 
-	project:function(frm, cdt, cdn){
+	project: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		frm.call({
-			method:"get_project_name",
-			args:{'project':child.project},
-			doc:frm.doc,
-			callback:function(r){
+			method: "get_project_name",
+			args: { 'project': child.project },
+			doc: frm.doc,
+			callback: function(r) {
 				child.project_name = r.message;
 				refresh_field("project_name",child.name, "details");
 			}
