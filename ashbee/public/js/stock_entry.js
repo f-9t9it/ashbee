@@ -184,7 +184,7 @@ var refresh_all_child_fields = function(frm){
 };
 
 var make_receipt_button = function(frm) {
-    if(!frm.doc.docstatus && frm.doc.purpose === "Material Issue") {
+    if(frm.doc.docstatus === 1 && frm.doc.purpose === "Material Issue") {
         frm.add_custom_button(__('Make Receipt'), function() {
             frappe.model.with_doctype('Stock Entry', function() {
                 var se = frappe.model.get_new_doc('Stock Entry');
