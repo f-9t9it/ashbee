@@ -8,18 +8,17 @@ from frappe.model.document import Document
 from frappe.utils import today
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 
-class BulkTimesheetEntry(Document):
-	
 
+class BulkTimesheetEntry(Document):
 	def get_employee_details(self, employee):
 		employee = frappe.get_doc("Employee", employee)
 		return {
-					"name":employee.employee_name, 
-					"rate":self.get_employee_charge_per_hour(employee)
-				}
+			"name": employee.employee_name,
+			"rate": self.get_employee_charge_per_hour(employee)
+		}
 
 	def get_project_name(self, project):
-		project = frappe.get_doc("Project",project)
+		project = frappe.get_doc("Project", project)
 		return project.name
 
 	def get_employee_charge_per_hour(self, employee):
@@ -28,7 +27,7 @@ class BulkTimesheetEntry(Document):
 			return 0.0
 		salary_structure = frappe.get_doc("Salary Structure", salary_structure)
 		if salary_structure.docstatus != 1 or not salary_structure.is_active == "Yes" or \
-						not salary_structure.salary_slip_based_on_timesheet:
+				not salary_structure.salary_slip_based_on_timesheet:
 			return 0.0
 		return salary_structure.hour_rate
 
@@ -46,16 +45,17 @@ class BulkTimesheetEntry(Document):
 
 
 	def bulk_delete(self):
-		filters = {"parent":self.name}
 		to_delete = []
-		timesheet_details = frappe.get_all("Bulk Timesheet Details",filters={"parent":self.name}, fields=["name","timesheet"])
+		filters = {"parent": self.name}
+		fields = ["name", "timesheet"]
+
+		timesheet_details = frappe.get_all("Bulk Timesheet Details", filters=filters, fields=fields)
+
 		for detail in timesheet_details:
 			if not self.details or detail.name not in [i.name for i in self.details]:
 				to_delete.append(detail.timesheet)
 		for d in to_delete:
 			self.delete_timesheet(d)
-
-
 
 	def delete_timesheet(self, timesheet):
 		if not timesheet:
@@ -64,8 +64,6 @@ class BulkTimesheetEntry(Document):
 			timesheet = frappe.get_doc("Timesheet", timesheet)
 		timesheet.cancel()
 		timesheet.delete()
-
-
 
 	def update_timesheet(self):
 		for detail in self.details:
@@ -78,15 +76,13 @@ class BulkTimesheetEntry(Document):
 			timesheet.submit()
 			detail.timesheet = timesheet.name
 
-
-
 	def get_timesheet_timelogs(self, timesheet, entry_detail):
 		timesheet_details = []
+
 		if not hasattr(timesheet, "time_logs") or not timesheet.time_logs:
 			detail = frappe.new_doc("Timesheet Detail")
 		else:
 			detail = timesheet.time_logs[0]
-			
 
 		detail.parentfield = "time_logs"
 		detail.activity_type = entry_detail.activity_type
@@ -99,6 +95,6 @@ class BulkTimesheetEntry(Document):
 		detail.project = entry_detail.project
 		detail.ashbee_ot = entry_detail.ot1
 		detail.ashbee_ot2 = entry_detail.ot2
-
 		timesheet_details.append(detail)
+
 		return timesheet_details
