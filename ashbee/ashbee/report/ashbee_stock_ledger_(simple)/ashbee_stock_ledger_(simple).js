@@ -42,6 +42,35 @@ frappe.query_reports["Ashbee Stock Ledger (Simple)"] = {
 					query: "erpnext.controllers.queries.item_query"
 				}
 			}
+		},
+		{
+			"fieldname": "item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group"
+		},
+		{
+			"fieldname": "batch_no",
+			"label": __("Batch No"),
+			"fieldtype": "Link",
+			"options": "Batch"
+		},
+		{
+			"fieldname": "brand",
+			"label": __("Brand"),
+			"fieldtype": "Link",
+			"options": "Brand"
+		},
+		{
+			"fieldname": "voucher_no",
+			"label": __("Voucher #"),
+			"fieldtype": "Data"
+		},
+		{
+			"fieldname": "project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
 		}
 	]
 }

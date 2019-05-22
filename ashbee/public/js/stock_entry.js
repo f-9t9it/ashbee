@@ -197,7 +197,7 @@ var make_receipt_button = function(frm) {
 
                 items.forEach(function(item) {
                     var se_item = frappe.model.add_child(se, 'items');
-                    se_item.item_code = item.item_code;
+                    se_item.item_code = item.ashbee_finished_item;
                     se_item.item_name = item.item_name;
                     se_item.uom = item.uom;
                     se_item.conversion_factor = item.conversion_factor;

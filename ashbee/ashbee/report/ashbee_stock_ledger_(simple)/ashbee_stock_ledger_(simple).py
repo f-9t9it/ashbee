@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from erpnext.stock.report.stock_ledger.stock_ledger import get_items, get_sle_conditions
 
 
 def execute(filters=None):
@@ -35,24 +36,9 @@ def get_stock_ledger_entries(filters, items):
 				FROM `tabStock Ledger Entry` sle
 				WHERE company=%(company)s 
 					AND posting_date BETWEEN %(from_date)s 
-					AND %(to_date)s {item_conditions} {warehouse_conditions}
+					AND %(to_date)s {item_conditions} {sle_conditions}
 				ORDER BY posting_date ASC, posting_time ASC, creation ASC
-			""".format(item_conditions=item_conditions, warehouse_conditions=get_warehouse_conditions(filters)), filters, as_dict=1)
-
-
-def get_warehouse_conditions(filters):
-	warehouse_conditions = ''
-	if filters.get('warehouse'):
-		warehouse_conditions = 'AND sle.warehouse = \'{}\''\
-			.format(filters.get('warehouse'))
-	return warehouse_conditions
-
-
-def get_items(filters):
-	items = []
-	if filters.get("item_code"):
-		items = frappe.db.sql_list("""SELECT name FROM `tabItem` item WHERE item.name=%(item_code)s""", filters)
-	return items
+			""".format(item_conditions=item_conditions, sle_conditions=get_sle_conditions(filters)), filters, as_dict=1)
 
 
 def get_color_variants():

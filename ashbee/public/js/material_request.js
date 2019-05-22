@@ -1,4 +1,7 @@
 frappe.ui.form.on('Material Request Item', {
+    items_add: function(frm, cdt, cdn) {
+        frappe.model.set_value(cdt, cdn, 'project', frm.doc.project);
+    },
     item_code: function(frm, cdt, cdn) {
         if (frm.doc.ashbee_production_issue) {
             frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
