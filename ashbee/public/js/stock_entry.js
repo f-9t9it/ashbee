@@ -198,6 +198,7 @@ var make_receipt_button = function(frm) {
                 items.forEach(function(item) {
                     var se_item = frappe.model.add_child(se, 'items');
                     se_item.item_code = item.ashbee_finished_item;
+                    se_item.basic_rate = item.ashbee_finished_item_valuation;
                     se_item.item_name = item.item_name;
                     se_item.uom = item.uom;
                     se_item.conversion_factor = item.conversion_factor;
@@ -205,6 +206,7 @@ var make_receipt_button = function(frm) {
                     se_item.description = item.description;
                     se_item.image = item.image;
                     se_item.qty = item.qty;
+                    se_item.transfer_qty = item.transfer_qty;
                     se_item.warehouse = item.s_warehouse;
                     se_item.required_date = frappe.datetime.nowdate();
                 });
