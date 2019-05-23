@@ -38,18 +38,21 @@ var extract_ashbee_attribute_value = function(ashbee_attribute_value){
 var set_ashbee_finished_item = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
 	child.ashbee_finished_item = "";
+
 	refresh_field("ashbee_finished_item", child.name, "items");
-	if(child.ashbee_recipient_task != ""){
+
+	if(child.ashbee_recipient_task != "") {
 		var _args = {
-					'item_code':child.item_code,
-					'attr_value':extract_ashbee_attribute_value(child.ashbee_attribute_value),
-					'attr_type':child.ashbee_attribute_type
-				}
+			'item_code': child.item_code,
+			'attr_value': extract_ashbee_attribute_value(child.ashbee_attribute_value),
+			'attr_type': child.ashbee_attribute_type
+		};
+
 		frappe.call({
-			method:"ashbee.ashbee.customs.stock_entry.get_finished_variant_item",
-			args:_args,
-			callback:function(r){
-				if(r.message){
+			method: "ashbee.ashbee.customs.stock_entry.get_finished_variant_item",
+			args: _args,
+			callback: function(r) {
+				if(r.message) {
 					child.ashbee_finished_item = r.message.name;
 					child.ashbee_finished_item_valuation = parseFloat(r.message.rate);
 					
@@ -64,29 +67,72 @@ var set_ashbee_finished_item = function(frm, cdt, cdn){
 var ash_create_variant = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
 	frappe.call({
-		method:"ashbee.ashbee.customs.stock_entry.get_all_variant_attributes_and_rate",
-		args:{"item_code":child.item_code},
-		callback:function(r){
-			if(r && r.message){
-				var rate = 0.0;
-				var size = r.message["Size"] == undefined ? 0.0 : r.message["Size"];
-				var weight = r.message['weight'] == undefined ? 0.0: r.message['weight'];
-				if(child.ashbee_attribute_type == "Colour" || child.ashbee_attribute_type == "Color"){
-					rate = (size * weight *0.250) + r.message.rate;
-				}
-				confirm_variant_create_with_rate(frm, child, rate, r.message);
+		method: "ashbee.ashbee.customs.stock_entry.get_all_variant_attributes_and_rate",
+		args: { "item_code": child.item_code },
+		callback: function(r) {
+			if(r && r.message) {
+				confirm_variant_create_with_rate(frm, child, r.message);
 			}
 		}
 	});
 };
 
-var confirm_variant_create_with_rate = function(frm, child, rate, attrs_and_valuation){
+var calculate_valuation_rate = function(args) {
+	return (args.length * args.weight * args.added) + args.rate;
+};
+
+var confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation) {
+	var calculated = attrs_and_valuation.rate;
+
+	if (child.ashbee_attribute_type === 'Colour') {
+		calculated = calculate_valuation_rate({
+			length: attrs_and_valuation.Length,
+			weight: attrs_and_valuation.weight,
+			rate: attrs_and_valuation.rate,
+			added: 0.250
+		});
+	}
+
+	var fields = [
+		{
+			fieldname: "valuation_rate",
+			label: __('Valuation Rate'),
+			fieldtype: "Currency",
+			default: attrs_and_valuation.rate,
+			description: "Pre-calculated value",
+			read_only: 1
+		},
+		{
+			fieldname: "added_value",
+			label: __('Added Value'),
+			fieldtype: "Currency",
+			default: 0.250,
+			reqd: 1,
+			onchange: function() {
+				var calculated = calculate_valuation_rate({
+					length: attrs_and_valuation.Length,
+					weight: attrs_and_valuation.weight,
+					rate: attrs_and_valuation.rate,
+					added: d.get_values().added_value
+				});
+				console.log(calculated);
+				d.set_value('calculated_valuation_rate', calculated);
+				console.log(d);
+			}
+		},
+		{
+			fieldname: "calculated_valuation_rate",
+			label: __('Calculated Valuation Rate'),
+			fieldtype: "Currency",
+			default: calculated,
+			description: "Calculated value",
+			read_only: 1
+		}
+	];
+
 	var d = new frappe.ui.Dialog({
 		title: "Create Variant",
-		fields: [
-			{ fieldname: "valuation_rate", label: __('Valuation Rate'), fieldtype: "Currency", default: rate },
-			{ fieldname: "added_value", label: __('Added Value'), fieldtype: "Currency", default: 0.250, reqd: 1 }
-		],
+		fields: fields,
 		primary_action_label: __('Create Variant'),
 		primary_action: () => {
 			d.get_primary_btn().attr('disabled', true);
@@ -242,7 +288,6 @@ var set_color_coating_select = function(frm, cdt, cdn){
 
 
 frappe.ui.form.on('Stock Entry Detail',{
-
 	ashbee_attribute_type:function(frm, cdt, cdn){
 		ashbee_attribute_values_populate(frm, cdt, cdn);
 	},
@@ -253,16 +298,12 @@ frappe.ui.form.on('Stock Entry Detail',{
 		empty_child_fields(frm, cdt, cdn);
 		set_color_coating_select(frm, cdt, cdn);
 	},
-
 	item_code:function(frm, cdt, cdn){
 		empty_child_fields(frm, cdt, cdn);
 	},
-
 	ashbee_create_variant:function(frm, cdt, cdn){
 		ash_create_variant(frm, cdt, cdn);
-
 	},
-
 });
 
 frappe.ui.form.on('Stock Entry',{
