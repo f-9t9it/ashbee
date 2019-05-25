@@ -2,15 +2,15 @@
 // rename this file from _test_[name] to test_[name] to activate
 // and remove above this line
 
-QUnit.test("test: Dummy Purchase Order", function (assert) {
+QUnit.test("test: Indirect Cost", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
 	assert.expect(1);
 
 	frappe.run_serially([
-		// insert a new Dummy Purchase Order
-		() => frappe.tests.make('Dummy Purchase Order', [
+		// insert a new Indirect Cost
+		() => frappe.tests.make('Indirect Cost', [
 			// values to be set
 			{key: 'value'}
 		]),

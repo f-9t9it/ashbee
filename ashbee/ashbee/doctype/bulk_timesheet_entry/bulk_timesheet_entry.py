@@ -52,6 +52,7 @@ class BulkTimesheetEntry(Document):
             if detail.timesheet:
                 timesheet = frappe.get_doc("Timesheet", detail.timesheet)
                 timesheet.cancel()
+                detail.timesheet = None
 
     def bulk_delete(self):
         to_delete = []

@@ -87,7 +87,8 @@ fixtures = [
                     "Project-ashbee_total_direct_cost",
                     "Stock Entry-ashbee_issue_items",
                     "Item-ashbee_weight",
-                    "Item-ashbee_bar"
+                    "Item-ashbee_bar",
+                    "Stock Entry-ashbee_supplier"
                 ]
             ]
         ]

@@ -14,6 +14,11 @@ def _set_item_recipient_task_color_coating(item):
 
 
 @frappe.whitelist()
+def calculate_valuation_rate(length, width, added, rate):
+	return (length * width * added) + rate
+
+
+@frappe.whitelist()
 def get_all_variant_attributes_and_rate(item_code):
 	item = frappe.get_doc("Item", item_code)
 	attrs = {}
@@ -30,12 +35,14 @@ def check_and_create_attribute(item):
 	item = frappe.get_doc("Item", item)
 	return item
 
+
 def get_variant_attribute_args(item, _args):
 	args = {}
 	for attr in item.attributes:
 		args[attr.attribute] = attr.attribute_value
 	args.update(_args)
 	return _args
+
 
 @frappe.whitelist()
 def create_multiple_variants(**filters):
@@ -70,10 +77,10 @@ def create_variant_item(**filters):
 		length = get_length_from_item(item)
 		weight = get_weight_from_item(item)
 		added_value = flt(filters.get('added_value'))
-		variant.valuation_rate = (length * weight * added_value) + item.valuation_rate
+
+		variant.valuation_rate = calculate_valuation_rate(length, weight, added_value, item.valuation_rate)
 		variant.ashbee_weight = weight
-	if filters.get('valuation_rate'):
-		variant.valuation_rate = filters.get('valuation_rate')
+
 	variant.save()
 	return variant
 
@@ -89,11 +96,13 @@ def update_missing_variant_attrs(item, template, args):
 			_args[attr] = args[attr]
 	return _args
 
+
 def get_size_from_item(item):
 	for attr in item.attributes:
 		if attr.attribute == "Size":
 			return flt(attr.attribute_value)
 	return 0.0
+
 
 def get_weight_from_item(item):
 	if isinstance(item ,str):
@@ -102,11 +111,13 @@ def get_weight_from_item(item):
 		return item.ashbee_weight
 	return item.weight_per_unit
 
+
 def get_length_from_item(item):
 	for attr in item.attributes:
 		if attr.attribute == "Length":
 			return flt(attr.attribute_value)
 	return 0.0
+
 
 @frappe.whitelist()
 def get_finished_variant_item(**filters):
@@ -121,8 +132,6 @@ def get_finished_variant_item(**filters):
 	if variant:
 		variant = frappe.get_doc("Item", variant)
 		return {'name':variant.name, 'rate':variant.valuation_rate}
-
-
 
 
 @frappe.whitelist()
@@ -140,6 +149,7 @@ def get_attribute_values(**filters):
 	print(retVal)
 	return retVal
 
+
 @frappe.whitelist()
 def get_variant_items(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	if not filters.get("item_code") or not filters.get("attr_type"):
@@ -154,6 +164,7 @@ def get_variant_items(doctype, txt, searchfield, start, page_len, filters, as_di
 								where attribute = "{attr_type}")
 								;'''.format(item_code=item.item_code, variant_of=item.variant_of,
 									attr_type=attr_type))
+
 
 @frappe.whitelist()
 def get_issue_items(**kwargs):
@@ -186,4 +197,5 @@ def get_issue_items(**kwargs):
 			new_entry_item.stock_uom = finished_item.stock_uom
 		new_entry_item.basic_rate = new_entry_item.valuation_rate * new_entry_item.qty
 		data.append(new_entry_item)
+
 	return data
