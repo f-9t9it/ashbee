@@ -19,6 +19,10 @@ class IndirectCost(Document):
 				_get_material_issues(self.start_date, self.end_date),
 				{}
 			)
+
+			if not projects:
+				frappe.throw(_('No active projects found within the date range. If you have transactions, set the project as active.'))
+
 			self._allocate_items(projects)
 		else:
 			self._check_allocation()

@@ -88,7 +88,13 @@ fixtures = [
                     "Stock Entry-ashbee_issue_items",
                     "Item-ashbee_weight",
                     "Item-ashbee_bar",
-                    "Stock Entry-ashbee_supplier"
+                    "Stock Entry-ashbee_supplier",
+                    "Material Request Item-section_break_5",
+                    "Material Request Item-ashbee_finished_item"
+                    "Material Request Item-ashbee_finished_item_valuation",
+                    "Material Request Item-ashbee_create_variant",
+                    "Material Request Item-column_break_7",
+                    "Project-ashbee_total_indirect_cost"
                 ]
             ]
         ]

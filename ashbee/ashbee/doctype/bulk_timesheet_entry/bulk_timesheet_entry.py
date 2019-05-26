@@ -6,11 +6,14 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import today
+from frappe.utils.data import get_datetime
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 
 
 class BulkTimesheetEntry(Document):
     def validate(self):
+        self.update_missing_details_fields()
+        self.update_project_fields()
         self.validate_costs()
 
     def on_submit(self):
@@ -18,6 +21,26 @@ class BulkTimesheetEntry(Document):
 
     def on_cancel(self):
         self.bulk_cancel()
+
+    def update_missing_details_fields(self):
+        for detail in self.details:
+            if not detail.start_date_time:
+                date_time = get_datetime(self.posting_date)
+                detail.start_date_time = date_time.replace(hour=5, minute=30, second=0, microsecond=0)
+                detail.end_date_time = date_time.replace(hour=13, minute=30, second=0, microsecond=0)
+            if not detail.employee_name and detail.employee:
+                detail.employee_name = frappe.db.get_value('Employee', detail.employee, 'employee_name')
+
+    def update_project_fields(self):
+        for detail in self.details:
+            if detail.project_code and not detail.project:
+                project = self.get_project_name_by_project_code(
+                    detail.project_code
+                )
+                if project:
+                    project = project[0]
+                    detail.project = project['name']
+                    detail.project_name = project['name']
 
     def get_employee_details(self, employee):
         employee = frappe.get_doc("Employee", employee)
@@ -29,6 +52,14 @@ class BulkTimesheetEntry(Document):
     def get_project_name(self, project):
         project = frappe.get_doc("Project", project)
         return project.name
+
+    def get_project_name_by_project_code(self, project_code):
+        project = frappe.db.sql("""
+            SELECT name FROM `tabProject`
+            WHERE ashbee_project_code=%s
+        """, project_code, as_dict=1)
+
+        return project
 
     def get_employee_charge_per_hour(self, employee):
         salary_structure = get_assigned_salary_structure(employee.name, today())
