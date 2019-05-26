@@ -6,11 +6,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import today
+from frappe.utils.data import get_datetime
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 
 
 class BulkTimesheetEntry(Document):
     def validate(self):
+        self.update_missing_details_fields()
         self.update_project_fields()
         self.validate_costs()
 
@@ -19,6 +21,15 @@ class BulkTimesheetEntry(Document):
 
     def on_cancel(self):
         self.bulk_cancel()
+
+    def update_missing_details_fields(self):
+        for detail in self.details:
+            if not detail.start_date_time:
+                date_time = get_datetime(self.posting_date)
+                detail.start_date_time = date_time.replace(hour=5, minute=30, second=0, microsecond=0)
+                detail.end_date_time = date_time.replace(hour=13, minute=30, second=0, microsecond=0)
+            if not detail.employee_name and detail.employee:
+                detail.employee_name = frappe.db.get_value('Employee', detail.employee, 'employee_name')
 
     def update_project_fields(self):
         for detail in self.details:
