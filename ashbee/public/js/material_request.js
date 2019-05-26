@@ -19,9 +19,6 @@ frappe.ui.form.on('Material Request Item', {
 });
 
 var _make_custom_button = function(frm) {
-    if (frm.doc.material_request_type !== 'Material Issue')
-        return;
-
     frm.add_custom_button(__('Make Issue'), function() {
         frappe.model.with_doctype('Stock Entry', function() {
             var se = frappe.model.get_new_doc('Stock Entry');
