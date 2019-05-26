@@ -19,6 +19,9 @@ frappe.ui.form.on('Material Request Item', {
 });
 
 var _make_custom_button = function(frm) {
+    if (frm.doc.material_request_type !== 'Material Issue')
+        return;
+
     frm.add_custom_button(__('Make Issue'), function() {
         frappe.model.with_doctype('Stock Entry', function() {
             var se = frappe.model.get_new_doc('Stock Entry');
@@ -36,6 +39,7 @@ var _make_custom_button = function(frm) {
                     se_item.description = item.description;
                     se_item.image = item.image;
                     se_item.qty = item.qty;
+                    se_item.transfer_qty = item.qty;
                     se_item.warehouse = item.warehouse;
                     se_item.required_date = frappe.datetime.nowdate();
             });
