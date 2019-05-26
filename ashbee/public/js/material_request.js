@@ -39,6 +39,12 @@ var _make_custom_button = function(frm) {
                     se_item.transfer_qty = item.qty;
                     se_item.warehouse = item.warehouse;
                     se_item.required_date = frappe.datetime.nowdate();
+
+                if (frm.doc.ashbee_production_issue) {
+                    se_item.ashbee_recipient_task = 'Color Coating';
+                    se_item.ashbee_attribute_type = item.ashbee_attribute_type;
+                    se_item.ashbee_attribute_value = item.ashbee_attribute_value;
+                }
             });
 
             frappe.set_route('Form', 'Stock Entry', se.name);
