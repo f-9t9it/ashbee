@@ -180,6 +180,8 @@ var _make_custom_button = function(frm) {
                     se_item.ashbee_recipient_task = 'Color Coating';
                     se_item.ashbee_attribute_type = item.ashbee_attribute_type;
                     se_item.ashbee_attribute_value = item.ashbee_attribute_value;
+                    se_item.ashbee_finished_item = item.ashbee_finished_item;
+                    se_item.ashbee_finished_item_valuation = item.ashbee_finished_item_valuation;
                 }
             });
 
