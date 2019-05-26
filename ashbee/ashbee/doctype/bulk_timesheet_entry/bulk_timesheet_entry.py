@@ -11,6 +11,7 @@ from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment 
 
 class BulkTimesheetEntry(Document):
     def validate(self):
+        self.update_project_fields()
         self.validate_costs()
 
     def on_submit(self):
@@ -18,6 +19,19 @@ class BulkTimesheetEntry(Document):
 
     def on_cancel(self):
         self.bulk_cancel()
+
+    def update_project_fields(self):
+        for detail in self.details:
+            if detail.project_code and not detail.project:
+                project = frappe.db.sql("""
+                    SELECT name FROM `tabProject`
+                    WHERE ashbee_project_code=%s
+                """, detail.project_code, as_dict=1)
+
+                if project:
+                    project = project[0]
+                    detail.project = project['name']
+                    detail.project_name = project['name']
 
     def get_employee_details(self, employee):
         employee = frappe.get_doc("Employee", employee)
