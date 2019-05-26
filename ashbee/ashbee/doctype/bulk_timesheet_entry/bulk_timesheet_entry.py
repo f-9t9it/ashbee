@@ -23,11 +23,9 @@ class BulkTimesheetEntry(Document):
     def update_project_fields(self):
         for detail in self.details:
             if detail.project_code and not detail.project:
-                project = frappe.db.sql("""
-                    SELECT name FROM `tabProject`
-                    WHERE ashbee_project_code=%s
-                """, detail.project_code, as_dict=1)
-
+                project = self.get_project_name_by_project_code(
+                    detail.project_code
+                )
                 if project:
                     project = project[0]
                     detail.project = project['name']
@@ -43,6 +41,14 @@ class BulkTimesheetEntry(Document):
     def get_project_name(self, project):
         project = frappe.get_doc("Project", project)
         return project.name
+
+    def get_project_name_by_project_code(self, project_code):
+        project = frappe.db.sql("""
+            SELECT name FROM `tabProject`
+            WHERE ashbee_project_code=%s
+        """, project_code, as_dict=1)
+
+        return project
 
     def get_employee_charge_per_hour(self, employee):
         salary_structure = get_assigned_salary_structure(employee.name, today())

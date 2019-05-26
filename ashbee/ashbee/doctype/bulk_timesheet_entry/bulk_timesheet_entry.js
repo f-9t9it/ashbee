@@ -156,7 +156,6 @@ frappe.ui.form.on('Bulk Timesheet Details', {
 		calculate_total_cost(frm, cdt, cdn);
 	},
 
-
 	project: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		frm.call({
@@ -166,6 +165,24 @@ frappe.ui.form.on('Bulk Timesheet Details', {
 			callback: function(r) {
 				child.project_name = r.message;
 				refresh_field("project_name",child.name, "details");
+			}
+		});
+	},
+
+	project_code: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		frm.call({
+			method: "get_project_name_by_project_code",
+			args: { 'project_code': child.project_code },
+			doc: frm.doc,
+			callback: function(r) {
+				if (r.message) {
+					var project = r.message[0];
+					child.project = project.name;
+					child.project_name = project.name;
+					refresh_field("project", child.name, "details");
+					refresh_field("project_name", child.name, "details");
+				}
 			}
 		});
 	}
