@@ -74,8 +74,8 @@ class BulkTimesheetEntry(Document):
     def validate_costs(self):
         for detail in self.details:
             detail.normal_cost = detail.hourly_cost * detail.normal_hours
-            detail.ot1 = detail.hourly_cost * detail.ot1_hours
-            detail.ot2 = detail.hourly_cost * detail.ot2_hours
+            detail.ot1 = detail.hourly_cost * detail.ot1_hours * 1.25
+            detail.ot2 = detail.hourly_cost * detail.ot2_hours * 1.50
             detail.total_cost = detail.ot1 + detail.ot2 + detail.normal_cost
 
     def bulk_cancel(self):

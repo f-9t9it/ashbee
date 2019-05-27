@@ -16,7 +16,7 @@ class IndirectCost(Document):
 		if not self.items:
 			projects = reduce(
 				_sum_material_issues_by_projects,
-				_get_material_issues(self.start_date, self.end_date),
+				_get_material_issues(self.start_date, self.end_date, self.is_central),
 				{}
 			)
 
@@ -38,7 +38,7 @@ class IndirectCost(Document):
 		total_mi_value = reduce(lambda x, y: x + y, projects.values())
 
 		for project, mi_value in projects.iteritems():
-			allocated = self.indirect_expense * (mi_value / total_mi_value)
+			allocated = self.allocation * (mi_value / total_mi_value)
 			self.append('items', {
 				'project': project,
 				'allocated': allocated
@@ -47,29 +47,31 @@ class IndirectCost(Document):
 	def _check_allocation(self):
 		total = reduce(lambda x, y: x.allocated + y.allocated, self.items)
 
-		if total != self.indirect_expense:
+		if total != self.allocation:
 			frappe.throw(_('Allocated values is not the same with allocated indirect expense'))
 
 	def _update_project_indirect_cost(self, cancel=False):
 		for item in self.items:
-			total_indirect_cost = _get_total_indirect_cost(item.project)
+			total_indirect_cost = _get_total_cost(item.project, self.is_central)
 
 			if cancel:
 				new_total = total_indirect_cost - item.allocated
 			else:
 				new_total = total_indirect_cost + item.allocated
 
-			_set_total_indirect_cost(item.project, new_total)
+			_set_total_cost(item.project, new_total, self.is_central)
 
 		frappe.db.commit()
 
 
-def _get_total_indirect_cost(project):
-	return frappe.db.get_value('Project', project, 'ashbee_total_indirect_cost')
+def _get_total_cost(project, is_central):
+	field = 'ashbee_total_central_cost' if is_central else 'ashbee_total_indirect_cost'
+	return frappe.db.get_value('Project', project, field)
 
 
-def _set_total_indirect_cost(project, total_indirect_cost):
-	frappe.db.set_value('Project', project, 'ashbee_total_indirect_cost', total_indirect_cost)
+def _set_total_cost(project, total_cost, is_central):
+	field = 'ashbee_total_central_cost' if is_central else 'ashbee_total_indirect_cost'
+	frappe.db.set_value('Project', project, field, total_cost)
 
 
 def _sum_material_issues_by_projects(_, material_issues):
@@ -90,7 +92,7 @@ def _sum_material_issues_by_projects(_, material_issues):
 	return _
 
 
-def _get_material_issues(start_date, end_date):
+def _get_material_issues(start_date, end_date, is_central):
 	"""
 	Get all submitted Stock Entry material issues
 	 with project where project is active
@@ -106,4 +108,5 @@ def _get_material_issues(start_date, end_date):
 		AND `tabStock Entry`.purpose = 'Material Issue'
 		AND `tabStock Entry`.docstatus = 1
 		AND `tabProject`.is_active = 'Yes'
-	""", (start_date, end_date), as_dict=1)
+		AND `tabStock Entry`.ashbee_production_issue = %i
+	""", (start_date, end_date, is_central), as_dict=1)
