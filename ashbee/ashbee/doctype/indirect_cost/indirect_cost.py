@@ -38,7 +38,7 @@ class IndirectCost(Document):
 		total_mi_value = reduce(lambda x, y: x + y, projects.values())
 
 		for project, mi_value in projects.iteritems():
-			allocated = self.indirect_expense * (mi_value / total_mi_value)
+			allocated = self.allocation * (mi_value / total_mi_value)
 			self.append('items', {
 				'project': project,
 				'allocated': allocated
@@ -47,7 +47,7 @@ class IndirectCost(Document):
 	def _check_allocation(self):
 		total = reduce(lambda x, y: x.allocated + y.allocated, self.items)
 
-		if total != self.indirect_expense:
+		if total != self.allocation:
 			frappe.throw(_('Allocated values is not the same with allocated indirect expense'))
 
 	def _update_project_indirect_cost(self, cancel=False):
