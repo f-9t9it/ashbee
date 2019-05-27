@@ -10,7 +10,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
- "editable_grid": 0, 
+ "editable_grid": 1, 
  "engine": "InnoDB", 
  "fields": [
   {
@@ -124,7 +124,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2019-05-21 10:33:00.269966", 
+ "modified": "2019-05-27 14:51:40.855988", 
  "modified_by": "Administrator", 
  "module": "Ashbee", 
  "name": "Direct Cost Item", 
