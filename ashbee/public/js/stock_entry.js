@@ -234,6 +234,7 @@ var make_receipt_button = function(frm) {
         frm.add_custom_button(__('Make Receipt'), function() {
             frappe.model.with_doctype('Stock Entry', function() {
                 var se = frappe.model.get_new_doc('Stock Entry');
+                se.naming_series = "MTSIN-.YY.-.#####";
                 se.purpose = "Material Receipt";
 
                 var items = frm.get_field('items').grid.get_selected_children();
@@ -306,8 +307,7 @@ frappe.ui.form.on('Stock Entry Detail',{
 	},
 });
 
-frappe.ui.form.on('Stock Entry',{
-
+frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
 		frm.set_query("ashbee_issue_items", function() {
 			return {
@@ -318,13 +318,19 @@ frappe.ui.form.on('Stock Entry',{
 			};
 		});
 	},
-
-	refresh:function(frm){
+	refresh: function(frm) {
 		set_page_primary_action(frm);
         make_receipt_button(frm);
 	},
-
-	ashbee_issue_items:function(frm){
+	ashbee_production_issue: function(frm) {
+		frm.set_value('naming_series', 'MTSOUT-.YY.-.#####');
+	},
+	purpose: function(frm) {
+		if (frm.doc.purpose === "Material Issue") {
+            frm.set_value('naming_series', 'MI-.YY.-.#####');
+        }
+	},
+	ashbee_issue_items: function(frm) {
 		var args = {"stock_entry":frm.doc.ashbee_issue_items};
 		return frappe.call({
 			method: "ashbee.ashbee.customs.stock_entry.get_issue_items",
