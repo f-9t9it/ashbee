@@ -18,5 +18,25 @@
   "property": "options", 
   "property_type": "Text", 
   "value": "MTSOUT-.YY.-.#####\nMTSIN-.YY.-.#####\nMI-.YY.-.#####\nSE-PI-.#####\nSE-MI-.#####\nMAT-STE-.YYYY.-"
+ }, 
+ {
+  "_assign": null, 
+  "_comments": null, 
+  "_liked_by": null, 
+  "_user_tags": null, 
+  "default_value": null, 
+  "doc_type": "Purchase Receipt", 
+  "docstatus": 0, 
+  "doctype": "Property Setter", 
+  "doctype_or_field": "DocField", 
+  "field_name": "naming_series", 
+  "modified": "2019-05-27 17:31:03.047817", 
+  "name": "Purchase Receipt-naming_series-options", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "property": "options", 
+  "property_type": "Text", 
+  "value": "PRL-.YY.-.#####\nPRF-.YY.-.#####\nMAT-PRE-.YYYY.-"
  }
 ]

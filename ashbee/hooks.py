@@ -108,7 +108,8 @@ fixtures = [
                 "name",
                 "in",
                 [
-                    "Stock Entry-naming_series-options"
+                    "Stock Entry-naming_series-options",
+                    "Purchase Receipt-naming_series-options"
                 ]
             ]
         ]
