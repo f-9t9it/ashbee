@@ -29,7 +29,8 @@ app_include_css = "/assets/ashbee/css/ashbee.css"
 doctype_js = {
     "Stock Entry": "public/js/stock_entry.js",
     "Timesheet": "public/js/timesheet.js",
-    "Material Request": "public/js/material_request.js"
+    "Material Request": "public/js/material_request.js",
+    "Purchase Receipt": "public/js/purchase_receipt.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
