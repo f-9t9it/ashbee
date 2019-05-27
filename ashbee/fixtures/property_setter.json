@@ -10,13 +10,13 @@
   "doctype": "Property Setter", 
   "doctype_or_field": "DocField", 
   "field_name": "naming_series", 
-  "modified": "2019-05-15 17:19:43.835766", 
+  "modified": "2019-05-27 17:19:58.650191", 
   "name": "Stock Entry-naming_series-options", 
   "parent": null, 
   "parentfield": null, 
   "parenttype": null, 
   "property": "options", 
   "property_type": "Text", 
-  "value": "SE-PI-.#####\nSE-MI-.#####\nMAT-STE-.YYYY.-"
+  "value": "MTSOUT-.YY.-.#####\nMTSIN-.YY.-.#####\nMI-.YY.-.#####\nSE-PI-.#####\nSE-MI-.#####\nMAT-STE-.YYYY.-"
  }
 ]
