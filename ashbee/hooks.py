@@ -94,7 +94,8 @@ fixtures = [
                     "Material Request Item-ashbee_finished_item_valuation",
                     "Material Request Item-ashbee_create_variant",
                     "Material Request Item-column_break_7",
-                    "Project-ashbee_total_indirect_cost"
+                    "Project-ashbee_total_indirect_cost",
+                    "Stock Entry-ashbee_production_issue"
                 ]
             ]
         ]
