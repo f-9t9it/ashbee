@@ -1,6 +1,9 @@
 frappe.ui.form.on('Material Request', {
     refresh: function(frm) {
         _make_custom_button(frm);
+    },
+    ashbee_production_issue: function(frm) {
+        frm.set_value('naming_series', 'MR-PI-.YY.-.#####');
     }
 });
 
