@@ -38,5 +38,25 @@
   "property": "options", 
   "property_type": "Text", 
   "value": "PRL-.YY.-.#####\nPRF-.YY.-.#####\nMAT-PRE-.YYYY.-"
+ }, 
+ {
+  "_assign": null, 
+  "_comments": null, 
+  "_liked_by": null, 
+  "_user_tags": null, 
+  "default_value": null, 
+  "doc_type": "Material Request", 
+  "docstatus": 0, 
+  "doctype": "Property Setter", 
+  "doctype_or_field": "DocField", 
+  "field_name": "naming_series", 
+  "modified": "2019-05-27 17:55:18.570843", 
+  "name": "Material Request-naming_series-options", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "property": "options", 
+  "property_type": "Text", 
+  "value": "MR-.YY.-.#####\nMR-PI-.YY.-.#####\nMAT-MR-.YYYY.-"
  }
 ]

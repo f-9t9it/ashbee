@@ -110,7 +110,8 @@ fixtures = [
                 "in",
                 [
                     "Stock Entry-naming_series-options",
-                    "Purchase Receipt-naming_series-options"
+                    "Purchase Receipt-naming_series-options",
+                    "Material Request-naming_series-options"
                 ]
             ]
         ]
