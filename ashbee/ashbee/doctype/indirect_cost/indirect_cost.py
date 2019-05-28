@@ -85,7 +85,7 @@ def _set_total_cost(project, total_cost, is_central):
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
 	projects = {}
 
-	_set_summed_dict(direct_costs, 'job_no', 'sum_direct_cost', projects)
+	_set_summed_dict(direct_costs, 'project', 'sum_direct_cost', projects)
 	_set_summed_dict(material_issues, 'project', 'sum_total_outgoing_value', projects)
 	_set_summed_dict(timesheet_details, 'project', 'sum_costing_amount', projects)
 

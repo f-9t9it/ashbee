@@ -45,11 +45,23 @@ def get_all_timesheet_details(filters):
 
 def get_all_direct_costs(filters):
     return frappe.db.sql("""
-        SELECT job_no, SUM(direct_cost) AS sum_direct_cost
+        SELECT job_no as project, SUM(direct_cost) AS sum_direct_cost
         FROM `tabDirect Cost Item`
         WHERE docstatus = 1
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         GROUP BY job_no
+    """, filters, as_dict=1)
+
+
+def get_all_indirect_costs(filters):
+    return frappe.db.sql("""
+        SELECT project, SUM(allocated) AS sum_allocated
+        FROM `tabIndirect Cost Item`
+        INNER JOIN `tabIndirect Cost`
+        ON `tabIndirect Cost Item`.parent = `tabIndirect Cost`.name
+        WHERE `tabIndirect Cost`.docstatus = 1
+        AND posting_date BETWEEN %(from_date)s AND %(to_date)s
+        GROUP BY project
     """, filters, as_dict=1)
 
 
