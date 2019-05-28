@@ -29,7 +29,8 @@ app_include_css = "/assets/ashbee/css/ashbee.css"
 doctype_js = {
     "Stock Entry": "public/js/stock_entry.js",
     "Timesheet": "public/js/timesheet.js",
-    "Material Request": "public/js/material_request.js"
+    "Material Request": "public/js/material_request.js",
+    "Purchase Receipt": "public/js/purchase_receipt.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -96,7 +97,8 @@ fixtures = [
                     "Material Request Item-column_break_7",
                     "Project-ashbee_total_indirect_cost",
                     "Stock Entry-ashbee_production_issue",
-                    "Project-ashbee_total_central_cost"
+                    "Project-ashbee_total_central_cost",
+                    "Stock Entry-ashbee_is_return"
                 ]
             ]
         ]
@@ -108,7 +110,9 @@ fixtures = [
                 "name",
                 "in",
                 [
-                    "Stock Entry-naming_series-options"
+                    "Stock Entry-naming_series-options",
+                    "Purchase Receipt-naming_series-options",
+                    "Material Request-naming_series-options"
                 ]
             ]
         ]
