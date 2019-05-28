@@ -5,167 +5,168 @@ from __future__ import unicode_literals
 import itertools
 from frappe import _
 from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_all_material_issues,\
-	get_all_indirect_costs, get_central_expenses, get_central_labour
+    get_all_indirect_costs, get_central_expenses, get_central_labour, get_all_material_returns
 
 
 def execute(filters=None):
-	columns, data = get_columns(filters), get_data(filters)
-	return columns, data
+    columns, data = get_columns(filters), get_data(filters)
+    return columns, data
 
 
 def get_columns(filters):
-	return [
-		{
-			"label": _("Project"),
-			"fieldname": "project",
-			"fieldtype": "Link",
-			"options": "Project",
-			"width": 120
-		},
-		{
-			"label": _("Material Issue"),
-			"fieldname": "material_issue",
-			"fieldtype": "Currency",
-			"width": 120
-		},
-		{
-			"label": _("Direct Cost"),
-			"fieldname": "direct_cost",
-			"fieldtype": "Currency",
-			"width": 120
-		},
-		{
-			"label": _("Labour"),
-			"fieldname": "labour",
-			"fieldtype": "Currency",
-			"width": 120
-		},
-		{
-			"label": _("Central Labour"),
-			"fieldname": "central_labour",
-			"fieldtype": "Currency",
-			"width": 120
-		},
-		{
-			"label": _("Central Expenses"),
-			"fieldname": "central_expenses",
-			"fieldtype": "Currency",
-			"width": 120
-		},
-		{
-			"label": _("Indirect Expenses"),
-			"fieldname": "indirect_expenses",
-			"fieldtype": "Currency",
-			"width": 120
-		},
-		{
-			"label": _("Overhead Charges"),
-			"fieldname": "overhead_charges",
-			"fieldtype": "Currency",
-			"width": 120
-		},
-		{
-			"label": _("Material Return"),
-			"fieldname": "material_return",
-			"fieldtype": "Currency",
-			"width": 120
-		},
-	]
+    return [
+        {
+            "label": _("Project"),
+            "fieldname": "project",
+            "fieldtype": "Link",
+            "options": "Project",
+            "width": 120
+        },
+        {
+            "label": _("Material Issue"),
+            "fieldname": "material_issue",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Direct Cost"),
+            "fieldname": "direct_cost",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Labour"),
+            "fieldname": "labour",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Central Labour"),
+            "fieldname": "central_labour",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Central Expenses"),
+            "fieldname": "central_expenses",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Indirect Expenses"),
+            "fieldname": "indirect_expenses",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Overhead Charges"),
+            "fieldname": "overhead_charges",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Material Return"),
+            "fieldname": "material_return",
+            "fieldtype": "Integer",
+            "width": 60
+        },
+    ]
 
 
 def get_data(filters):
-	res_data = []
+    res_data = []
 
-	# Get all costs
-	data = sum([
-		get_all_material_issues(filters),
-		get_all_indirect_costs(filters),
-		get_all_direct_costs(filters),
-		get_all_timesheet_details(filters)
-	], [])
+    # Get all costs
+    data = sum([
+        get_all_material_issues(filters),
+        get_all_indirect_costs(filters),
+        get_all_direct_costs(filters),
+        get_all_timesheet_details(filters),
+        get_all_material_returns(filters)
+    ], [])
 
-	# Group by projects
-	def keyfunc(x):
-		return x['project']
+    # Group by projects
+    def keyfunc(x):
+        return x['project']
 
-	data = sorted(data, key=keyfunc)
-	costs_by_projects = itertools.groupby(data, key=keyfunc)
+    data = sorted(data, key=keyfunc)
+    costs_by_projects = itertools.groupby(data, key=keyfunc)
 
-	for project, costs in costs_by_projects:
-		project_data = {}
+    for project, costs in costs_by_projects:
+        project_data = {}
 
-		for cost in costs:
-			project_data.update(cost)
+        for cost in costs:
+            project_data.update(cost)
 
-		if project is None:
-			project_data.update({'project': 'Other Projects'})
+        if project is None:
+            project_data.update({'project': 'Other Projects'})
 
-		res_data.append(project_data)
+        res_data.append(project_data)
 
-	# Transform fieldnames to right report fields
-	_rename_fieldnames_for_report(res_data)
+    # Transform fieldnames to right report fields
+    _rename_fieldnames_for_report(res_data)
 
-	# Charges and Sum
-	_fill_overhead_charges(res_data, filters.get('overhead_percent'))
-	_sum_costs(res_data)
+    # Charges and Sum
+    _fill_overhead_charges(res_data, filters.get('overhead_percent'))
+    _sum_costs(res_data)
 
-	# Add central formula
-	central_labour = get_central_labour(filters)
-	central_expenses = get_central_expenses(filters)
-	total_sum_costs = _sum_costs(res_data)
+    # Add central formula
+    central_labour = get_central_labour(filters)
+    central_expenses = get_central_expenses(filters)
+    total_sum_costs = _sum_costs(res_data)
 
-	_fill_central_fields(
-		res_data,
-		central_labour,
-		central_expenses,
-		total_sum_costs
-	)
+    _fill_central_fields(
+        res_data,
+        central_labour,
+        central_expenses,
+        total_sum_costs
+    )
 
-	return res_data
+    return res_data
 
 
 def _fill_central_fields(data, labour, expenses, sum_costs):
-	for row in data:
-		row['central_labour'] = labour * (row['dividend'] / sum_costs)
-		row['central_expenses'] = expenses * (row['dividend'] / sum_costs)
+    for row in data:
+        row['central_labour'] = labour * (row['dividend'] / sum_costs)
+        row['central_expenses'] = expenses * (row['dividend'] / sum_costs)
 
 
 def _sum_costs(data):
-	total_sum_costs = 0.0
-	for row in data:
-		row['dividend'] = sum([
-			row['material_issue'],
-			row['direct_cost'],
-			row['labour']
-		])
-		total_sum_costs = total_sum_costs + row['dividend']
-	return total_sum_costs
+    total_sum_costs = 0.0
+    for row in data:
+        row['dividend'] = sum([
+            row['material_issue'],
+            row['direct_cost'],
+            row['labour']
+        ])
+        total_sum_costs = total_sum_costs + row['dividend']
+    return total_sum_costs
 
 
 def _fill_overhead_charges(data, overhead):
-	for row in data:
-		row['overhead_charges'] = sum([
-			row['material_issue'],
-			row['direct_cost'],
-			row['labour'],
-			row['indirect_expenses']
-		]) * (overhead / 100.00)
+    for row in data:
+        row['overhead_charges'] = sum([
+            row['material_issue'],
+            row['direct_cost'],
+            row['labour'],
+            row['indirect_expenses']
+        ]) * (overhead / 100.00)
 
 
 def _rename_fieldnames_for_report(data):
-	fieldnames = {
-		'sum_total_outgoing_value': 'material_issue',
-		'sum_direct_cost': 'direct_cost',
-		'sum_costing_amount': 'labour',
-		'sum_allocated': 'indirect_expenses'
-	}
+    fieldnames = {
+        'sum_total_outgoing_value': 'material_issue',
+        'sum_direct_cost': 'direct_cost',
+        'sum_costing_amount': 'labour',
+        'sum_allocated': 'indirect_expenses'
+    }
 
-	for row in data:
-		for current, new in fieldnames.iteritems():
-			if current in row:
-				row[new] = row.pop(current)
-			else:
-				row[new] = 0.00
+    for row in data:
+        for current, new in fieldnames.iteritems():
+            if current in row:
+                row[new] = row.pop(current)
+            else:
+                row[new] = 0.00
 
 # def each_central_expense(row, central_expense):
 # 	'''Distribute Central Expenses for each project.'''

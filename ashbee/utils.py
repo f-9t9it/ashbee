@@ -99,11 +99,30 @@ def get_central_labour(filters):
     return res[0][0] if res else None
 
 
+def get_all_material_returns(filters):
+    filters.update({'project': frappe.db.get_single_value('Ashbee Settings', 'central_project')})
+    return frappe.db.sql("""
+        SELECT project, SUM(qty) AS material_return
+        FROM `tabStock Entry Detail`
+        INNER JOIN `tabStock Entry`
+        ON `tabStock Entry Detail`.parent = `tabStock Entry`.name
+        WHERE `tabStock Entry`.docstatus = 1
+        AND `tabStock Entry`.ashbee_is_return = 1
+        AND `tabStock Entry`.project != %(project)s
+        AND `tabStock Entry`.purpose = 'Material Issue'
+        AND posting_date BETWEEN %(from_date)s AND %(to_date)s
+        GROUP BY project
+    """, filters, as_dict=1)
+
+
 def test():
     filters = {
         'from_date': '2019-04-24',
         'to_date': '2019-05-31'
     }
 
-    print(get_central_expenses(filters))
-    print(get_central_labour(filters))
+    print(get_all_timesheet_details(filters))
+    print(get_all_direct_costs(filters))
+    print(get_all_indirect_costs(filters))
+    print(get_all_material_issues(filters))
+    print(get_all_material_returns(filters))
