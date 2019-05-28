@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import itertools
 from frappe import _
 from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_all_material_issues,\
-	get_all_indirect_costs
+	get_all_indirect_costs, get_central_expenses, get_central_labour
 
 
 def execute(filters=None):
@@ -104,19 +104,52 @@ def get_data(filters):
 
 	# Transform fieldnames to right report fields
 	_rename_fieldnames_for_report(res_data)
-	_fill_overhead_charges(res_data)
+
+	# Charges and Sum
+	_fill_overhead_charges(res_data, filters.get('overhead_percent'))
+	_sum_costs(res_data)
+
+	# Add central formula
+	central_labour = get_central_labour(filters)
+	central_expenses = get_central_expenses(filters)
+	total_sum_costs = _sum_costs(res_data)
+
+	_fill_central_fields(
+		res_data,
+		central_labour,
+		central_expenses,
+		total_sum_costs
+	)
 
 	return res_data
 
 
-def _fill_overhead_charges(data):
+def _fill_central_fields(data, labour, expenses, sum_costs):
+	for row in data:
+		row['central_labour'] = labour * (row['dividend'] / sum_costs)
+		row['central_expenses'] = expenses * (row['dividend'] / sum_costs)
+
+
+def _sum_costs(data):
+	total_sum_costs = 0.0
+	for row in data:
+		row['dividend'] = sum([
+			row['material_issue'],
+			row['direct_cost'],
+			row['labour']
+		])
+		total_sum_costs = total_sum_costs + row['dividend']
+	return total_sum_costs
+
+
+def _fill_overhead_charges(data, overhead):
 	for row in data:
 		row['overhead_charges'] = sum([
 			row['material_issue'],
 			row['direct_cost'],
 			row['labour'],
 			row['indirect_expenses']
-		]) * 0.20
+		]) * (overhead / 100.00)
 
 
 def _rename_fieldnames_for_report(data):
