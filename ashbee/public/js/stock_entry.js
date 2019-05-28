@@ -287,6 +287,14 @@ var set_color_coating_select = function(frm, cdt, cdn){
 	}
 };
 
+var _check_negative_qty = function(items) {
+	$.each(items, function(i, v) {
+		if (v.qty > 0) {
+			frappe.throw(__('Set quantity as negative.'));
+			return;
+		}
+	});
+}
 
 frappe.ui.form.on('Stock Entry Detail',{
 	ashbee_attribute_type:function(frm, cdt, cdn){
@@ -321,6 +329,11 @@ frappe.ui.form.on('Stock Entry', {
 	refresh: function(frm) {
 		set_page_primary_action(frm);
         make_receipt_button(frm);
+	},
+	validate: function(frm) {
+		if (frm.doc.ashbee_is_return) {
+            _check_negative_qty(frm.doc.items);
+        }
 	},
 	ashbee_production_issue: function(frm) {
 		frm.set_value('naming_series', 'MTSOUT-.YY.-.#####');
