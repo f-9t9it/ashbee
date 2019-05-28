@@ -21,37 +21,42 @@ def calculate_overhead_charges(project):
     return costing_sum * 0.20
 
 
-def get_all_material_issues(project, filters):
-    fields = ['sum(total_outgoing_value) as sum_total_outgoing_value']
-    record_filters = {
-        'project': project,
-        'purpose': 'Material Issue',
-        'docstatus': 1
+def get_all_material_issues(filters):
+    return frappe.db.sql("""
+        SELECT project, SUM(total_outgoing_value) AS sum_total_outgoing_value
+        FROM `tabStock Entry`
+        WHERE docstatus = 1
+        AND purpose = 'Material Issue'
+        AND posting_date BETWEEN %(from_date)s AND %(to_date)s
+        GROUP BY project
+    """, filters, as_dict=1)
+
+
+def get_all_timesheet_details(filters):
+    return frappe.db.sql("""
+        SELECT project, SUM(costing_amount) AS sum_costing_amount
+        FROM `tabTimesheet Detail`
+        WHERE docstatus = 1
+        AND DATE(from_time) <= %(to_date)s
+        AND DATE(to_time) >= %(from_date)s
+        GROUP BY project
+    """, filters, as_dict=1)
+
+
+def get_all_direct_cost(filters):
+    return frappe.db.sql("""
+        SELECT job_no, SUM(direct_cost) AS sum_direct_cost
+        FROM `tabDirect Cost Item`
+        WHERE docstatus = 1
+        AND posting_date BETWEEN %(from_date)s AND %(to_date)s
+        GROUP BY project
+    """, filters, as_dict=1)
+
+
+def test():
+    filters = {
+        'from_date': '2019-04-24',
+        'to_date': '2019-05-26'
     }
 
-    material_issues = frappe.get_all('Stock Entry', filters=record_filters, fields=fields)
-
-    return material_issues
-
-
-def get_all_timesheets(project, filters):
-    fields = ['sum(costing_amount) as sum_costing_amount']
-    record_filters = {
-        'project': project,
-        'docstatus': 1
-    }
-
-    timesheets = frappe.get_all('Timesheet Detail', filters=record_filters, fields=fields)
-
-    return timesheets
-
-
-def get_all_direct_cost(project, filters):
-    fields = ['sum(direct_cost) as sum_direct_cost']
-    record_filters = {
-        'job_no': project
-    }
-
-    direct_costs = frappe.get_all('Direct Cost Item', filters=record_filters, fields=fields)
-
-    return direct_costs
+    return get_all_timesheet_details(filters)
