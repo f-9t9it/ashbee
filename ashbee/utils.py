@@ -43,13 +43,13 @@ def get_all_timesheet_details(filters):
     """, filters, as_dict=1)
 
 
-def get_all_direct_cost(filters):
+def get_all_direct_costs(filters):
     return frappe.db.sql("""
         SELECT job_no, SUM(direct_cost) AS sum_direct_cost
         FROM `tabDirect Cost Item`
         WHERE docstatus = 1
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
-        GROUP BY project
+        GROUP BY job_no
     """, filters, as_dict=1)
 
 
