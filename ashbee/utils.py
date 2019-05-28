@@ -29,6 +29,7 @@ def get_all_material_issues(filters):
         WHERE docstatus = 1
         AND project != %(project)s
         AND purpose = 'Material Issue'
+        AND ashbee_is_return = 0
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         GROUP BY project
     """, filters, as_dict=1)
@@ -79,6 +80,7 @@ def get_central_expenses(filters):
             WHERE docstatus = 1
             AND purpose = 'Material Issue'
             AND project = %(project)s
+            AND ashbee_is_return = 0
             AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         """, filters)
     return res[0][0] if res else None
