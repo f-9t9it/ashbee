@@ -8,6 +8,10 @@ from frappe.model.document import Document
 
 
 class DirectCost(Document):
+	def validate(self):
+		for item in self.items:
+			item.posting_date = self.posting_date
+
 	def on_submit(self):
 		for item in self.items:
 			total_direct_cost = _get_total_direct_cost(item.job_no)
