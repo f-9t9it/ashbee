@@ -30,7 +30,8 @@ doctype_js = {
     "Stock Entry": "public/js/stock_entry.js",
     "Timesheet": "public/js/timesheet.js",
     "Material Request": "public/js/material_request.js",
-    "Purchase Receipt": "public/js/purchase_receipt.js"
+    "Purchase Receipt": "public/js/purchase_receipt.js",
+    "Project": "public/js/project.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -98,7 +99,10 @@ fixtures = [
                     "Project-ashbee_total_indirect_cost",
                     "Stock Entry-ashbee_production_issue",
                     "Project-ashbee_total_central_cost",
-                    "Stock Entry-ashbee_is_return"
+                    "Stock Entry-ashbee_is_return",
+                    "Project-ashbee_total_central_labor",
+                    "Project-ashbee_total_material_return",
+                    "Project-ashbee_total_overhead_charges"
                 ]
             ]
         ]
@@ -172,10 +176,12 @@ doc_events = {
         "validate": "ashbee.ashbee.customs.items.item_save"
     },
     "Timesheet": {
-        "validate": "ashbee.ashbee.customs.timesheet.timesheet_save"
+        "validate": "ashbee.ashbee.customs.timesheet.timesheet_save",
+        "on_submit": "ashbee.ashbee.customs.timesheet.timesheet_submit"
     },
     "Stock Entry": {
-        "validate": "ashbee.ashbee.customs.stock_entry.stock_entry_save"
+        "validate": "ashbee.ashbee.customs.stock_entry.stock_entry_save",
+        "on_submit": "ashbee.ashbee.customs.stock_entry.stock_entry_submit"
     }
 }
 
