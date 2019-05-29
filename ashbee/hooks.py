@@ -177,11 +177,13 @@ doc_events = {
     },
     "Timesheet": {
         "validate": "ashbee.ashbee.customs.timesheet.timesheet_save",
-        "on_submit": "ashbee.ashbee.customs.timesheet.timesheet_submit"
+        "on_submit": "ashbee.ashbee.customs.timesheet.timesheet_submit",
+        "on_cancel": "ashbee.ashbee.customs.timesheet.timesheet_cancel"
     },
     "Stock Entry": {
         "validate": "ashbee.ashbee.customs.stock_entry.stock_entry_save",
-        "on_submit": "ashbee.ashbee.customs.stock_entry.stock_entry_submit"
+        "on_submit": "ashbee.ashbee.customs.stock_entry.stock_entry_submit",
+        "on_cancel": "ashbee.ashbee.customs.stock_entry.stock_entry_cancel"
     }
 }
 

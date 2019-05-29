@@ -1,5 +1,6 @@
 import frappe
 from frappe.utils import flt
+from ashbee.utils import get_central_entry
 
 
 def timesheet_save(doc, d):
@@ -22,6 +23,17 @@ def timesheet_submit(doc, d):
         if detail.project == central_project:
             central_entry = _create_central_entry(doc, detail)
             central_entry.submit()
+
+
+def timesheet_cancel(doc, d):
+    _cancel_central_entry(doc)
+
+
+def _cancel_central_entry(doc):
+    for detail in doc.time_logs:
+        central_entry = get_central_entry(doc.name, detail.name)
+        if central_entry:
+            central_entry.cancel()
 
 
 def _create_central_entry(doc, detail):

@@ -6,17 +6,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils.data import get_first_day, get_last_day
-from ashbee.utils import get_costs_by_projects
+from ashbee.utils import get_costs_by_projects, get_month_date_range
 
 
 class CentralEntry(Document):
 	def validate(self):
 		if not self.items:
-			filters = {
-				'from_date': get_first_day(self.posting_date),
-				'to_date': get_last_day(self.posting_date)
-			}
-
+			filters = get_month_date_range(self.posting_date)
 			projects = get_costs_by_projects(filters)
 
 			if not projects:
