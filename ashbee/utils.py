@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils.data import get_first_day, get_last_day
 
 
 def calculate_overhead_charges(project):
@@ -125,6 +126,13 @@ def get_costs_by_projects(filters):
         material_issues,
         timesheet_details
     )
+
+
+def get_month_date_range(posting_date):
+    return {
+        'from_date': get_first_day(posting_date),
+        'to_date': get_last_day(posting_date)
+    }
 
 
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
