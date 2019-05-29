@@ -135,6 +135,22 @@ def get_month_date_range(posting_date):
     }
 
 
+def get_central_entry(voucher_no, voucher_detail_no=None):
+    filters = {'voucher_no': voucher_no, 'docstatus': 1}
+
+    if voucher_detail_no:
+        filters.update({'voucher_detail_no': voucher_detail_no})
+
+    central_entry_doc = None
+    central_entry = frappe.get_all('Central Entry', filters=filters)
+
+    if central_entry:
+        name = central_entry[0]['name']
+        central_entry_doc = frappe.get_doc('Central Entry', name)
+
+    return central_entry_doc
+
+
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
     projects = {}
 
@@ -169,3 +185,4 @@ def test():
     print(get_all_indirect_costs(filters))
     print(get_all_material_issues(filters))
     print(get_all_material_returns(filters))
+    print(get_central_entry('MTSOUT-19-00007'))
