@@ -10,8 +10,12 @@ def stock_entry_save(doc, method):
 
 
 def stock_entry_submit(doc, method):
-	central_project = frappe.db.get_single_value('Ashbee Settings', 'central_project')
+	_set_central_entry(doc)
+	_set_material_return_in_project(doc)
 
+
+def _set_central_entry(doc):
+	central_project = frappe.db.get_single_value('Ashbee Settings', 'central_project')
 	if doc.purpose == 'Material Issue' and doc.ashbee_production_issue:
 		if doc.project == central_project:
 			central_entry = _create_central_entry(doc)
@@ -28,8 +32,24 @@ def _create_central_entry(doc):
 	}).insert()
 
 
+def _set_material_return_in_project(doc):
+	if doc.purpose == 'Material Issue' and doc.ashbee_is_return:
+		if doc.project:
+			total_material_return = _get_total_material_return(doc.project)
+			material_returns = sum([item.qty for item in doc.items])
+			_set_total_material_return(doc.project, total_material_return + material_returns)
+
+
 def _set_item_recipient_task_color_coating(item):
 	item.ashbee_recipient_task = "Color Coating"
+
+
+def _get_total_material_return(project):
+	return frappe.db.get_value('Project', project, 'ashbee_total_material_return')
+
+
+def _set_total_material_return(project, total_material_return):
+	frappe.db.set_value('Project', project, 'ashbee_total_material_return', total_material_return)
 
 
 @frappe.whitelist()
