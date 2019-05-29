@@ -21,6 +21,7 @@ def timesheet_submit(doc, d):
     for detail in doc.time_logs:
         if detail.project == central_project:
             central_entry = _create_central_entry(doc, detail)
+            central_entry.submit()
 
 
 def _create_central_entry(doc, detail):

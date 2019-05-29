@@ -14,7 +14,8 @@ def stock_entry_submit(doc, method):
 
 	if doc.purpose == 'Material Issue' and doc.ashbee_production_issue:
 		if doc.project == central_project:
-			_create_central_entry(doc)
+			central_entry = _create_central_entry(doc)
+			central_entry.submit()
 
 
 def _create_central_entry(doc):
