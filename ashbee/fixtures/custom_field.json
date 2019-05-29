@@ -2398,7 +2398,7 @@
   "in_list_view": 0, 
   "in_standard_filter": 0, 
   "insert_after": "ashbee_total_central_cost", 
-  "label": "Ashbee Total Material Return", 
+  "label": "Total Material Return (via Stock Entry)", 
   "modified": "2019-05-29 05:41:20.492333", 
   "name": "Project-ashbee_total_material_return", 
   "no_copy": 0, 
