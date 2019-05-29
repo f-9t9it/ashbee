@@ -12,4 +12,18 @@ def timesheet_save(doc, d):
 		doc.total_costing_amount = flt(doc.total_costing_amount) or 0.0
 
 		detail.costing_amount += detail.ashbee_ot + detail.ashbee_ot2
-		doc.total_costing_amount += detail.ashbee_ot + detail.ashbee_ot2 	
+		doc.total_costing_amount += detail.ashbee_ot + detail.ashbee_ot2
+
+
+def timesheet_submit(doc, d):
+	for detail in doc.time_logs:
+		central_entry = frappe.get_doc({
+			'doctype': 'Central Entry',
+			'posting_date': doc.start_date,
+			'voucher_type': 'Timesheet',
+			'voucher_no': doc.name,
+			'voucher_detail_no': detail.name,
+			'allocation': detail.costing_amount
+		})
+
+		central_entry.insert()

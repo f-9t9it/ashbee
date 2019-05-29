@@ -176,7 +176,8 @@ doc_events = {
         "validate": "ashbee.ashbee.customs.items.item_save"
     },
     "Timesheet": {
-        "validate": "ashbee.ashbee.customs.timesheet.timesheet_save"
+        "validate": "ashbee.ashbee.customs.timesheet.timesheet_save",
+        "on_submit": "ashbee.ashbee.customs.timesheet.timesheet_submit"
     },
     "Stock Entry": {
         "validate": "ashbee.ashbee.customs.stock_entry.stock_entry_save"
