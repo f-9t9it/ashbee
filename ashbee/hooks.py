@@ -98,7 +98,9 @@ fixtures = [
                     "Project-ashbee_total_indirect_cost",
                     "Stock Entry-ashbee_production_issue",
                     "Project-ashbee_total_central_cost",
-                    "Stock Entry-ashbee_is_return"
+                    "Stock Entry-ashbee_is_return",
+                    "Project-ashbee_total_central_labor",
+                    "Project-ashbee_total_material_return"
                 ]
             ]
         ]
