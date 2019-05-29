@@ -180,7 +180,8 @@ doc_events = {
         "on_submit": "ashbee.ashbee.customs.timesheet.timesheet_submit"
     },
     "Stock Entry": {
-        "validate": "ashbee.ashbee.customs.stock_entry.stock_entry_save"
+        "validate": "ashbee.ashbee.customs.stock_entry.stock_entry_save",
+        "on_submit": "ashbee.ashbee.customs.stock_entry.stock_entry_submit"
     }
 }
 

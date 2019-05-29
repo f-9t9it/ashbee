@@ -9,6 +9,24 @@ def stock_entry_save(doc, method):
 		any(_set_item_recipient_task_color_coating(item) for item in doc.items)
 
 
+def stock_entry_submit(doc, method):
+	central_project = frappe.db.get_single_value('Ashbee Settings', 'central_project')
+
+	if doc.purpose == 'Material Issue' and doc.ashbee_production_issue:
+		if doc.project == central_project:
+			_create_central_entry(doc)
+
+
+def _create_central_entry(doc):
+	return frappe.get_doc({
+		'doctype': 'Central Entry',
+		'posting_date': doc.posting_date,
+		'voucher_type': 'Stock Entry',
+		'voucher_no': doc.name,
+		'allocation': doc.total_amount
+	}).insert()
+
+
 def _set_item_recipient_task_color_coating(item):
 	item.ashbee_recipient_task = "Color Coating"
 
