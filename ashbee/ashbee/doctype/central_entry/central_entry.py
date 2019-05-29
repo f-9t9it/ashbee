@@ -5,14 +5,40 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import get_first_day, get_last_day
+from ashbee.utils import get_costs_by_projects
 
 
 class CentralEntry(Document):
+	def validate(self):
+		if not self.items:
+			filters = {
+				'from_date': get_first_day(self.posting_date),
+				'to_date': get_last_day(self.posting_date)
+			}
+
+			projects = get_costs_by_projects(filters)
+
+			if not projects:
+				frappe.throw(_('No active projects found within the date range. If you have transactions, set the project as active.'))
+
+			self._allocate_items(projects)
+
 	def on_submit(self):
 		_set_project_costing(self.items, self.voucher_type)
 
 	def on_cancel(self):
 		_set_project_costing(self.items, self.voucher_type, cancel=True)
+
+	def _allocate_items(self, projects):
+		total_mi_value = reduce(lambda x, y: x + y, projects.values())
+
+		for project, mi_value in projects.iteritems():
+			allocated = self.allocation * (mi_value / total_mi_value)
+			self.append('items', {
+				'project': project,
+				'allocated': allocated
+			})
 
 
 def _set_project_costing(items, voucher_type, cancel=False):

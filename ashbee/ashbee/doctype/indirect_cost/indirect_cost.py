@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from functools import reduce
-from ashbee.utils import get_all_direct_costs, get_all_timesheet_details, get_all_material_issues
+from ashbee.utils import get_costs_by_projects
 
 
 class IndirectCost(Document):
@@ -18,15 +18,7 @@ class IndirectCost(Document):
 				'to_date': self.end_date
 			}
 
-			direct_costs = get_all_direct_costs(filters)
-			material_issues = get_all_material_issues(filters)
-			timesheet_details = get_all_timesheet_details(filters)
-
-			projects = _sum_costs_by_projects(
-				direct_costs,
-				material_issues,
-				timesheet_details
-			)
+			projects = get_costs_by_projects(filters)
 
 			if not projects:
 				frappe.throw(_('No active projects found within the date range. If you have transactions, set the project as active.'))
@@ -80,29 +72,6 @@ def _get_total_cost(project, is_central):
 def _set_total_cost(project, total_cost, is_central):
 	field = 'ashbee_total_central_cost' if is_central else 'ashbee_total_indirect_cost'
 	frappe.db.set_value('Project', project, field, total_cost)
-
-
-def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
-	projects = {}
-
-	_set_summed_dict(direct_costs, 'project', 'sum_direct_cost', projects)
-	_set_summed_dict(material_issues, 'project', 'sum_total_outgoing_value', projects)
-	_set_summed_dict(timesheet_details, 'project', 'sum_costing_amount', projects)
-
-	return projects
-
-
-def _set_summed_dict(sum_list, field_key, field_value, _):
-	for sum_element in sum_list:
-		key = sum_element[field_key]
-		value = sum_element[field_value]
-
-		if key in _:
-			value = value + _[key]
-
-		_[key] = value
-
-	return _
 
 
 # def _sum_material_issues_by_projects(_, material_issues):

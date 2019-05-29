@@ -115,6 +115,41 @@ def get_all_material_returns(filters):
     """, filters, as_dict=1)
 
 
+def get_costs_by_projects(filters):
+    direct_costs = get_all_direct_costs(filters)
+    material_issues = get_all_material_issues(filters)
+    timesheet_details = get_all_timesheet_details(filters)
+
+    return _sum_costs_by_projects(
+        direct_costs,
+        material_issues,
+        timesheet_details
+    )
+
+
+def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
+    projects = {}
+
+    _set_summed_dict(direct_costs, 'project', 'sum_direct_cost', projects)
+    _set_summed_dict(material_issues, 'project', 'sum_total_outgoing_value', projects)
+    _set_summed_dict(timesheet_details, 'project', 'sum_costing_amount', projects)
+
+    return projects
+
+
+def _set_summed_dict(sum_list, field_key, field_value, _):
+    for sum_element in sum_list:
+        key = sum_element[field_key]
+        value = sum_element[field_value]
+
+        if key in _:
+            value = value + _[key]
+
+        _[key] = value
+
+    return _
+
+
 def test():
     filters = {
         'from_date': '2019-04-24',
