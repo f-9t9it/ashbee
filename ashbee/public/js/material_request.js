@@ -1,9 +1,11 @@
+let naming_series = '';
+
 frappe.ui.form.on('Material Request', {
     refresh: function(frm) {
         _make_custom_button(frm);
     },
     ashbee_production_issue: function(frm) {
-        frm.set_value('naming_series', 'MR-PI-.YY.-.#####');
+        _set_naming_series(frm);
     }
 });
 
@@ -26,6 +28,18 @@ frappe.ui.form.on('Material Request Item', {
         _ash_create_variant(frm, cdt, cdn);
     }
 });
+
+var _set_naming_series = function(frm) {
+    if (!naming_series) {
+        naming_series = frm.doc.naming_series;
+    }
+    if (frm.doc.ashbee_production_issue) {
+        naming_series = frm.doc.naming_series;
+        frm.set_value('naming_series', 'MR-PI-.YY.-.#####');
+    } else {
+        frm.set_value('naming_series', naming_series);
+    }
+};
 
 var _set_ashbee_finished_item = function(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
