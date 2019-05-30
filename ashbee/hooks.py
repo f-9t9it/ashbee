@@ -108,7 +108,7 @@ fixtures = [
                     "Project-ashbee_color",
                     "Project-ashbee_variation",
                     "Project-ashbee_variations",
-                    "Project-ashbee_total_variation_amount"
+                    "Project-ashbee_total_variation"
                 ]
             ]
         ]
@@ -191,6 +191,9 @@ doc_events = {
         "validate": "ashbee.ashbee.customs.stock_entry.stock_entry_save",
         "on_submit": "ashbee.ashbee.customs.stock_entry.stock_entry_submit",
         "on_cancel": "ashbee.ashbee.customs.stock_entry.stock_entry_cancel"
+    },
+    "Project": {
+        "validate": "ashbee.ashbee.customs.project.project_save"
     }
 }
 
