@@ -13,6 +13,7 @@ frappe.ui.form.on('Stock Entry', {
 	refresh: function(frm) {
 		_set_page_primary_action(frm);
         _make_receipt_button(frm);
+        _populate_rows_attribute_values(frm);
 	},
 	validate: function(frm) {
 		if (frm.doc.ashbee_is_return) {
@@ -59,6 +60,7 @@ frappe.ui.form.on('Stock Entry', {
 	}
 });
 
+
 frappe.ui.form.on('Stock Entry Detail', {
 	ashbee_attribute_type: function(frm, cdt, cdn) {
 		ashbee.populate_attribute_values(frm, cdt, cdn);
@@ -79,10 +81,12 @@ frappe.ui.form.on('Stock Entry Detail', {
 	},
 });
 
+
 var extract_ashbee_attribute_value = function(ashbee_attribute_value){
 	ashbee_attribute_value = ashbee_attribute_value.split("|")[1];
 	return ashbee_attribute_value.trim();
 };
+
 
 var _set_ashbee_finished_item = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
@@ -113,6 +117,7 @@ var _set_ashbee_finished_item = function(frm, cdt, cdn){
 	}
 };
 
+
 var _ash_create_variant = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
 	frappe.call({
@@ -126,9 +131,11 @@ var _ash_create_variant = function(frm, cdt, cdn){
 	});
 };
 
+
 var calculate_valuation_rate = function(args) {
 	return (args.length * args.weight * args.added) + args.rate;
 };
+
 
 var confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation) {
 	var calculated = attrs_and_valuation.rate;
@@ -213,6 +220,7 @@ var confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation)
 	d.show();
 };
 
+
 var _set_page_primary_action = function(frm){
 		var data = {};
 		$.each(frm.doc.items, (i, v)=>{
@@ -230,6 +238,7 @@ var _set_page_primary_action = function(frm){
 		});
 
 };
+
 
 var create_variants_and_save = function(frm){
 	var attrs = [];
@@ -271,6 +280,7 @@ var create_variants_and_save = function(frm){
 	});
 };
 
+
 var _make_receipt_button = function(frm) {
     if(frm.doc.docstatus === 1 && frm.doc.purpose === "Material Issue") {
         frm.add_custom_button(__('Make Receipt'), function() {
@@ -306,6 +316,7 @@ var _make_receipt_button = function(frm) {
     }
 };
 
+
 var _empty_child_fields = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
 	child.ashbee_finished_item = "";
@@ -322,12 +333,14 @@ var _empty_child_fields = function(frm, cdt, cdn){
 
 var _set_color_coating_select = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
-	if(child.ashbee_recipient_task == "Color Coating"){
+
+	if (child.ashbee_recipient_task === 'Color Coating') {
 		child.ashbee_attribute_type = "Colour";
 		refresh_field("ashbee_attribute_type", child.name, "items");
 		ashbee.populate_attribute_values(frm, cdt, cdn);
 	}
 };
+
 
 var _check_negative_qty = function(items) {
 	$.each(items, function(i, v) {
@@ -338,8 +351,8 @@ var _check_negative_qty = function(items) {
 	});
 };
 
-let last_naming_series = '';
 
+let last_naming_series = '';
 var _set_naming_series = function(frm) {
 	let naming_series = !last_naming_series ? frm.doc.naming_series : '';
 
@@ -353,8 +366,16 @@ var _set_naming_series = function(frm) {
 	frm.set_value('naming_series', naming_series);
 };
 
+
 var _set_attribute_type = function(frm, cdt, cdn) {
     if (frm.doc.ashbee_production_issue) {
         frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
     }
+};
+
+
+var _populate_rows_attribute_values = function(frm) {
+	if (!frm.doc.__islocal) {
+		ashbee.populate_attribute_values_rows_options(frm);
+	}
 };
