@@ -102,7 +102,10 @@ fixtures = [
                     "Stock Entry-ashbee_is_return",
                     "Project-ashbee_total_central_labor",
                     "Project-ashbee_total_material_return",
-                    "Project-ashbee_total_overhead_charges"
+                    "Project-ashbee_total_overhead_charges",
+                    "Project-ashbee_location",
+                    "Project-ashbee_quotation_ref_no",
+                    "Project-ashbee_color"
                 ]
             ]
         ]
