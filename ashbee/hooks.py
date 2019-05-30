@@ -107,7 +107,8 @@ fixtures = [
                     "Project-ashbee_quotation_ref_no",
                     "Project-ashbee_color",
                     "Project-ashbee_variation",
-                    "Project-ashbee_variations"
+                    "Project-ashbee_variations",
+                    "Project-ashbee_total_variation_amount"
                 ]
             ]
         ]
