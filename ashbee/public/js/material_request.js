@@ -17,12 +17,10 @@ frappe.ui.form.on('Material Request Item', {
         frappe.model.set_value(cdt, cdn, 'project', frm.doc.project);
     },
     item_code: function(frm, cdt, cdn) {
-        if (frm.doc.ashbee_production_issue) {
-            frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
-        }
+        _set_attribute_type(frm, cdt, cdn);
     },
     ashbee_attribute_type: function(frm, cdt, cdn) {
-        ashbee_attribute_values_populate(frm, cdt, cdn);
+        _populate_attribute_values(frm, cdt, cdn);
     },
     ashbee_attribute_value: function(frm, cdt, cdn) {
         _set_ashbee_finished_item(frm, cdt, cdn);
@@ -31,6 +29,12 @@ frappe.ui.form.on('Material Request Item', {
         _ash_create_variant(frm, cdt, cdn);
     }
 });
+
+var _set_attribute_type = function(frm, cdt, cdn) {
+    if (frm.doc.ashbee_production_issue) {
+        frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
+    }
+};
 
 var _set_items_warehouse = function(frm) {
     var items = frm.doc.items;
@@ -219,14 +223,15 @@ var _make_custom_button = function(frm) {
 
             frappe.set_route('Form', 'Stock Entry', se.name);
         });
-    })
+    });
 };
 
-var ashbee_attribute_values_populate = function(frm, cdt, cdn) {
+var _populate_attribute_values = function(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
+    var args = { 'item_code': child.item_code, 'attr_type': child.ashbee_attribute_type };
     frappe.call({
         method: 'ashbee.ashbee.customs.stock_entry.get_attribute_values',
-        args: { 'item_code': child.item_code, 'attr_type': child.ashbee_attribute_type },
+        args: args,
         callback: function(r) {
             var attrs = $.map(r.message, _generate_attribute_values);
             frm.set_df_property('ashbee_attribute_value', 'options', attrs.join('\n'), child.name, 'items');
