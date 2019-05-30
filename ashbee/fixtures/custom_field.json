@@ -602,7 +602,7 @@
   "parent": null, 
   "parentfield": null, 
   "parenttype": null, 
-  "permlevel": 0, 
+  "permlevel": 1, 
   "precision": "", 
   "print_hide": 0, 
   "print_hide_if_no_value": 0, 
