@@ -311,6 +311,10 @@ var _set_naming_series = function(frm) {
 	frm.set_value('naming_series', naming_series);
 };
 
+var _set_attribute_type = function(frm, cdt, cdn) {
+	frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
+};
+
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
 		frm.set_query("ashbee_issue_items", function() {
@@ -370,20 +374,23 @@ frappe.ui.form.on('Stock Entry', {
 });
 
 frappe.ui.form.on('Stock Entry Detail',{
-	ashbee_attribute_type:function(frm, cdt, cdn){
+	items_add: function(frm, cdt, cdn) {
+		_set_attribute_type(frm, cdt, cdn);
+	},
+	ashbee_attribute_type: function(frm, cdt, cdn) {
 		ashbee_attribute_values_populate(frm, cdt, cdn);
 	},
-	ashbee_attribute_value:function(frm, cdt, cdn){
+	ashbee_attribute_value: function(frm, cdt, cdn) {
 		set_ashbee_finished_item(frm, cdt, cdn);
 	},
-	ashbee_recipient_task:function(frm, cdt, cdn){
+	ashbee_recipient_task: function(frm, cdt, cdn) {
 		empty_child_fields(frm, cdt, cdn);
 		set_color_coating_select(frm, cdt, cdn);
 	},
-	item_code:function(frm, cdt, cdn){
+	item_code: function(frm, cdt, cdn) {
 		empty_child_fields(frm, cdt, cdn);
 	},
-	ashbee_create_variant:function(frm, cdt, cdn){
+	ashbee_create_variant: function(frm, cdt, cdn) {
 		ash_create_variant(frm, cdt, cdn);
 	},
 });
