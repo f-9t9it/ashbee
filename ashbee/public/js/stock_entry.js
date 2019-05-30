@@ -344,6 +344,8 @@ frappe.ui.form.on('Stock Entry', {
 	purpose: function(frm) {
 		if (frm.doc.purpose === "Material Issue") {
             frm.set_value('naming_series', 'MI-.YY.-.#####');
+        } else if (frm.doc.purpose === "Material Return") {
+		    frm.set_value('naming_series', 'MR-.YY.-.#####');
         }
 	},
 	ashbee_issue_items: function(frm) {
