@@ -20,7 +20,7 @@ frappe.ui.form.on('Material Request Item', {
         _set_attribute_type(frm, cdt, cdn);
     },
     ashbee_attribute_type: function(frm, cdt, cdn) {
-        _populate_attribute_values(frm, cdt, cdn);
+        ashbee.populate_attribute_values(frm, cdt, cdn);
     },
     ashbee_attribute_value: function(frm, cdt, cdn) {
         _set_ashbee_finished_item(frm, cdt, cdn);
@@ -224,22 +224,4 @@ var _make_custom_button = function(frm) {
             frappe.set_route('Form', 'Stock Entry', se.name);
         });
     });
-};
-
-var _populate_attribute_values = function(frm, cdt, cdn) {
-    var child = locals[cdt][cdn];
-    var args = { 'item_code': child.item_code, 'attr_type': child.ashbee_attribute_type };
-    frappe.call({
-        method: 'ashbee.ashbee.customs.stock_entry.get_attribute_values',
-        args: args,
-        callback: function(r) {
-            var attrs = $.map(r.message, _generate_attribute_values);
-            frm.set_df_property('ashbee_attribute_value', 'options', attrs.join('\n'), child.name, 'items');
-            refresh_field('ashbee_attribute_value', child.name, 'items');
-        }
-    });
-};
-
-var _generate_attribute_values = function(attr) {
-    return attr[0] + " | " + attr[1];
 };
