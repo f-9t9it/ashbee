@@ -193,6 +193,7 @@ var _make_custom_button = function(frm) {
         frappe.model.with_doctype('Stock Entry', function() {
             var se = frappe.model.get_new_doc('Stock Entry');
             se.purpose = 'Material Issue';
+            se.ashbee_production_issue = frm.doc.ashbee_production_issue;
 
             var items = frm.doc.items;
             items.forEach(function(item) {
