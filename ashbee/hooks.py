@@ -123,7 +123,8 @@ fixtures = [
                     "Stock Entry-naming_series-options",
                     "Purchase Receipt-naming_series-options",
                     "Material Request-naming_series-options",
-                    "Stock Entry-purpose-options"
+                    "Stock Entry-purpose-options",
+                    "Material Request-material_request_type-default"
                 ]
             ]
         ]
