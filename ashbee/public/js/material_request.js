@@ -172,6 +172,12 @@ var _ash_create_variant = function(frm, cdt, cdn) {
 };
 
 var _make_custom_button = function(frm) {
+    if (frm.doc.docstatus == 0)
+        return;
+
+    if (frm.doc.material_request_type !== 'Material Issue')
+        return;
+
     frm.add_custom_button(__('Make Issue'), function() {
         frappe.model.with_doctype('Stock Entry', function() {
             var se = frappe.model.get_new_doc('Stock Entry');
@@ -192,14 +198,11 @@ var _make_custom_button = function(frm) {
                     se_item.transfer_qty = item.qty;
                     se_item.warehouse = item.warehouse;
                     se_item.required_date = frappe.datetime.nowdate();
-
-                if (frm.doc.ashbee_production_issue) {
                     se_item.ashbee_recipient_task = 'Color Coating';
                     se_item.ashbee_attribute_type = item.ashbee_attribute_type;
                     se_item.ashbee_attribute_value = item.ashbee_attribute_value;
                     se_item.ashbee_finished_item = item.ashbee_finished_item;
                     se_item.ashbee_finished_item_valuation = item.ashbee_finished_item_valuation;
-                }
             });
 
             frappe.set_route('Form', 'Stock Entry', se.name);
