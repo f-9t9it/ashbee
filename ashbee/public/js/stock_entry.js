@@ -294,26 +294,22 @@ var _check_negative_qty = function(items) {
 			return;
 		}
 	});
-}
+};
 
-frappe.ui.form.on('Stock Entry Detail',{
-	ashbee_attribute_type:function(frm, cdt, cdn){
-		ashbee_attribute_values_populate(frm, cdt, cdn);
-	},
-	ashbee_attribute_value:function(frm, cdt, cdn){
-		set_ashbee_finished_item(frm, cdt, cdn);
-	},
-	ashbee_recipient_task:function(frm, cdt, cdn){
-		empty_child_fields(frm, cdt, cdn);
-		set_color_coating_select(frm, cdt, cdn);
-	},
-	item_code:function(frm, cdt, cdn){
-		empty_child_fields(frm, cdt, cdn);
-	},
-	ashbee_create_variant:function(frm, cdt, cdn){
-		ash_create_variant(frm, cdt, cdn);
-	},
-});
+let last_naming_series = '';
+
+var _set_naming_series = function(frm) {
+	let naming_series = !last_naming_series ? frm.doc.naming_series : '';
+
+	if (frm.doc.ashbee_production_issue) {
+		last_naming_series = frm.doc.naming_series;
+		naming_series = 'MTSOUT-.YY.-.#####';
+	} else {
+		naming_series = last_naming_series;
+	}
+
+	frm.set_value('naming_series', naming_series);
+};
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
@@ -336,7 +332,7 @@ frappe.ui.form.on('Stock Entry', {
         }
 	},
 	ashbee_production_issue: function(frm) {
-		frm.set_value('naming_series', 'MTSOUT-.YY.-.#####');
+		_set_naming_series(frm);
 	},
 	purpose: function(frm) {
 		if (frm.doc.purpose === "Material Issue") {
@@ -373,3 +369,21 @@ frappe.ui.form.on('Stock Entry', {
 	}
 });
 
+frappe.ui.form.on('Stock Entry Detail',{
+	ashbee_attribute_type:function(frm, cdt, cdn){
+		ashbee_attribute_values_populate(frm, cdt, cdn);
+	},
+	ashbee_attribute_value:function(frm, cdt, cdn){
+		set_ashbee_finished_item(frm, cdt, cdn);
+	},
+	ashbee_recipient_task:function(frm, cdt, cdn){
+		empty_child_fields(frm, cdt, cdn);
+		set_color_coating_select(frm, cdt, cdn);
+	},
+	item_code:function(frm, cdt, cdn){
+		empty_child_fields(frm, cdt, cdn);
+	},
+	ashbee_create_variant:function(frm, cdt, cdn){
+		ash_create_variant(frm, cdt, cdn);
+	},
+});
