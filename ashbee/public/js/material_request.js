@@ -6,6 +6,9 @@ frappe.ui.form.on('Material Request', {
     },
     ashbee_production_issue: function(frm) {
         _set_naming_series(frm);
+    },
+    ashbee_warehouse: function(frm) {
+        _set_items_warehouse(frm);
     }
 });
 
@@ -28,6 +31,14 @@ frappe.ui.form.on('Material Request Item', {
         _ash_create_variant(frm, cdt, cdn);
     }
 });
+
+var _set_items_warehouse = function(frm) {
+    var items = frm.doc.items;
+    items.forEach(function(item) {
+        item.warehouse = frm.doc.ashbee_warehouse;
+    });
+    refresh_field('items');
+};
 
 var _set_naming_series = function(frm) {
     if (!naming_series) {
