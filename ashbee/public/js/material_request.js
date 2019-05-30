@@ -6,6 +6,9 @@ frappe.ui.form.on('Material Request', {
     },
     ashbee_production_issue: function(frm) {
         _set_naming_series(frm);
+    },
+    ashbee_warehouse: function(frm) {
+        _set_items_warehouse(frm);
     }
 });
 
@@ -14,12 +17,10 @@ frappe.ui.form.on('Material Request Item', {
         frappe.model.set_value(cdt, cdn, 'project', frm.doc.project);
     },
     item_code: function(frm, cdt, cdn) {
-        if (frm.doc.ashbee_production_issue) {
-            frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
-        }
+        _set_attribute_type(frm, cdt, cdn);
     },
     ashbee_attribute_type: function(frm, cdt, cdn) {
-        ashbee_attribute_values_populate(frm, cdt, cdn);
+        ashbee.populate_attribute_values(frm, cdt, cdn);
     },
     ashbee_attribute_value: function(frm, cdt, cdn) {
         _set_ashbee_finished_item(frm, cdt, cdn);
@@ -28,6 +29,20 @@ frappe.ui.form.on('Material Request Item', {
         _ash_create_variant(frm, cdt, cdn);
     }
 });
+
+var _set_attribute_type = function(frm, cdt, cdn) {
+    if (frm.doc.ashbee_production_issue) {
+        frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
+    }
+};
+
+var _set_items_warehouse = function(frm) {
+    var items = frm.doc.items;
+    items.forEach(function(item) {
+        item.warehouse = frm.doc.ashbee_warehouse;
+    });
+    refresh_field('items');
+};
 
 var _set_naming_series = function(frm) {
     if (!naming_series) {
@@ -182,6 +197,7 @@ var _make_custom_button = function(frm) {
         frappe.model.with_doctype('Stock Entry', function() {
             var se = frappe.model.get_new_doc('Stock Entry');
             se.purpose = 'Material Issue';
+            se.ashbee_production_issue = frm.doc.ashbee_production_issue;
 
             var items = frm.doc.items;
             items.forEach(function(item) {
@@ -207,22 +223,5 @@ var _make_custom_button = function(frm) {
 
             frappe.set_route('Form', 'Stock Entry', se.name);
         });
-    })
-};
-
-var ashbee_attribute_values_populate = function(frm, cdt, cdn) {
-    var child = locals[cdt][cdn];
-    frappe.call({
-        method: 'ashbee.ashbee.customs.stock_entry.get_attribute_values',
-        args: { 'item_code': child.item_code, 'attr_type': child.ashbee_attribute_type },
-        callback: function(r) {
-            var attrs = $.map(r.message, _generate_attribute_values);
-            frm.set_df_property('ashbee_attribute_value', 'options', attrs.join('\n'), child.name, 'items');
-            refresh_field('ashbee_attribute_value', child.name, 'items');
-        }
     });
-};
-
-var _generate_attribute_values = function(attr) {
-    return attr[0] + " | " + attr[1];
 };

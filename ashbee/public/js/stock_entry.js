@@ -1,34 +1,83 @@
-var ashbee_finished_item_populate = function(frm){
-	frm.set_query("ashbee_finished_item","items", function(doc,cdt,cdn) {
-			var child = locals[cdt][cdn];
-				return {
-					query:"ashbee.ashbee.customs.stock_entry.get_variant_items",
-					filters: {
-						'item_code':child.item_code,
-						'attr_type':child.ashbee_attribute_type
-
-					}
-				};
-			});
-};
-
-var _ashbee_attribute_values_populate = function(frm, cdt, cdn){
-	var child = locals[cdt][cdn];
-	if(child.ashbee_recipient_task != ""){
-			frappe.call({
-			method:"ashbee.ashbee.customs.stock_entry.get_attribute_values",
-			args:{'item_code':child.item_code, 'attr_type':child.ashbee_attribute_type},
+frappe.ui.form.on('Stock Entry', {
+	setup: function(frm) {
+		frm.set_query("ashbee_issue_items", function() {
+			return {
+				filters: {
+					'purpose': 'Material Issue',
+					'docstatus': 1,
+					'ashbee_production_issue': 1
+				}
+			};
+		});
+	},
+	refresh: function(frm) {
+		_set_page_primary_action(frm);
+        _make_receipt_button(frm);
+	},
+	validate: function(frm) {
+		if (frm.doc.ashbee_is_return) {
+            _check_negative_qty(frm.doc.items);
+        }
+	},
+	ashbee_production_issue: function(frm) {
+		_set_naming_series(frm);
+	},
+	purpose: function(frm) {
+		if (frm.doc.purpose === "Material Issue") {
+            frm.set_value('naming_series', 'MI-.YY.-.#####');
+        } else if (frm.doc.purpose === "Material Return") {
+		    frm.set_value('naming_series', 'MR-.YY.-.#####');
+        }
+	},
+	ashbee_issue_items: function(frm) {
+		var args = {"stock_entry":frm.doc.ashbee_issue_items};
+		return frappe.call({
+			method: "ashbee.ashbee.customs.stock_entry.get_issue_items",
+			args,
 			callback:function(r){
-				var m = [];
-				$(r.message).each(function(i,v){
-					m.push(v[0] + " | " +v[1]);
-				});
-				frm.set_df_property("ashbee_attribute_value", "options", m.join("\n"), child.name, "items");
-				refresh_field("ashbee_attribute_value",child.name, "items");
+				if(r.message){
+					frm.clear_table("items");
+					$.each(r.message, function(i, val){
+						var row = frm.add_child("items");
+						row.item_code = val.item_code;
+						row.qty = val.qty;
+						row.ashbee_recipient_task = "";
+						row.stock_uom = val.stock_uom;
+						row.uom = val.uom;
+						row.conversion_factor = val.conversion_factor;
+						row.cost_center = val.cost_center;
+						row.valuation_rate = val.valuation_rate;
+						row.transfer_qty = val.transfer_qty;
+						row.retain_sample = val.retain_sample;
+						row.sample_quantity = val.sample_quantity;
+						row.t_warehouse = val.s_warehouse;
+						refresh_field("items");
+					});
+				}
 			}
 		});
-	}	
-};
+	}
+});
+
+frappe.ui.form.on('Stock Entry Detail', {
+	ashbee_attribute_type: function(frm, cdt, cdn) {
+		ashbee.populate_attribute_values(frm, cdt, cdn);
+	},
+	ashbee_attribute_value: function(frm, cdt, cdn) {
+		_set_ashbee_finished_item(frm, cdt, cdn);
+	},
+	ashbee_recipient_task: function(frm, cdt, cdn) {
+		_empty_child_fields(frm, cdt, cdn);
+		_set_color_coating_select(frm, cdt, cdn);
+	},
+	item_code: function(frm, cdt, cdn) {
+		_empty_child_fields(frm, cdt, cdn);
+		_set_attribute_type(frm, cdt, cdn);
+	},
+	ashbee_create_variant: function(frm, cdt, cdn) {
+		_ash_create_variant(frm, cdt, cdn);
+	},
+});
 
 var extract_ashbee_attribute_value = function(ashbee_attribute_value){
 	ashbee_attribute_value = ashbee_attribute_value.split("|")[1];
@@ -222,13 +271,6 @@ var create_variants_and_save = function(frm){
 	});
 };
 
-var refresh_all_child_fields = function(frm){
-	$.each(frm.doc.items, (i, v)=>{
-		_ashbee_attribute_values_populate(frm, v.doctype, v.name);
-		_set_ashbee_finished_item(frm, v.doctype, v.name);
-	});
-};
-
 var _make_receipt_button = function(frm) {
     if(frm.doc.docstatus === 1 && frm.doc.purpose === "Material Issue") {
         frm.add_custom_button(__('Make Receipt'), function() {
@@ -283,7 +325,7 @@ var _set_color_coating_select = function(frm, cdt, cdn){
 	if(child.ashbee_recipient_task == "Color Coating"){
 		child.ashbee_attribute_type = "Colour";
 		refresh_field("ashbee_attribute_type", child.name, "items");
-		_ashbee_attribute_values_populate(frm, cdt, cdn);
+		ashbee.populate_attribute_values(frm, cdt, cdn);
 	}
 };
 
@@ -316,81 +358,3 @@ var _set_attribute_type = function(frm, cdt, cdn) {
         frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
     }
 };
-
-frappe.ui.form.on('Stock Entry', {
-	setup: function(frm) {
-		frm.set_query("ashbee_issue_items", function() {
-			return {
-				filters: {
-					'purpose': 'Material Issue',
-					'docstatus':1
-				}
-			};
-		});
-	},
-	refresh: function(frm) {
-		_set_page_primary_action(frm);
-        _make_receipt_button(frm);
-	},
-	validate: function(frm) {
-		if (frm.doc.ashbee_is_return) {
-            _check_negative_qty(frm.doc.items);
-        }
-	},
-	ashbee_production_issue: function(frm) {
-		_set_naming_series(frm);
-	},
-	purpose: function(frm) {
-		if (frm.doc.purpose === "Material Issue") {
-            frm.set_value('naming_series', 'MI-.YY.-.#####');
-        }
-	},
-	ashbee_issue_items: function(frm) {
-		var args = {"stock_entry":frm.doc.ashbee_issue_items};
-		return frappe.call({
-			method: "ashbee.ashbee.customs.stock_entry.get_issue_items",
-			args,
-			callback:function(r){
-				if(r.message){
-					frm.clear_table("items");
-					$.each(r.message, function(i, val){
-						var row = frm.add_child("items");
-						row.item_code = val.item_code;
-						row.qty = val.qty;
-						row.ashbee_recipient_task = "";
-						row.stock_uom = val.stock_uom;
-						row.uom = val.uom;
-						row.conversion_factor = val.conversion_factor;
-						row.cost_center = val.cost_center;
-						row.valuation_rate = val.valuation_rate;
-						row.transfer_qty = val.transfer_qty;
-						row.retain_sample = val.retain_sample;
-						row.sample_quantity = val.sample_quantity;
-						row.t_warehouse = val.s_warehouse;
-						refresh_field("items");
-					});
-				}
-			}
-		});
-	}
-});
-
-frappe.ui.form.on('Stock Entry Detail', {
-	ashbee_attribute_type: function(frm, cdt, cdn) {
-		_ashbee_attribute_values_populate(frm, cdt, cdn);
-	},
-	ashbee_attribute_value: function(frm, cdt, cdn) {
-		_set_ashbee_finished_item(frm, cdt, cdn);
-	},
-	ashbee_recipient_task: function(frm, cdt, cdn) {
-		_empty_child_fields(frm, cdt, cdn);
-		_set_color_coating_select(frm, cdt, cdn);
-	},
-	item_code: function(frm, cdt, cdn) {
-		_empty_child_fields(frm, cdt, cdn);
-		_set_attribute_type(frm, cdt, cdn);
-	},
-	ashbee_create_variant: function(frm, cdt, cdn) {
-		_ash_create_variant(frm, cdt, cdn);
-	},
-});

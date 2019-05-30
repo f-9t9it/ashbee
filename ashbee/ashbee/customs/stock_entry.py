@@ -200,8 +200,6 @@ def get_attribute_values(**filters):
     retVal = frappe.db.sql('''select abbr, attribute_value from `tabItem Attribute Value`
                             where parent = '{parent}' and parenttype = 'Item Attribute'; '''
                             .format(parent=attr_type),as_list = 1)
-    print("bomsy")
-    print(retVal)
     return retVal
 
 

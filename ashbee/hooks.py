@@ -16,7 +16,7 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 app_include_css = "/assets/ashbee/css/ashbee.css"
-# app_include_js = "/assets/ashbee/js/ashbee.js"
+app_include_js = "/assets/js/ashbee_utils.min.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/ashbee/css/ashbee.css"
@@ -108,7 +108,8 @@ fixtures = [
                     "Project-ashbee_color",
                     "Project-ashbee_variation",
                     "Project-ashbee_variations",
-                    "Project-ashbee_total_variation_amount"
+                    "Project-ashbee_total_variation",
+                    "Material Request-ashbee_warehouse"
                 ]
             ]
         ]
@@ -123,7 +124,8 @@ fixtures = [
                     "Stock Entry-naming_series-options",
                     "Purchase Receipt-naming_series-options",
                     "Material Request-naming_series-options",
-                    "Stock Entry-purpose-options"
+                    "Stock Entry-purpose-options",
+                    "Material Request-material_request_type-default"
                 ]
             ]
         ]
@@ -191,6 +193,9 @@ doc_events = {
         "validate": "ashbee.ashbee.customs.stock_entry.stock_entry_save",
         "on_submit": "ashbee.ashbee.customs.stock_entry.stock_entry_submit",
         "on_cancel": "ashbee.ashbee.customs.stock_entry.stock_entry_cancel"
+    },
+    "Project": {
+        "validate": "ashbee.ashbee.customs.project.project_save"
     }
 }
 
