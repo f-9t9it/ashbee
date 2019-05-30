@@ -323,7 +323,8 @@ frappe.ui.form.on('Stock Entry', {
 			return {
 				filters: {
 					'purpose': 'Material Issue',
-					'docstatus':1
+					'docstatus': 1,
+					'ashbee_production_issue': 1
 				}
 			};
 		});
