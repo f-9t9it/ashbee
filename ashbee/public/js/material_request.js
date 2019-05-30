@@ -1,8 +1,10 @@
 let naming_series = '';
 
+
 frappe.ui.form.on('Material Request', {
     refresh: function(frm) {
         _make_custom_button(frm);
+        _populate_rows_attribute_values(frm);
     },
     ashbee_production_issue: function(frm) {
         _set_naming_series(frm);
@@ -11,6 +13,7 @@ frappe.ui.form.on('Material Request', {
         _set_items_warehouse(frm);
     }
 });
+
 
 frappe.ui.form.on('Material Request Item', {
     items_add: function(frm, cdt, cdn) {
@@ -30,11 +33,20 @@ frappe.ui.form.on('Material Request Item', {
     }
 });
 
+
+var _populate_rows_attribute_values = function(frm) {
+	if (!frm.doc.__islocal) {
+		ashbee.populate_attribute_values_rows_options(frm);
+	}
+};
+
+
 var _set_attribute_type = function(frm, cdt, cdn) {
     if (frm.doc.ashbee_production_issue) {
         frappe.model.set_value(cdt, cdn, 'ashbee_attribute_type', 'Colour');
     }
 };
+
 
 var _set_items_warehouse = function(frm) {
     var items = frm.doc.items;
@@ -43,6 +55,7 @@ var _set_items_warehouse = function(frm) {
     });
     refresh_field('items');
 };
+
 
 var _set_naming_series = function(frm) {
     if (!naming_series) {
@@ -55,6 +68,7 @@ var _set_naming_series = function(frm) {
         frm.set_value('naming_series', naming_series);
     }
 };
+
 
 var _set_ashbee_finished_item = function(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
@@ -83,14 +97,17 @@ var _set_ashbee_finished_item = function(frm, cdt, cdn) {
     });
 };
 
+
 var _calculate_valuation_rate = function(args) {
     return (args.length * args.weight * args.added) + args.rate;
 };
+
 
 var _extract_ashbee_attribute_value = function(ashbee_attribute_value) {
     ashbee_attribute_value = ashbee_attribute_value.split("|")[1];
     return ashbee_attribute_value.trim();
 };
+
 
 var _confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation) {
     var calculated = attrs_and_valuation.rate;
@@ -173,6 +190,7 @@ var _confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation
 	d.show();
 };
 
+
 var _ash_create_variant = function(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
     frappe.call({
@@ -185,6 +203,7 @@ var _ash_create_variant = function(frm, cdt, cdn) {
 		}
 	});
 };
+
 
 var _make_custom_button = function(frm) {
     if (frm.doc.docstatus == 0)
