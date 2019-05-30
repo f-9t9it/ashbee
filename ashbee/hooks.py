@@ -102,7 +102,13 @@ fixtures = [
                     "Stock Entry-ashbee_is_return",
                     "Project-ashbee_total_central_labor",
                     "Project-ashbee_total_material_return",
-                    "Project-ashbee_total_overhead_charges"
+                    "Project-ashbee_total_overhead_charges",
+                    "Project-ashbee_location",
+                    "Project-ashbee_quotation_ref_no",
+                    "Project-ashbee_color",
+                    "Project-ashbee_variation",
+                    "Project-ashbee_variations",
+                    "Project-ashbee_total_variation_amount"
                 ]
             ]
         ]
@@ -116,7 +122,8 @@ fixtures = [
                 [
                     "Stock Entry-naming_series-options",
                     "Purchase Receipt-naming_series-options",
-                    "Material Request-naming_series-options"
+                    "Material Request-naming_series-options",
+                    "Stock Entry-purpose-options"
                 ]
             ]
         ]

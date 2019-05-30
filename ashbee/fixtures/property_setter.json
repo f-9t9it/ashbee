@@ -58,5 +58,25 @@
   "property": "options", 
   "property_type": "Text", 
   "value": "MR-.YY.-.#####\nMR-PI-.YY.-.#####\nMAT-MR-.YYYY.-"
+ }, 
+ {
+  "_assign": null, 
+  "_comments": null, 
+  "_liked_by": null, 
+  "_user_tags": null, 
+  "default_value": null, 
+  "doc_type": "Stock Entry", 
+  "docstatus": 0, 
+  "doctype": "Property Setter", 
+  "doctype_or_field": "DocField", 
+  "field_name": "purpose", 
+  "modified": "2019-05-30 10:38:17.666987", 
+  "name": "Stock Entry-purpose-options", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "property": "options", 
+  "property_type": "Text", 
+  "value": "Material Issue\nMaterial Return\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSubcontract"
  }
 ]
