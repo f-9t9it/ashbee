@@ -105,7 +105,9 @@ fixtures = [
                     "Project-ashbee_total_overhead_charges",
                     "Project-ashbee_location",
                     "Project-ashbee_quotation_ref_no",
-                    "Project-ashbee_color"
+                    "Project-ashbee_color",
+                    "Project-ashbee_variation",
+                    "Project-ashbee_variations"
                 ]
             ]
         ]
