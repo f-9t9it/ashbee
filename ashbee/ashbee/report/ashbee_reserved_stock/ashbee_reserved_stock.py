@@ -68,7 +68,11 @@ def _get_sql_conditions(filters):
 
 
 def _get_material_issues(filters):
-	# sql_conditions = _get_sql_conditions(filters)
+	sql_conditions = _get_sql_conditions(filters)
+
+	if sql_conditions:
+		sql_conditions = 'AND {}'.format(sql_conditions)
+
 	return frappe.db.sql("""
 		SELECT 
 			`tabStock Entry`.posting_date AS 'date', 
@@ -80,9 +84,10 @@ def _get_material_issues(filters):
 		INNER JOIN `tabStock Entry` ON `tabStock Entry Detail`.parent = `tabStock Entry`.name
 		INNER JOIN `tabProject` on `tabStock Entry`.project = `tabProject`.name
 		WHERE `tabStock Entry`.docstatus = 1
+		{sql_conditions}
 		AND `tabStock Entry`.purpose = 'Material Issue'
 		AND `tabStock Entry`.posting_date BETWEEN %(from_date)s AND %(to_date)s
 		GROUP BY `tabStock Entry`.name
 		ORDER BY `tabStock Entry`.posting_date DESC
-	""", filters, as_dict=1)
+	""".format(sql_conditions=sql_conditions), filters, as_dict=1)
 
