@@ -37,18 +37,21 @@ frappe.ui.form.on('Bulk Timesheet Details', {
 
 	employee: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-
-		frm.call({
-			method: "get_employee_details",
-			args: { "employee": child.employee },
-			doc: frm.doc,
-			callback: function(r) {
-				child.employee_name = r.message.name;
-				child.hourly_cost = r.message.rate;
-				refresh_field("employee_name",child.name, "details");
-				refresh_field("hourly_cost",child.name, "details");
-			}
-		});
+		if (child.employee) {
+            frm.call({
+                method: "get_employee_details",
+                args: {"employee": child.employee},
+                doc: frm.doc,
+                callback: function (r) {
+                    child.employee_name = r.message.name;
+                    child.hourly_cost = r.message.rate;
+                    refresh_field("employee_name", child.name, "details");
+                    refresh_field("hourly_cost", child.name, "details");
+                }
+            });
+        } else {
+			frappe.throw(__('Please fill-up employee'));
+		}
 	},
 
 	hourly_cost: function(frm, cdt, cdn) {
