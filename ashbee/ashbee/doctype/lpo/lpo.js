@@ -2,8 +2,20 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('LPO', {
+	onload: function(frm) {
+		frm.trigger('setup_queries');
+	},
 	refresh: function(frm) {
 
+	},
+	setup_queries: function(frm) {
+		frm.set_query('supplier_address', {
+			query: 'frappe.contacts.doctype.address.address.address_query',
+			filters: {
+				link_doctype: 'Supplier',
+				link_name: frm.doc.supplier
+			}
+		});
 	}
 });
 
