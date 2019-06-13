@@ -16,6 +16,9 @@ class LPO(Document):
 		self._set_money_in_words()
 
 	def _set_taxes_and_charges(self):
+		if not self.taxes_and_charges:
+			return
+
 		if self.taxes:
 			self.taxes = []
 
@@ -26,6 +29,9 @@ class LPO(Document):
 			self.append('taxes', taxes_and_charge)
 
 	def _calculate_taxes_and_charges(self):
+		if not self.taxes_and_charges:
+			return
+
 		tax_amount = 0.0
 		for tax in self.taxes:
 			tax_amount = tax_amount + tax.tax_amount
@@ -36,10 +42,16 @@ class LPO(Document):
 
 	def _calculate_totals(self):
 		totals = 0.0
+
 		for item in self.items:
 			totals = totals + (item.qty * item.rate)
-		self.base_grand_total = totals + self.base_total_taxes_and_charges
-		self.grand_total = totals + self.total_taxes_and_charges
+
+		self.base_grand_total = totals
+		self.grand_total = totals
+
+		if self.taxes_and_charges:
+			self.base_grand_total = self.base_grand_total + self.base_total_taxes_and_charges
+			self.grand_total = self.grand_total + self.total_taxes_and_charges
 
 	def _set_money_in_words(self):
 		self.in_words = money_in_words(self.grand_total, self.currency)
