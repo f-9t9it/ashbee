@@ -1,4 +1,9 @@
 frappe.ui.form.on('Stock Entry', {
+	onload: function(frm) {
+		frm.set_query("item_code", "items", function() {
+			return { query: "ashbee.queries.item_query" };
+		});
+	},
 	setup: function(frm) {
 		frm.set_query("ashbee_issue_items", function() {
 			return {
