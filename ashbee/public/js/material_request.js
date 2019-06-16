@@ -1,6 +1,5 @@
 let naming_series = '';
 
-
 frappe.ui.form.on('Material Request', {
     refresh: function(frm) {
         _make_custom_button(frm);
@@ -244,3 +243,17 @@ var _make_custom_button = function(frm) {
         });
     });
 };
+
+// override erpnext.buying.MaterialRequestController onload function
+frappe.provide('ashbee.buying');
+
+ashbee.buying.MaterialRequestController = erpnext.buying.MaterialRequestController.extend({
+    onload: function(doc, cdt, cdn) {
+        this._super();
+        this.frm.set_query('item_code', 'items', function() {
+            return { query: 'ashbee.queries.item_query' };
+        });
+    }
+});
+
+$.extend(cur_frm.cscript, new ashbee.buying.MaterialRequestController({ frm: cur_frm }));
