@@ -8,6 +8,20 @@ frappe.ui.form.on('LPO', {
 	refresh: function(frm) {
 
 	},
+	supplier_address: function(frm) {
+		frappe.call({
+			method: 'frappe.contacts.doctype.address.address.get_address_display',
+			args: {'address_dict': frm.doc.supplier_address },
+			callback: function(r) {
+				if (r.message) {
+					frm.set_value('address_display', r.message);
+				}
+			}
+		});
+	},
+	shipping_address: function(frm) {
+		erpnext.utils.get_address_display(frm, "shipping_address", "shipping_address_display", true);
+	},
 	setup_queries: function(frm) {
 		frm.set_query('supplier_address', {
 			query: 'frappe.contacts.doctype.address.address.address_query',
