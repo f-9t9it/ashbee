@@ -20,10 +20,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
         if(length(tabItem.description) > 40, \
             concat(substr(tabItem.description, 1, 40), "..."), description) as decription
         from tabItem
-        left join `tabItem Variant Attribute` as variant
+        left join (SELECT parent, attribute_value FROM `tabItem Variant Attribute` WHERE attribute="Colour") variant
         on tabItem.name = variant.parent
         where tabItem.docstatus < 2
-            and variant.attribute="Colour"
             and tabItem.has_variants=0
             and tabItem.disabled=0
             and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
