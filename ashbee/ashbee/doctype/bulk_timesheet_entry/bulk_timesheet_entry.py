@@ -12,17 +12,35 @@ from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment 
 
 class BulkTimesheetEntry(Document):
     def validate(self):
-        self.update_missing_details_fields()
-        self.update_project_fields()
-        self.validate_costs()
+        self._update_missing_details_fields()
+        self._update_project_fields()
+        self._validate_costs()
 
     def on_submit(self):
-        self.update_timesheet()
+        self._update_timesheet()
 
     def on_cancel(self):
-        self.bulk_cancel()
+        self._bulk_cancel()
 
-    def update_missing_details_fields(self):
+    def update_hourly_costs(self):
+        """
+        Called from update_costs button.
+        Get the hour rate from assigned salary structure
+        Set to hourly cost
+        Update costs
+        :return:
+        """
+        for detail in self.details:
+            hourly_cost = 0.00
+
+            salary_structure = get_assigned_salary_structure(detail.employee, today())
+            if salary_structure:
+                hour_rate = frappe.db.get_value('Salary Structure', salary_structure, 'hour_rate')
+                hourly_cost = hour_rate
+
+            detail.hourly_cost = hourly_cost
+
+    def _update_missing_details_fields(self):
         for detail in self.details:
             if not detail.ot1_hours:
                 detail.ot1_hours = 0.00
@@ -35,7 +53,7 @@ class BulkTimesheetEntry(Document):
             if not detail.employee_name and detail.employee:
                 detail.employee_name = frappe.db.get_value('Employee', detail.employee, 'employee_name')
 
-    def update_project_fields(self):
+    def _update_project_fields(self):
         for detail in self.details:
             if detail.project_code and not detail.project:
                 project = self.get_project_name_by_project_code(
@@ -75,12 +93,12 @@ class BulkTimesheetEntry(Document):
             return 0.0
         return salary_structure.hour_rate
 
-    def validate_costs(self):
+    def _validate_costs(self):
         for detail in self.details:
             _validate_cost_details(detail)
             _calculate_cost_details(detail)
 
-    def bulk_cancel(self):
+    def _bulk_cancel(self):
         for detail in self.details:
             if detail.timesheet:
                 timesheet = frappe.get_doc("Timesheet", detail.timesheet)
@@ -108,7 +126,7 @@ class BulkTimesheetEntry(Document):
         timesheet.cancel()
         timesheet.delete()
 
-    def update_timesheet(self):
+    def _update_timesheet(self):
         for detail in self.details:
             self.delete_timesheet(detail.timesheet)
             timesheet = _create_timesheet(self.company, detail)
