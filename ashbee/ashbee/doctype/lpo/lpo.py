@@ -13,6 +13,7 @@ class LPO(Document):
 		self._set_taxes_and_charges()
 		self._calculate_taxes_and_charges()
 		self._calculate_totals()
+		self._apply_discount()
 		self._set_money_in_words()
 
 	def _set_taxes_and_charges(self):
@@ -54,6 +55,21 @@ class LPO(Document):
 
 		self.base_grand_total = self.base_grand_total + self.base_total_taxes_and_charges
 		self.grand_total = self.grand_total + self.total_taxes_and_charges
+
+	def _apply_discount(self):
+		total_amount = self.grand_total
+
+		if self.apply_discount_on == 'Net Total':
+			total_amount = self.net_total
+
+		discount_amount = total_amount / float(self.additional_discount_percentage)
+		self.base_discount_amount = discount_amount
+		self.discount_amount = discount_amount
+
+		if self.apply_discount_on == 'Net Total':
+			self.net_total = self.net_total - discount_amount
+		else:
+			self.grand_total = self.grand_total - discount_amount
 
 	def _set_money_in_words(self):
 		self.in_words = money_in_words(self.grand_total, self.currency)
