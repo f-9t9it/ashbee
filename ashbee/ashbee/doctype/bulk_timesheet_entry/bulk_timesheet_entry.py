@@ -24,6 +24,12 @@ class BulkTimesheetEntry(Document):
 
     def update_missing_details_fields(self):
         for detail in self.details:
+            if not detail.hourly_cost:
+                detail.hourly_cost = 0.00
+            if not detail.ot1_hours:
+                detail.ot1_hours = 0.00
+            if not detail.ot2_hours:
+                detail.ot2_hours = 0.00
             if not detail.start_date_time:
                 date_time = get_datetime(self.posting_date)
                 detail.start_date_time = date_time.replace(hour=5, minute=30, second=0, microsecond=0)
