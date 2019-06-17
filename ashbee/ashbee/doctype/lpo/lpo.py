@@ -57,12 +57,15 @@ class LPO(Document):
 		self.grand_total = totals + self.total_taxes_and_charges
 
 	def _apply_discount(self):
+		if not self.additional_discount_percentage:
+			return
+
 		total_amount = self.grand_total
 
 		if self.apply_discount_on == 'Net Total':
 			total_amount = self.net_total
 
-		discount_amount = total_amount / float(self.additional_discount_percentage)
+		discount_amount = total_amount / self.additional_discount_percentage
 		self.base_discount_amount = discount_amount
 		self.discount_amount = discount_amount
 
