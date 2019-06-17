@@ -146,7 +146,7 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
+   "allow_bulk_edit": 1, 
    "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
@@ -223,7 +223,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2019-05-22 11:16:30.607049", 
+ "modified": "2019-06-17 09:34:29.805254", 
  "modified_by": "Administrator", 
  "module": "Ashbee", 
  "name": "Bulk Timesheet Entry", 

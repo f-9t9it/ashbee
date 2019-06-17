@@ -73,10 +73,8 @@ class BulkTimesheetEntry(Document):
 
     def validate_costs(self):
         for detail in self.details:
-            detail.normal_cost = detail.hourly_cost * detail.normal_hours
-            detail.ot1 = detail.hourly_cost * detail.ot1_hours * 1.25
-            detail.ot2 = detail.hourly_cost * detail.ot2_hours * 1.50
-            detail.total_cost = detail.ot1 + detail.ot2 + detail.normal_cost
+            _validate_cost_details()
+            _calculate_cost_details(detail)
 
     def bulk_cancel(self):
         for detail in self.details:
@@ -154,3 +152,21 @@ def _get_timesheet_timelogs(timesheet, entry_detail):
     timesheet_details.append(detail)
 
     return timesheet_details
+
+
+def _calculate_cost_details(detail):
+    detail.normal_cost = detail.hourly_cost * detail.normal_hours
+    detail.ot1 = detail.hourly_cost * detail.ot1_hours * 1.25
+    detail.ot2 = detail.hourly_cost * detail.ot2_hours * 1.50
+    detail.total_cost = detail.ot1 + detail.ot2 + detail.normal_cost
+
+
+def _validate_cost_details(detail):
+    if isinstance(detail.hourly_cost, unicode):
+        detail.hourly_cost = float(detail.hourly_cost)
+    if isinstance(detail.normal_hours, unicode):
+        detail.normal_hours = float(detail.normal_hours)
+    if isinstance(detail.ot1_hours, unicode):
+        detail.ot1_hours = float(detail.ot1_hours)
+    if isinstance(detail.ot2_hours, unicode):
+        detail.ot2_hours = float(detail.ot2_hours)
