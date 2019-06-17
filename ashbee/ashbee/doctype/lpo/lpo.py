@@ -53,8 +53,8 @@ class LPO(Document):
 		for item in self.items:
 			totals = totals + (item.qty * item.rate)
 
-		self.base_grand_total = self.base_grand_total + self.base_total_taxes_and_charges
-		self.grand_total = self.grand_total + self.total_taxes_and_charges
+		self.base_grand_total = totals + self.base_total_taxes_and_charges
+		self.grand_total = totals + self.total_taxes_and_charges
 
 	def _apply_discount(self):
 		total_amount = self.grand_total
