@@ -73,7 +73,7 @@ class BulkTimesheetEntry(Document):
 
     def validate_costs(self):
         for detail in self.details:
-            _validate_cost_details()
+            _validate_cost_details(detail)
             _calculate_cost_details(detail)
 
     def bulk_cancel(self):
