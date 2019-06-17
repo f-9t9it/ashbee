@@ -2,6 +2,18 @@
 // For license information, please see license.txt
 
 
+frappe.ui.form.on('Bulk Timesheet Entry', {
+	update_hourly_costs: function(frm) {
+		frm.call({
+			doc: frm.doc,
+			method: 'update_hourly_costs',
+			callback: function(r) {
+				frm.save();
+			}
+		});
+	}
+});
+
 frappe.ui.form.on('Bulk Timesheet Details', {
 	details_add: function(frm, cdt, cdn) {
 		set_start_date_time(frm, cdt, cdn);
