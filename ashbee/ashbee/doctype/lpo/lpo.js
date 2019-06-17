@@ -5,10 +5,13 @@ frappe.ui.form.on('LPO', {
 	onload: function(frm) {
 		frm.trigger('setup_queries');
 	},
-	refresh: function(frm) {
-
+	supplier: function(frm) {
+		frm.trigger('setup_queries');
 	},
 	supplier_address: function(frm) {
+		if (!frm.doc.supplier_address)
+			return;
+
 		frappe.call({
 			method: 'frappe.contacts.doctype.address.address.get_address_display',
 			args: {'address_dict': frm.doc.supplier_address },
