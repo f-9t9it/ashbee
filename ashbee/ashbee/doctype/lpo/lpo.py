@@ -13,6 +13,7 @@ class LPO(Document):
 		self._set_taxes_and_charges()
 		self._calculate_taxes_and_charges()
 		self._calculate_totals()
+		self._apply_discount()
 		self._set_money_in_words()
 
 	def _set_taxes_and_charges(self):
@@ -29,16 +30,22 @@ class LPO(Document):
 			self.append('taxes', taxes_and_charge)
 
 	def _calculate_taxes_and_charges(self):
-		if not self.taxes_and_charges:
-			return
+		taxes_and_charges_added = 0.00
+		taxes_and_charges_deducted = 0.00
 
-		tax_amount = 0.0
 		for tax in self.taxes:
-			tax_amount = tax_amount + tax.tax_amount
-		self.base_taxes_and_charges_added = tax_amount
-		self.base_total_taxes_and_charges = self.base_taxes_and_charges_added + self.base_taxes_and_charges_deducted
-		self.taxes_and_charges_added = tax_amount
-		self.total_taxes_and_charges = self.taxes_and_charges_added + self.base_taxes_and_charges_deducted
+			if tax.add_deduct_tax == "Add":
+				taxes_and_charges_added = taxes_and_charges_added + tax.tax_amount
+			else:
+				taxes_and_charges_deducted = taxes_and_charges_deducted + tax.tax_amount
+
+		self.base_taxes_and_charges_added = taxes_and_charges_added
+		self.base_taxes_and_charges_deducted = taxes_and_charges_deducted
+		self.base_total_taxes_and_charges = self.base_taxes_and_charges_added - self.base_taxes_and_charges_deducted
+
+		self.taxes_and_charges_added = self.base_taxes_and_charges_added
+		self.taxes_and_charges_deducted = self.base_taxes_and_charges_deducted
+		self.total_taxes_and_charges = self.base_total_taxes_and_charges
 
 	def _calculate_totals(self):
 		totals = 0.0
@@ -46,12 +53,26 @@ class LPO(Document):
 		for item in self.items:
 			totals = totals + (item.qty * item.rate)
 
-		self.base_grand_total = totals
-		self.grand_total = totals
+		self.base_grand_total = totals + self.base_total_taxes_and_charges
+		self.grand_total = totals + self.total_taxes_and_charges
 
-		if self.taxes_and_charges:
-			self.base_grand_total = self.base_grand_total + self.base_total_taxes_and_charges
-			self.grand_total = self.grand_total + self.total_taxes_and_charges
+	def _apply_discount(self):
+		if not self.additional_discount_percentage:
+			return
+
+		total_amount = self.grand_total
+
+		if self.apply_discount_on == 'Net Total':
+			total_amount = self.net_total
+
+		discount_amount = total_amount / self.additional_discount_percentage
+		self.base_discount_amount = discount_amount
+		self.discount_amount = discount_amount
+
+		if self.apply_discount_on == 'Net Total':
+			self.net_total = self.net_total - discount_amount
+		else:
+			self.grand_total = self.grand_total - discount_amount
 
 	def _set_money_in_words(self):
 		self.in_words = money_in_words(self.grand_total, self.currency)
