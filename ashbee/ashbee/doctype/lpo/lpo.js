@@ -8,6 +8,13 @@ frappe.ui.form.on('LPO', {
 	supplier: function(frm) {
 		frm.trigger('setup_queries');
 	},
+	refresh: function(frm) {
+		if (frm.doc.taxes[0]) {
+			const cdt = frm.doc.taxes[0].doctype;
+			const cdn = frm.doc.taxes[0].name;
+			_setup_tax_fields(frm, cdt, cdn);
+		}
+	},
 	supplier_address: function(frm) {
 		if (!frm.doc.supplier_address)
 			return;
@@ -50,6 +57,19 @@ frappe.ui.form.on('LPO Item', {
 		frm.refresh();
 	}
 });
+
+frappe.ui.form.on('Purchase Taxes and Charges', {
+	charge_type: function(frm, cdt, cdn) {
+		_setup_tax_fields(frm, cdt, cdn);
+	}
+});
+
+var _setup_tax_fields = function(frm, cdt, cdn) {
+	var tax = locals[cdt][cdn];
+	var df = frappe.meta.get_docfield('Purchase Taxes and Charges', 'rate', frm.doc.name);
+	df.read_only = tax.charge_type === "Actual" ? 1 : 0;
+	refresh_field('taxes');
+};
 
 var _update_amount = function(frm, cdt, cdn) {
 	var item = locals[cdt][cdn];
