@@ -4,6 +4,16 @@
 frappe.ui.form.on('LPO', {
 	onload: function(frm) {
 		frm.trigger('setup_queries');
+		frm.set_query('account_head', 'taxes', function(doc) {
+			var account_type = ['Tax', 'Chargeable', 'Income Account', 'Expenses Included in Valuation'];
+			return {
+				query: 'erpnext.controllers.queries.tax_account_query',
+				filters: {
+					'account_type': account_type,
+					'company': doc.company
+				}
+			};
+		});
 	},
 	supplier: function(frm) {
 		frm.trigger('setup_queries');
@@ -55,6 +65,9 @@ frappe.ui.form.on('LPO Item', {
 		_update_total_amount(frm);
 		_update_total_qty(frm);
 		frm.refresh();
+	},
+	account_head: function(frm, cdt, cdn) {
+		_update_description(frm, cdt, cdn);
 	}
 });
 
@@ -63,6 +76,11 @@ frappe.ui.form.on('Purchase Taxes and Charges', {
 		_setup_tax_fields(frm, cdt, cdn);
 	}
 });
+
+var _update_description = function(frm, cdt, cdn) {
+	var tax = locals[cdt][cdn];
+	frappe.model.set_value(cdt, cdn, 'description', tax.account_head);
+};
 
 var _setup_tax_fields = function(frm, cdt, cdn) {
 	var tax = locals[cdt][cdn];
