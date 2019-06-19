@@ -4,9 +4,26 @@
 frappe.ui.form.on('LPO', {
 	onload: function(frm) {
 		frm.trigger('setup_queries');
+		frm.set_query('account_head', 'taxes', function(doc) {
+			var account_type = ['Tax', 'Chargeable', 'Income Account', 'Expenses Included in Valuation'];
+			return {
+				query: 'erpnext.controllers.queries.tax_account_query',
+				filters: {
+					'account_type': account_type,
+					'company': doc.company
+				}
+			};
+		});
 	},
 	supplier: function(frm) {
 		frm.trigger('setup_queries');
+	},
+	refresh: function(frm) {
+		if (frm.doc.taxes[0]) {
+			const cdt = frm.doc.taxes[0].doctype;
+			const cdn = frm.doc.taxes[0].name;
+			_setup_tax_fields(frm, cdt, cdn);
+		}
 	},
 	supplier_address: function(frm) {
 		if (!frm.doc.supplier_address)
@@ -48,8 +65,29 @@ frappe.ui.form.on('LPO Item', {
 		_update_total_amount(frm);
 		_update_total_qty(frm);
 		frm.refresh();
+	},
+	account_head: function(frm, cdt, cdn) {
+		_update_description(frm, cdt, cdn);
 	}
 });
+
+frappe.ui.form.on('Purchase Taxes and Charges', {
+	charge_type: function(frm, cdt, cdn) {
+		_setup_tax_fields(frm, cdt, cdn);
+	}
+});
+
+var _update_description = function(frm, cdt, cdn) {
+	var tax = locals[cdt][cdn];
+	frappe.model.set_value(cdt, cdn, 'description', tax.account_head);
+};
+
+var _setup_tax_fields = function(frm, cdt, cdn) {
+	var tax = locals[cdt][cdn];
+	var df = frappe.meta.get_docfield('Purchase Taxes and Charges', 'rate', frm.doc.name);
+	df.read_only = tax.charge_type === "Actual" ? 1 : 0;
+	refresh_field('taxes');
+};
 
 var _update_amount = function(frm, cdt, cdn) {
 	var item = locals[cdt][cdn];
