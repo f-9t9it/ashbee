@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from erpnext.stock.report.stock_ledger.stock_ledger import get_items, get_sle_conditions
 
+from ashbee.utils import get_color_variants
+
 
 def execute(filters=None):
 	columns = get_columns()
@@ -39,12 +41,6 @@ def get_stock_ledger_entries(filters, items):
 					AND %(to_date)s {item_conditions} {sle_conditions}
 				ORDER BY posting_date ASC, posting_time ASC, creation ASC
 			""".format(item_conditions=item_conditions, sle_conditions=get_sle_conditions(filters)), filters, as_dict=1)
-
-
-def get_color_variants():
-	filters = {'attribute': 'Colour'}
-	variants = frappe.get_all('Item Variant Attribute', filters=filters, fields=['parent', 'attribute_value'])
-	return {variant['parent']: variant['attribute_value'] for variant in variants}
 
 
 def get_columns():

@@ -151,6 +151,15 @@ def get_central_entry(voucher_no, voucher_detail_no=None):
     return central_entry_doc
 
 
+def get_color_variants():
+    variants = frappe.get_all(
+        'Item Variant Attribute',
+        filters={'attribute': 'Colour'},
+        fields=['parent', 'attribute_value']
+    )
+    return {variant['parent']: variant['attribute_value'] for variant in variants}
+
+
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
     projects = {}
 
