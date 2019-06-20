@@ -37,12 +37,14 @@ class CentralExpense(Document):
 		total_cost = reduce(lambda x, y: x + y, projects.values())
 		for project, cost in projects.iteritems():
 			ratio = cost / total_cost
-			allocation = self.total_allocation * ratio
+			allocation = self.cost_allocation * ratio
+			labor_allocation = self.labor_allocation * ratio
 			self.append('projects', {
 				'project': project,
 				'cost': cost,
 				'ratio': ratio,
-				'allocation': allocation
+				'allocation': allocation,
+				'labor_allocation': labor_allocation
 			})
 		self.total_cost = total_cost
 
