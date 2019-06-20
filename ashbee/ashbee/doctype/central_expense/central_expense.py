@@ -23,6 +23,12 @@ class CentralExpense(Document):
 		projects = get_costs_by_projects(date_range)
 		self._set_projects(projects)
 
+	def on_submit(self):
+		_set_project_costing(self.projects)
+
+	def on_cancel(self):
+		_set_project_costing(self.projects, True)
+
 	def _set_central_entries(self, central_entries):
 		append_and_sum = partial(_append_and_sum_central_entry, self)
 		allocation = reduce(append_and_sum, central_entries, {
@@ -79,3 +85,34 @@ def _append_and_sum_central_entry(central_expense, x, y):
 		x['cost_allocation'] = cost_allocation
 
 	return x
+
+
+def _set_project_costing(items, cancel=False):
+	for item in items:
+		central_labor = _get_project_central_value(item.project, 'Timesheet')
+		central_cost = _get_project_central_value(item.project, 'Stock Entry')
+
+		allocated = item.allocated if not cancel else -item.allocated
+
+		_set_project_central_value(item.project, 'Timesheet', central_labor + allocated)
+		_set_project_central_value(item.project, 'Stock Entry', central_cost + allocated)
+
+	frappe.db.commit()
+
+
+def _get_project_central_value(project, entry_type):
+	fields = {
+		'Timesheet': 'ashbee_total_central_labor',
+		'Stock Entry': 'ashbee_total_central_cost'
+	}
+
+	return frappe.db.get_value('Project', project, fields[entry_type])
+
+
+def _set_project_central_value(project, entry_type, value):
+	fields = {
+		'Timesheet': 'ashbee_total_central_labor',
+		'Stock Entry': 'ashbee_total_central_cost'
+	}
+
+	frappe.db.set_value('Project', project, fields[entry_type], value)
