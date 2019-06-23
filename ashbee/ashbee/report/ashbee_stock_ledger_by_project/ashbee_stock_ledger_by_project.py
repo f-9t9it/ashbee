@@ -41,6 +41,7 @@ def get_columns():
 		_get_column("Item Name", "item_name", "Data", 200),
 		_get_column("Stock UOM", "stock_uom", "Link", 90, options='UOM'),
 		_get_column("Variant Colour", "variant_color", "Data", 95),
+		_get_column("Voucher #", "voucher_no", "Data", 95),
 		_get_column("Project Code", "project_code", "Data", 95),
 		_get_column("Project Name", "project_name", "Link", 95, options='Project'),
 		_get_column("Qty", "actual_qty", "Float", 50),
@@ -95,7 +96,7 @@ def _get_stock_ledger_entries(filters):
 	return frappe.db.sql("""
 		SELECT CONCAT_WS(" ", sle.posting_date, sle.posting_time) AS date,
 			sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.project AS project_name,
-			sle.stock_uom, item.item_name
+			sle.stock_uom, item.item_name, sle.voucher_no
 		FROM `tabStock Ledger Entry` sle
 		INNER JOIN `tabItem` item ON sle.item_code = item.name
 		WHERE sle.posting_date BETWEEN %(from_date)s AND %(to_date)s
