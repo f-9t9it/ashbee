@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from erpnext.stock.report.stock_ledger.stock_ledger import get_sle_conditions
 from toolz import unique, compose, partial, merge
 
 from ashbee.utils import get_color_variants
@@ -93,15 +94,18 @@ def _get_stock_ledger_entries(filters):
 	:param filters:
 	:return: Stock Ledger Entries
 	"""
+	item_code = filters.get('item_code')
+	item_conditions = 'AND sle.item_code = %(item_code)s' if item_code else ''
+
 	return frappe.db.sql("""
 		SELECT CONCAT_WS(" ", sle.posting_date, sle.posting_time) AS date,
 			sle.item_code, sle.actual_qty, sle.qty_after_transaction, sle.project AS project_name,
 			sle.stock_uom, item.item_name, sle.voucher_no
 		FROM `tabStock Ledger Entry` sle
 		INNER JOIN `tabItem` item ON sle.item_code = item.name
-		WHERE sle.posting_date BETWEEN %(from_date)s AND %(to_date)s
+		WHERE sle.posting_date BETWEEN %(from_date)s AND %(to_date)s {item_conditions} {sle_conditions}
 		ORDER BY sle.posting_date ASC, sle.posting_time ASC, sle.creation ASC
-	""", filters, as_dict=1)
+	""".format(item_conditions=item_conditions, sle_conditions=get_sle_conditions(filters)), filters, as_dict=1)
 
 
 def _get_column(label, fieldname, fieldtype, width, options=None):
