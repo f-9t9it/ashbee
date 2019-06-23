@@ -1,3 +1,5 @@
+frappe.provide('ashbee.stock');
+
 frappe.ui.form.on('Stock Entry', {
 	onload: function(frm) {
 		frm.set_query("item_code", "items", function() {
@@ -369,3 +371,21 @@ var _populate_rows_attribute_values = function(frm) {
 		ashbee.populate_attribute_values_rows_options(frm);
 	}
 };
+
+ashbee.stock.StockEntry = erpnext.stock.StockEntry.extend({
+	show_stock_ledger: function() {
+		var me = this;
+		if (this.frm.doc.docstatus === 1) {
+			cur_frm.add_custom_button(__("Stock Ledger"), function() {
+				frappe.route_options = {
+					voucher_no: me.frm.doc.name,
+					from_date: me.frm.doc.posting_date,
+					to_date: me.frm.doc.posting_date
+				};
+				frappe.set_route("query-report", "Ashbee Stock Movement");
+			}, __("View"));
+		}
+	}
+});
+
+$.extend(cur_frm.cscript, new ashbee.stock.StockEntry({ frm: cur_frm }));
