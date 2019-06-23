@@ -197,10 +197,12 @@ def get_attribute_values(**filters):
     if not item.variant_of:
         return []
     attr_type = filters.get("attr_type")
-    retVal = frappe.db.sql('''select abbr, attribute_value from `tabItem Attribute Value`
-                            where parent = '{parent}' and parenttype = 'Item Attribute'; '''
-                            .format(parent=attr_type),as_list = 1)
-    return retVal
+
+    return frappe.db.sql("""
+        SELECT abbr, attribute_value FROM `tabItem Attribute Value`
+        WHERE parent=%s AND parenttype="Item Attribute"
+        ORDER BY CAST(abbr AS UNSIGNED) ASC
+    """, attr_type, as_list=1)
 
 
 @frappe.whitelist()

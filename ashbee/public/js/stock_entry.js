@@ -20,11 +20,6 @@ frappe.ui.form.on('Stock Entry', {
         _make_receipt_button(frm);
         _populate_rows_attribute_values(frm);
 	},
-	validate: function(frm) {
-		if (frm.doc.ashbee_is_return) {
-            _check_negative_qty(frm.doc.items);
-        }
-	},
 	ashbee_production_issue: function(frm) {
 		_set_naming_series(frm);
 	},
@@ -344,16 +339,6 @@ var _set_color_coating_select = function(frm, cdt, cdn){
 		refresh_field("ashbee_attribute_type", child.name, "items");
 		ashbee.populate_attribute_values(frm, cdt, cdn);
 	}
-};
-
-
-var _check_negative_qty = function(items) {
-	$.each(items, function(i, v) {
-		if (v.qty > 0) {
-			frappe.throw(__('Set quantity as negative.'));
-			return;
-		}
-	});
 };
 
 
