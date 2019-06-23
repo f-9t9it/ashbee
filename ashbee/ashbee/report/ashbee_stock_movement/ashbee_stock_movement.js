@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Ashbee Stock Ledger by Project"] = {
+frappe.query_reports["Ashbee Stock Movement"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
