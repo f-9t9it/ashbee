@@ -98,5 +98,25 @@
   "property": "options", 
   "property_type": "Text", 
   "value": "MI-.YY.-.#####\nMTSOUT-.YY.-.#####\nMTSIN-.YY.-.#####\nMR-.YY.-.#####\nSE-PI-.#####\nSE-MI-.#####\nMAT-STE-.YYYY.-"
+ }, 
+ {
+  "_assign": null, 
+  "_comments": null, 
+  "_liked_by": null, 
+  "_user_tags": null, 
+  "default_value": null, 
+  "doc_type": "Batch", 
+  "docstatus": 0, 
+  "doctype": "Property Setter", 
+  "doctype_or_field": "DocField", 
+  "field_name": "expiry_date", 
+  "modified": "2019-06-23 17:48:08.788521", 
+  "name": "Batch-expiry_date-bold", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "property": "bold", 
+  "property_type": "Check", 
+  "value": "1"
  }
 ]
