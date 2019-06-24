@@ -3,11 +3,11 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from erpnext.stock.report.stock_ledger.stock_ledger import get_sle_conditions
 from toolz import unique, compose, partial, merge
 
 from ashbee.utils import get_color_variants
+from ashbee.helpers import new_column
 
 
 def execute(filters=None):
@@ -37,17 +37,16 @@ def get_data(filters):
 
 def get_columns():
 	return [
-		_get_column("Date", "date", "Date", 95),
-		_get_column("Item Code", "item_code", "Link", 130, options='Item'),
-		_get_column("Item Name", "item_name", "Data", 200),
-		_get_column("Stock UOM", "stock_uom", "Link", 90, options='UOM'),
-		_get_column("Variant Colour", "variant_color", "Data", 95),
-		_get_column("Voucher #", "voucher_no", "Data", 95),
-		_get_column("Project Code", "project_code", "Data", 95),
-		_get_column("Project Name", "project_name", "Link", 95, options='Project'),
-		_get_column("Qty", "actual_qty", "Float", 50),
-		_get_column("Balance Qty", "qty_after_transaction", "Float", 100)
-
+		new_column("Date", "date", "Date", 95),
+		new_column("Item Code", "item_code", "Link", 130, options='Item'),
+		new_column("Item Name", "item_name", "Data", 200),
+		new_column("Stock UOM", "stock_uom", "Link", 90, options='UOM'),
+		new_column("Variant Colour", "variant_color", "Data", 95),
+		new_column("Voucher #", "voucher_no", "Data", 95),
+		new_column("Project Code", "project_code", "Data", 95),
+		new_column("Project Name", "project_name", "Link", 95, options='Project'),
+		new_column("Qty", "actual_qty", "Float", 50),
+		new_column("Balance Qty", "qty_after_transaction", "Float", 100)
 	]
 
 
@@ -106,10 +105,3 @@ def _get_stock_ledger_entries(filters):
 		WHERE sle.posting_date BETWEEN %(from_date)s AND %(to_date)s {item_conditions} {sle_conditions}
 		ORDER BY sle.posting_date ASC, sle.posting_time ASC, sle.creation ASC
 	""".format(item_conditions=item_conditions, sle_conditions=get_sle_conditions(filters)), filters, as_dict=1)
-
-
-def _get_column(label, fieldname, fieldtype, width, options=None):
-	column = {"label": _(label), "fieldname": fieldname, "fieldtype": fieldtype, "width": width}
-	if options:
-		column.update({'options': options})
-	return column
