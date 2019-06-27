@@ -16,7 +16,7 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 app_include_css = "/assets/ashbee/css/ashbee.css"
-app_include_js = "/assets/js/ashbee_utils.min.js"
+app_include_js = "/assets/js/ashbee.min.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/ashbee/css/ashbee.css"
@@ -31,6 +31,7 @@ doctype_js = {
     "Timesheet": "public/js/timesheet.js",
     "Material Request": "public/js/material_request.js",
     "Purchase Receipt": "public/js/purchase_receipt.js",
+    "Purchase Order": "public/js/purchase_order.js",
     "Project": "public/js/project.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -129,7 +130,8 @@ fixtures = [
                     "Purchase Receipt-naming_series-options",
                     "Material Request-naming_series-options",
                     "Stock Entry-purpose-options",
-                    "Material Request-material_request_type-default"
+                    "Material Request-material_request_type-default",
+                    "Batch-expiry_date-bold"
                 ]
             ]
         ]

@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Ashbee Reserved Stock"] = {
+frappe.query_reports["Ashbee Single Job Cost"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
@@ -19,24 +19,11 @@ frappe.query_reports["Ashbee Reserved Stock"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname": "stock_entry",
-			"label": __("Stock Entry"),
+			"fieldname": "project",
+			"label": __("Project"),
 			"fieldtype": "Link",
-			"options": "Stock Entry"
-		},
-		{
-			"fieldname": "item_code",
-			"label": __("Item Code"),
-			"fieldtype": "Link",
-			"options": "Item",
-			"get_query": function() {
-				return { query: "ashbee.queries.item_query" }
-			}
-		},
-		{
-			"fieldname": "job_code",
-			"label": __("Job Code"),
-			"fieldtype": "Data"
+			"options": "Project",
+			"reqd": 1
 		}
 	]
-};
+}

@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Ashbee Stock Ledger by Project"] = {
+frappe.query_reports["Ashbee Stock Movement"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
@@ -17,6 +17,26 @@ frappe.query_reports["Ashbee Stock Ledger by Project"] = {
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
 			"reqd": 1
+		},
+		{
+			"fieldname": "item_code",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"get_query": function() {
+				return { query: "ashbee.queries.item_query" }
+			}
+		},
+		{
+			"fieldname": "voucher_no",
+			"label": __("Voucher #"),
+			"fieldtype": "Data"
+		},
+		{
+			"fieldname": "project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
 		}
 	]
 }
