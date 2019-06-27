@@ -156,7 +156,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2019-06-02 14:05:02.079297", 
+ "modified": "2019-06-27 08:49:30.413135", 
  "modified_by": "Administrator", 
  "module": "Ashbee", 
  "name": "Direct Cost", 
@@ -165,7 +165,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
+   "cancel": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
