@@ -38,9 +38,7 @@ frappe.query_reports["Ashbee Stock Ledger (Simple)"] = {
 			"fieldtype": "Link",
 			"options": "Item",
 			"get_query": function() {
-				return {
-					query: "erpnext.controllers.queries.item_query"
-				}
+				return { query: "ashbee.queries.item_query" }
 			}
 		},
 		{

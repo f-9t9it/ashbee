@@ -28,7 +28,10 @@ frappe.query_reports["Ashbee Reserved Stock"] = {
 			"fieldname": "item_code",
 			"label": __("Item Code"),
 			"fieldtype": "Link",
-			"options": "Item"
+			"options": "Item",
+			"get_query": function() {
+				return { query: "ashbee.queries.item_query" }
+			}
 		},
 		{
 			"fieldname": "job_code",
