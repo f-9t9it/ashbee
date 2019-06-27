@@ -1,5 +1,6 @@
 import json
 import frappe
+from frappe import _
 from frappe.utils import flt
 from erpnext.controllers.item_variant import get_variant, create_variant
 from ashbee.utils import get_central_entry
@@ -11,12 +12,29 @@ def stock_entry_save(doc, method):
 
 
 def stock_entry_submit(doc, method):
+    _check_item_already_issued(doc)
     _set_central_entry(doc)
     _set_material_return_in_project(doc)
 
 
 def stock_entry_cancel(doc, method):
     _cancel_central_entry(doc)
+
+
+def _check_item_already_issued(doc):
+    if not doc.ashbee_is_return:
+        return
+
+    for item in doc.items:
+        sle = frappe.db.sql("""
+            SELECT count(*) AS items_count FROM `tabStock Ledger Entry` AS sle
+            WHERE sle.item_code=%s AND sle.project=%s
+        """, (item.item_code, doc.project), as_dict=1)
+
+        if sle['items_count'] == 0:
+            frappe.throw(
+                _('Item {} was not issued to Project {}'.format(item.item_code, doc.project))
+            )
 
 
 def _cancel_central_entry(doc):
