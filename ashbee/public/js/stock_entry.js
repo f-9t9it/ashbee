@@ -18,6 +18,7 @@ frappe.ui.form.on('Stock Entry', {
 		});
 	},
 	refresh: function(frm) {
+		frm.trigger('naming_series');
 		_set_page_primary_action(frm);
         _make_receipt_button(frm);
         _populate_rows_attribute_values(frm);
@@ -31,6 +32,14 @@ frappe.ui.form.on('Stock Entry', {
         } else if (frm.doc.purpose === "Material Return") {
 		    frm.set_value('naming_series', 'MR-.YY.-.#####');
         }
+	},
+	naming_series: function(frm) {
+		const series = ['MI-.YY.-.#####', 'MR-.YY.-.#####'];
+		frm.set_df_property(
+			'project',
+			'reqd',
+			series.includes(frm.doc.naming_series) ? 1 : 0
+		);
 	},
 	ashbee_issue_items: function(frm) {
 		var args = {"stock_entry":frm.doc.ashbee_issue_items};
