@@ -147,11 +147,9 @@ def create_variant_item(**filters):
         template = check_and_create_attribute(item.variant_of)
         args = update_missing_variant_attrs(item, template, args)
         variant = create_variant(template.name, args)
-        # length = get_length_from_item(item)
         weight = get_weight_from_item(item)
-        # added_value = flt(filters.get('added_value'))
-        # variant.valuation_rate = calculate_valuation_rate(length, weight, added_value, item.valuation_rate)
-        variant.valuation_rate = frappe.db.get_value('Item', item.variant_of, 'valuation_rate')
+        # variant.valuation_rate = frappe.db.get_value('Item', item.variant_of, 'valuation_rate')
+        variant.valuation_rate = item.valuation_rate
         variant.ashbee_weight = weight
 
     variant.save()
