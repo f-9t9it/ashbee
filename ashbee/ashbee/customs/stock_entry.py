@@ -7,6 +7,7 @@ from ashbee.utils import get_central_entry
 
 
 def stock_entry_save(doc, method):
+    _set_finished_items(doc)
     if doc.naming_series == "SE-PI-.#####":
         any(_set_item_recipient_task_color_coating(item) for item in doc.items)
 
@@ -19,6 +20,35 @@ def stock_entry_submit(doc, method):
 
 def stock_entry_cancel(doc, method):
     _cancel_central_entry(doc)
+
+
+def _set_finished_items(doc):
+    for item in doc.items:
+        _set_finished_item(item)
+
+
+def _set_finished_item(item):
+    if item.ashbee_recipient_task:
+        item_for_creation = {
+            'item_code': item.item_code,
+            'attr_value': _extract_attribute_value(item.ashbee_attribute_value),
+            'attr_type': item.ashbee_attribute_type
+        }
+
+        variant_item = get_finished_variant_item(**item_for_creation)
+
+        if variant_item:
+            variant_item['valuation_rate'] = variant_item.pop('rate')
+        else:
+            variant_item = create_variant_item(**item_for_creation)
+
+        item.ashbee_finished_item = variant_item.get('name')
+        item.ashbee_finished_item_valuation = variant_item.get('valuation_rate')
+
+
+def _extract_attribute_value(attribute_value):
+    extracted_value = attribute_value.split('|')[1]
+    return extracted_value.strip()
 
 
 def _check_item_already_issued(doc):
@@ -147,11 +177,9 @@ def create_variant_item(**filters):
         template = check_and_create_attribute(item.variant_of)
         args = update_missing_variant_attrs(item, template, args)
         variant = create_variant(template.name, args)
-        # length = get_length_from_item(item)
         weight = get_weight_from_item(item)
-        # added_value = flt(filters.get('added_value'))
-        # variant.valuation_rate = calculate_valuation_rate(length, weight, added_value, item.valuation_rate)
-        variant.valuation_rate = frappe.db.get_value('Item', item.variant_of, 'valuation_rate')
+        # variant.valuation_rate = frappe.db.get_value('Item', item.variant_of, 'valuation_rate')
+        variant.valuation_rate = item.valuation_rate
         variant.ashbee_weight = weight
 
     variant.save()
@@ -204,7 +232,7 @@ def get_finished_variant_item(**filters):
     variant = get_variant(item.variant_of, args)
     if variant:
         variant = frappe.get_doc("Item", variant)
-        return {'name':variant.name, 'rate':variant.valuation_rate}
+        return {'name': variant.name, 'rate': variant.valuation_rate}
 
 
 @frappe.whitelist()

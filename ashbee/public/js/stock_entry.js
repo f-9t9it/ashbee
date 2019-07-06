@@ -166,35 +166,8 @@ var confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation)
 			label: __('Valuation Rate'),
 			fieldtype: "Currency",
 			default: attrs_and_valuation.rate,
-			description: "Pre-calculated value",
 			read_only: 1
 		},
-		{
-			fieldname: "added_value",
-			label: __('Added Value'),
-			fieldtype: "Currency",
-			default: 0.250,
-			reqd: 1,
-			onchange: function() {
-				var calculated = calculate_valuation_rate({
-					length: attrs_and_valuation.Length,
-					weight: attrs_and_valuation.weight,
-					rate: attrs_and_valuation.rate,
-					added: d.get_values().added_value
-				});
-				console.log(calculated);
-				d.set_value('calculated_valuation_rate', calculated);
-				console.log(d);
-			}
-		},
-		{
-			fieldname: "calculated_valuation_rate",
-			label: __('Calculated Valuation Rate'),
-			fieldtype: "Currency",
-			default: calculated,
-			description: "Calculated value",
-			read_only: 1
-		}
 	];
 
 	var d = new frappe.ui.Dialog({
@@ -206,7 +179,6 @@ var confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation)
 
 			var _args = {
 				"item_code": child.item_code,
-				"added_value": d.get_values().added_value,
 				"valuation_rate": d.get_values().valuation_rate,
 				"attr_value": extract_ashbee_attribute_value(child.ashbee_attribute_value),
 				"attr_type": child.ashbee_attribute_type

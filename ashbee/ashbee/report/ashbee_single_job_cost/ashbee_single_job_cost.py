@@ -14,11 +14,63 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		new_column("Reference", "reference", "Data", 95),
+		new_column("Reference", "reference", "Data", 150),
 		new_column("Date", "date", "Date", 95),
-		new_column("Description", "description", "Data", 200)
+		new_column("Description", "description", "Data", 200),
+		new_column("Income", "income", "Currency", 90),
+		new_column("Qty", "qty", "Currency", 90),
+		new_column("Rate", "rate", "Currency", 90),
+		new_column("Material+Direct", "material_direct", "currency", 120),
+		new_column("Labor Expenses", "labor_expenses", "currency", 120),
+		new_column("Central", "central", "currency", 120),
+		new_column("Indirect", "indirect", "currency", 120)
 	]
 
 
 def get_data(filters):
-	return []
+	data = []
+
+	project_expenses = _get_project_expenses(filters)
+	data.append({
+		'material_direct': project_expenses['material'] + project_expenses['direct'],
+		'labor_expenses': project_expenses['labor'],
+		'central': project_expenses['central_labor'] + project_expenses['central_cost'],
+		'indirect': project_expenses['indirect_cost']
+	})
+
+	entries = [
+		_get_stock_ledger_entries(filters),
+		_get_timesheet_details(filters)
+	]
+
+	for entry in entries:
+		data.extend(entry)
+
+	return data
+
+
+def _get_project_expenses(filters):
+	return frappe.db.sql("""
+		SELECT total_consumed_material_cost AS material, ashbee_total_direct_cost AS direct,
+			total_costing_amount AS labor, ashbee_total_central_cost AS central_cost, ashbee_total_central_labor AS central_labor, ashbee_total_indirect_cost AS indirect_cost
+		FROM `tabProject`
+		WHERE name=%(project)s
+	""", filters, as_dict=1)[0]
+
+
+def _get_stock_ledger_entries(filters):
+	return frappe.db.sql("""
+		SELECT posting_date AS date, voucher_no AS reference, item_code AS description
+		FROM `tabStock Ledger Entry`
+		WHERE project=%(project)s 
+		AND posting_date BETWEEN %(from_date)s AND %(to_date)s
+	""", filters, as_dict=1)
+
+
+def _get_timesheet_details(filters):
+	return frappe.db.sql("""
+		SELECT DATE(from_time) AS date, parent AS reference, activity_type AS description
+		FROM `tabTimesheet Detail`
+		WHERE project=%(project)s
+		AND DATE(from_time) BETWEEN %(from_date)s AND %(to_date)s
+	""", filters, as_dict=1)
