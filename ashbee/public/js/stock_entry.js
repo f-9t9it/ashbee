@@ -16,6 +16,15 @@ frappe.ui.form.on('Stock Entry', {
 				}
 			};
 		});
+		frm.set_query("ashbee_material_issue", function() {
+			return {
+				filters: {
+					'purpose': 'Material Issue',
+					'docstatus': 1,
+					'ashbee_production_issue': 1
+				}
+			};
+		});
 	},
 	refresh: function(frm) {
 		frm.trigger('naming_series');
@@ -271,6 +280,7 @@ var _make_receipt_button = function(frm) {
                 var se = frappe.model.get_new_doc('Stock Entry');
                 se.naming_series = "MTSIN-.YY.-.#####";
                 se.purpose = "Material Receipt";
+				se.ashbee_material_issue = frm.doc.name;
 
                 var items = frm.get_field('items').grid.get_selected_children();
                 if(!items.length) {
