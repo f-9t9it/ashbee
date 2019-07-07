@@ -7,6 +7,7 @@ from ashbee.utils import get_central_entry
 
 
 def stock_entry_save(doc, method):
+    _check_receipt_existed(doc)
     _set_finished_items(doc)
     if doc.naming_series == "SE-PI-.#####":
         any(_set_item_recipient_task_color_coating(item) for item in doc.items)
@@ -20,6 +21,19 @@ def stock_entry_submit(doc, method):
 
 def stock_entry_cancel(doc, method):
     _cancel_central_entry(doc)
+
+
+def _check_receipt_existed(doc):
+    if doc.purpose == 'Material Receipt':
+        filters = {
+            'ashbee_material_issue': doc.ashbee_material_issue,
+            'docstatus': 1
+        }
+
+        material_receipts = frappe.get_all('Stock Entry', filters)
+
+        if material_receipts:
+            frappe.throw(_('Existing Material Receipt found for {}'.format(doc.ashbee_material_issue)))
 
 
 def _set_finished_items(doc):
