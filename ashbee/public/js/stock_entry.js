@@ -16,10 +16,19 @@ frappe.ui.form.on('Stock Entry', {
 				}
 			};
 		});
+		frm.set_query("ashbee_material_issue", function() {
+			return {
+				filters: {
+					'purpose': 'Material Issue',
+					'docstatus': 1,
+					'ashbee_production_issue': 1
+				}
+			};
+		});
 	},
 	refresh: function(frm) {
 		frm.trigger('naming_series');
-		_set_page_primary_action(frm);
+		// _set_page_primary_action(frm);
         _make_receipt_button(frm);
         _populate_rows_attribute_values(frm);
 	},
@@ -203,24 +212,24 @@ var confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation)
 	d.show();
 };
 
-
-var _set_page_primary_action = function(frm){
-		var data = {};
-		$.each(frm.doc.items, (i, v)=>{
-			if(v.ashbee_recipient_task != "" && v.ashbee_attribute_type != "" && v.ashbee_attribute_value != ""
-				&& v.ashbee_finished_item == "" && v.item_code != ""){
-
-				frm.page.set_primary_action(__("Save"), function() {
-			   		frappe.confirm(__("Create Variants and Save?"), function(){
-			   			create_variants_and_save(frm);
-			   			return false;
-
-			   		});
-		       });
-			}
-		});
-
-};
+// DEPRECATED
+// var _set_page_primary_action = function(frm){
+// 		var data = {};
+// 		$.each(frm.doc.items, (i, v)=>{
+// 			if(v.ashbee_recipient_task != "" && v.ashbee_attribute_type != "" && v.ashbee_attribute_value != ""
+// 				&& v.ashbee_finished_item == "" && v.item_code != ""){
+//
+// 				frm.page.set_primary_action(__("Save"), function() {
+// 			   		frappe.confirm(__("Create Variants and Save?"), function(){
+// 			   			create_variants_and_save(frm);
+// 			   			return false;
+//
+// 			   		});
+// 		       });
+// 			}
+// 		});
+//
+// };
 
 
 var create_variants_and_save = function(frm){
@@ -271,6 +280,7 @@ var _make_receipt_button = function(frm) {
                 var se = frappe.model.get_new_doc('Stock Entry');
                 se.naming_series = "MTSIN-.YY.-.#####";
                 se.purpose = "Material Receipt";
+				se.ashbee_material_issue = frm.doc.name;
 
                 var items = frm.get_field('items').grid.get_selected_children();
                 if(!items.length) {
