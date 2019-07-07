@@ -84,7 +84,7 @@ def get_central_expenses(filters):
             AND ashbee_is_return = 0
             AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         """, filters)
-    return res[0][0] if res else None
+    return res[0][0] if res else 0.00
 
 
 def get_central_labour(filters):
@@ -97,7 +97,7 @@ def get_central_labour(filters):
             AND DATE(from_time) <= %(to_date)s
             AND DATE(to_time) >= %(from_date)s
         """, filters)
-    return res[0][0] if res else None
+    return res[0][0] if res else 0.00
 
 
 def get_all_material_returns(filters):
