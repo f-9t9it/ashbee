@@ -114,7 +114,8 @@ fixtures = [
                     "Material Request-ashbee_dummy_items_section",
                     "Material Request-ashbee_dummy_items",
                     "Stock Entry-ashbee_dummy_items_section",
-                    "Stock Entry-ashbee_dummy_items"
+                    "Stock Entry-ashbee_dummy_items",
+                    "Stock Entry-ashbee_material_issue"
                 ]
             ]
         ]
