@@ -291,7 +291,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2019-07-11 06:09:31.824739", 
+ "modified": "2019-07-11 06:14:26.751571", 
  "modified_by": "ivan@9t9it.com", 
  "module": "Ashbee", 
  "name": "Bulk Timesheet Entry", 
@@ -362,7 +362,7 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "ASC", 
- "title_field": "posting_date", 
+ "title_field": "", 
  "track_changes": 1, 
  "track_seen": 0, 
  "track_views": 0
