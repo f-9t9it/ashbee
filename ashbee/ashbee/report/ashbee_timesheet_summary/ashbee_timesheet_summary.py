@@ -4,13 +4,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils.data import date_diff
 
 
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
 
-	_fill_totals(data)
+	if data:
+		_fill_totals(data)
 
 	return columns, data
 
@@ -100,7 +102,12 @@ def get_columns():
 
 
 def get_data(filters):
-	working_hours = filters.get('working_hours')
+	calendar_days = date_diff(
+		filters.get('to_date'),
+		filters.get('from_date')
+	)
+
+	working_hours = (calendar_days + 1) * 8
 
 	timesheets = frappe.db.sql("""
 		SELECT
