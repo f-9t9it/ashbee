@@ -130,6 +130,10 @@ def get_data(filters):
 
 
 def _fill_central_fields(data, labour, expenses, sum_costs):
+    if not labour:
+        labour = 0.00
+    if not expenses:
+        expenses = 0.00
     for row in data:
         row['central_labour'] = labour * (row['dividend'] / sum_costs)
         row['central_expenses'] = expenses * (row['dividend'] / sum_costs)
