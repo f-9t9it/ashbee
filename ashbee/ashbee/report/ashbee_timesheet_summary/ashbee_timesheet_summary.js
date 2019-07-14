@@ -15,12 +15,6 @@ frappe.query_reports["Ashbee Timesheet Summary"] = {
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today()
-		},
-		{
-			"fieldname": "working_hours",
-			"label": __("Working Hours"),
-			"fieldtype": "Int",
-			"reqd": 1
 		}
 	]
 }

@@ -128,9 +128,10 @@ class BulkTimesheetEntry(Document):
 
     def _update_timesheet(self):
         for detail in self.details:
-            self.delete_timesheet(detail.timesheet)
-            timesheet = _create_timesheet(self.company, detail)
-            _set_detail_timesheet(detail.name, timesheet.name)
+            if detail.normal_hours > 0:
+                self.delete_timesheet(detail.timesheet)
+                timesheet = _create_timesheet(self.company, detail)
+                _set_detail_timesheet(detail.name, timesheet.name)
 
         frappe.db.commit()
 
