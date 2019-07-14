@@ -30,7 +30,7 @@ def get_columns():
 			"label": _("Emp Name"),
 			"fieldtype": "Data",
 			"fieldname": "employee_name",
-			"width": 230
+			"width": 200
 		},
 		{
 			"label": _("Basic"),
@@ -42,19 +42,19 @@ def get_columns():
 			"label": _("Normal Hour"),
 			"fieldtype": "Data",
 			"fieldname": "normal_hours",
-			"width": 100
+			"width": 50
 		},
 		{
 			"label": _("Normal Amt"),
 			"fieldtype": "Currency",
 			"fieldname": "normal_cost",
-			"width": 100
+			"width": 80
 		},
 		{
 			"label": _("OT1 Hour"),
 			"fieldtype": "Data",
 			"fieldname": "ot1_hours",
-			"width": 80
+			"width": 50
 		},
 		{
 			"label": _("OT1 Amt"),
@@ -66,7 +66,7 @@ def get_columns():
 			"label": _("OT2 Hour"),
 			"fieldtype": "Data",
 			"fieldname": "ot2_hours",
-			"width": 80
+			"width": 50
 		},
 		{
 			"label": _("OT2 Amt"),
@@ -78,19 +78,19 @@ def get_columns():
 			"label": _("Absent Hour"),
 			"fieldtype": "Data",
 			"fieldname": "absent_hours",
-			"width": 100
+			"width": 50
 		},
 		{
 			"label": _("Absent Amt"),
 			"fieldtype": "Currency",
 			"fieldname": "absent",
-			"width": 100
+			"width": 80
 		},
 		{
 			"label": _("Total Hours"),
 			"fieldtype": "Data",
 			"fieldname": "total_hours",
-			"width": 100
+			"width": 80
 		},
 		{
 			"label": _("Total Amt"),
