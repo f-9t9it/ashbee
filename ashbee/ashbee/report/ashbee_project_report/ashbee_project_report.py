@@ -10,6 +10,10 @@ from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_al
 
 def execute(filters=None):
     columns, data = get_columns(filters), get_data(filters)
+
+    if data:
+        _fill_totals(data)
+
     return columns, data
 
 
@@ -167,6 +171,28 @@ def _rename_fieldnames_for_report(data):
                 row[new] = row.pop(current)
             else:
                 row[new] = 0.00
+
+
+def _fill_totals(data):
+    total_row = {
+        'material_issue': 0.000,
+        'direct_cost': 0.000,
+        'labour': 0.000,
+        'central_labour': 0.000,
+        'central_expenses': 0.000,
+        'indirect_expenses': 0.000,
+        'overhead_charges': 0.000,
+        'material_return': 0
+    }
+
+    for row in data:
+        for key, value in total_row.items():
+            row_value = row.get(key) or 0.00
+            total_row[key] = value + row_value
+
+    total_row['project'] = 'Total:'
+
+    data.append(total_row)
 
 # def each_central_expense(row, central_expense):
 # 	'''Distribute Central Expenses for each project.'''
