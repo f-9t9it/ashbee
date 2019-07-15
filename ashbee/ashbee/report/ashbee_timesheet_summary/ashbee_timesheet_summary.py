@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils.data import date_diff
+from toolz import groupby
 
 
 def execute(filters=None):
@@ -102,35 +103,34 @@ def get_columns():
 
 
 def get_data(filters):
-	calendar_days = date_diff(
-		filters.get('to_date'),
-		filters.get('from_date')
-	)
-
-	working_hours = (calendar_days + 1) * 8
+	# calendar_days = date_diff(
+	# 	filters.get('to_date'),
+	# 	filters.get('from_date')
+	# )
+	# working_hours = (calendar_days + 1) * 8
 
 	timesheets = frappe.db.sql("""
 		SELECT
 			employee, employee_name, 
-			sum(normal_hours) as normal_hours, sum(normal_cost) as normal_cost,
-			sum(ot1_hours) as ot1_hours, sum(ot1) as ot1,
-			sum(ot2_hours) as ot2_hours, sum(ot2) as ot2,
-			hourly_cost
+			normal_hours, normal_cost,
+			ot1_hours, ot1,
+			ot2_hours, ot2,
+			hourly_cost, status
 		FROM `tabBulk Timesheet Details`
 		WHERE 
 			DATE(start_date_time) BETWEEN %(from_date)s AND %(to_date)s
 			AND docstatus = 1
-		GROUP BY employee
 		ORDER BY idx
 	""", filters, as_dict=1)
 
-	basics = _get_employees_basic()
+	timesheets_data = _sum_employee_timesheets(
+		groupby('employee', timesheets)
+	)
 
-	_fill_employees_basic(timesheets, basics)
-	_fill_employees_absent(timesheets, working_hours)
-	_fill_employees_total(timesheets)
+	# _fill_employees_absent(timesheets_data)
+	_fill_employees_total(timesheets_data)
 
-	return timesheets
+	return timesheets_data
 
 
 def _get_employees_basic():
@@ -143,11 +143,10 @@ def _fill_employees_basic(timesheets, basics):
 		employee = timesheet.get('employee')
 		timesheet['basic'] = basics.get(employee)
 
-
-def _fill_employees_absent(timesheets, working_hours):
-	for timesheet in timesheets:
-		timesheet['absent_hours'] = timesheet.get('normal_hours') - working_hours
-		timesheet['absent'] = timesheet.get('hourly_cost') * timesheet.get('absent_hours')
+#
+# def _fill_employees_absent(timesheets):
+# 	for timesheet in timesheets:
+# 		timesheet['absent'] = timesheet.get('hourly_cost') * timesheet.get('absent_hours')
 
 
 def _fill_employees_total(timesheets):
@@ -174,3 +173,64 @@ def _fill_totals(data):
 			total_row[key] = value + row[key]
 
 	data.append(total_row)
+
+
+def _sum_employee_timesheets(employee_timesheets):
+	sorted_keys = sorted(employee_timesheets.keys())
+
+	timesheets_data = []
+
+	for employee in sorted_keys:
+		timesheets = employee_timesheets[employee]
+
+		timesheet_row = reduce(
+			_sum_timesheets,
+			timesheets,
+			_new_timesheet_row()
+		)
+
+		first_timesheet = timesheets[0]
+
+		timesheet_row['employee'] = first_timesheet.get('employee')
+		timesheet_row['employee_name'] = first_timesheet.get('employee_name')
+
+		timesheets_data.append(timesheet_row)
+
+	return timesheets_data
+
+
+def _sum_timesheets(_, timesheet):
+	compute_fields = [
+		'normal_hours',
+		'ot1_hours',
+		'ot2_hours',
+		'normal_cost',
+		'ot1',
+		'ot2',
+		'absent_hours',
+		'absent'
+	]
+
+	if timesheet.status == 'Absent':
+		timesheet['normal_hours'] = 0
+		timesheet['absent_hours'] = 8
+		timesheet['absent'] = 8 * timesheet.get('hourly_cost')
+
+	for field in compute_fields:
+		timesheet_value = timesheet.get(field) or 0
+		_[field] = _.get(field) + timesheet_value
+
+	return _
+
+
+def _new_timesheet_row():
+	return {
+		'normal_hours': 0,
+		'ot1_hours': 0,
+		'ot2_hours': 0,
+		'absent_hours': 0,
+		'normal_cost': 0.00,
+		'ot1': 0.00,
+		'ot2': 0.00,
+		'absent': 0.00
+	}

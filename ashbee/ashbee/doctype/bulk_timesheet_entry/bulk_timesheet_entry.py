@@ -95,6 +95,7 @@ class BulkTimesheetEntry(Document):
 
     def _validate_costs(self):
         for detail in self.details:
+            _set_zero_hours_for_absent(detail)
             _validate_cost_details(detail)
             _calculate_cost_details(detail)
 
@@ -193,3 +194,8 @@ def _validate_cost_details(detail):
         detail.ot1_hours = float(detail.ot1_hours)
     if isinstance(detail.ot2_hours, unicode):
         detail.ot2_hours = float(detail.ot2_hours)
+
+
+def _set_zero_hours_for_absent(detail):
+    if detail.status == 'Absent':
+        detail.normal_hours = 0
