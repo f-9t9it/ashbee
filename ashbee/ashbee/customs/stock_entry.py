@@ -95,13 +95,14 @@ def _cancel_central_entry(doc):
 
 def _set_central_entry(doc):
     central_project = frappe.db.get_single_value('Ashbee Settings', 'central_project')
-    if doc.purpose == 'Material Issue' and doc.ashbee_production_issue:
+    if doc.purpose == 'Material Issue' and not doc.ashbee_central_entry:
         if doc.project == central_project:
             central_entry = _create_central_entry(doc)
             central_entry.submit()
 
 
 def _create_central_entry(doc):
+    # TODO: use the create_central_entry from utils.py
     return frappe.get_doc({
         'doctype': 'Central Entry',
         'posting_date': doc.posting_date,

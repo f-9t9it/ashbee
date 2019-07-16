@@ -12,6 +12,9 @@ def new_column(label, fieldname, fieldtype, width, options=None):
     :return:
     """
     column = {"label": _(label), "fieldname": fieldname, "fieldtype": fieldtype, "width": width}
+
+    print(column)
+
     if options:
         column.update({'options': options})
     return column

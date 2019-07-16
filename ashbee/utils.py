@@ -160,6 +160,16 @@ def get_color_variants():
     return {variant['parent']: variant['attribute_value'] for variant in variants}
 
 
+def create_central_entry(stock_entry):
+    return frappe.get_doc({
+        'doctype': 'Central Entry',
+        'voucher_type': 'Stock Entry',
+        'voucher_no': stock_entry.get('name'),
+        'posting_date': stock_entry.get('posting_date'),
+        'allocation': stock_entry.get('total_amount')
+    }).insert()
+
+
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
     projects = {}
 
