@@ -2,7 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Ashbee Settings', {
-	refresh: function(frm) {
-
+	create_central_entries: function(frm) {
+		frm.call({
+			doc: frm.doc,
+			method: 'create_central_entries',
+			callback: function(r) {
+				console.log(r);
+			}
+		});
 	}
 });
