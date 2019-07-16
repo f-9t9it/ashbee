@@ -24,7 +24,10 @@ def stock_entry_cancel(doc, method):
 
 
 def _check_receipt_existed(doc):
-    validate_material_issue = frappe.db.get_single_value('Ashbee Settings')
+    validate_material_issue = frappe.db.get_single_value(
+        'Ashbee Settings',
+        'validate_material_issue'
+    )
 
     if not validate_material_issue:
         return
@@ -72,6 +75,11 @@ def _extract_attribute_value(attribute_value):
 
 def _check_item_already_issued(doc):
     if not doc.ashbee_is_return:
+        return
+
+    validate_material_return = frappe.db.get_single_value('Ashbee Settings', 'validate_material_return')
+
+    if not validate_material_return:
         return
 
     for item in doc.items:
