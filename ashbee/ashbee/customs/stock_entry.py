@@ -77,6 +77,11 @@ def _check_item_already_issued(doc):
     if not doc.ashbee_is_return:
         return
 
+    validate_material_return = frappe.db.get_single_value('Ashbee Settings', 'validate_material_return')
+
+    if not validate_material_return:
+        return
+
     for item in doc.items:
         sle = frappe.db.sql("""
             SELECT count(*) AS items_count FROM `tabStock Ledger Entry` AS sle
