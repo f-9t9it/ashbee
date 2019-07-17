@@ -116,13 +116,13 @@ def get_data(filters):
     costs_by_projects = itertools.groupby(data, key=keyfunc)
 
     for project, costs in costs_by_projects:
+        if project == '':
+            continue
+
         project_data = {}
 
         for cost in costs:
             project_data.update(cost)
-
-        if project is None:
-            project_data.update({'project': 'Other Projects'})
 
         res_data.append(project_data)
 
