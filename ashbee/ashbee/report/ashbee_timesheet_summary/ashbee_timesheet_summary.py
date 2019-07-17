@@ -4,8 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils.data import date_diff
 from toolz import groupby
+
+from ashbee.helpers import round_off_rows
 
 
 def execute(filters=None):
@@ -14,6 +15,14 @@ def execute(filters=None):
 
 	if data:
 		_fill_totals(data)
+
+		round_off_rows(data, [
+			'normal_cost',
+			'ot1',
+			'ot2',
+			'absent',
+			'total'
+		])
 
 	return columns, data
 
