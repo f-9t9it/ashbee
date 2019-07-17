@@ -44,11 +44,20 @@ frappe.ui.form.on('Stock Entry', {
 	},
 	naming_series: function(frm) {
 		const series = ['MI-.YY.-.#####', 'MR-.YY.-.#####'];
+
 		frm.set_df_property(
 			'project',
 			'reqd',
 			series.includes(frm.doc.naming_series) ? 1 : 0
 		);
+
+		frm.set_df_property(
+			'ashbee_project_ref',
+			'hidden',
+			series.includes(frm.doc.naming_series) ? 1 : 0
+		);
+
+		_setup_project_field(frm);
 	},
 	ashbee_issue_items: function(frm) {
 		var args = {"stock_entry":frm.doc.ashbee_issue_items};
@@ -108,7 +117,24 @@ var extract_ashbee_attribute_value = function(ashbee_attribute_value){
 };
 
 
-var _set_ashbee_finished_item = function(frm, cdt, cdn){
+var _setup_project_field = function(frm) {
+	const series = ['MTSOUT-.YY.-.#####', 'MTSIN-.YY.-.#####'];
+
+	frm.set_df_property(
+		'project',
+		'hidden',
+		series.includes(frm.doc.naming_series) ? 1 : 0
+	);
+
+	frm.set_df_property(
+		'ashbee_project_ref',
+		'reqd',
+		series.includes(frm.doc.naming_series) ? 1 : 0
+	);
+
+};
+
+var _set_ashbee_finished_item = function(frm, cdt, cdn) {
 	var child = locals[cdt][cdn];
 	child.ashbee_finished_item = "";
 
