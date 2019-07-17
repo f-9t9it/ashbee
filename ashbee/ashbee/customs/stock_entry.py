@@ -9,6 +9,7 @@ from ashbee.utils import get_central_entry
 def stock_entry_save(doc, method):
     _check_receipt_existed(doc)
     _set_finished_items(doc)
+    _set_total_weight(doc)
     if doc.naming_series == "SE-PI-.#####":
         any(_set_item_recipient_task_color_coating(item) for item in doc.items)
 
@@ -47,6 +48,13 @@ def _check_receipt_existed(doc):
 def _set_finished_items(doc):
     for item in doc.items:
         _set_finished_item(item)
+
+
+def _set_total_weight(doc):
+    total_weight = 0.00
+    for item in doc.items:
+        total_weight = total_weight + float(item.item_weight)
+    doc.ashbee_total_weight = total_weight
 
 
 def _set_finished_item(item):
