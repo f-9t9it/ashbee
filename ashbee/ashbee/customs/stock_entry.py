@@ -336,3 +336,13 @@ def get_issue_items(**kwargs):
         data.append(new_entry_item)
 
     return data
+
+
+@frappe.whitelist()
+def get_attribute_values_by_name(name):
+    item_attribute = frappe.db.sql("""
+        SELECT attribute_value, abbr
+        FROM `tabItem Attribute Value`
+        WHERE name=%s
+    """, name, as_dict=1)
+    return item_attribute[0] if item_attribute else None
