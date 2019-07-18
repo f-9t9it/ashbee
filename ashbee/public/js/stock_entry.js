@@ -2,9 +2,14 @@ frappe.provide('ashbee.stock');
 
 frappe.ui.form.on('Stock Entry', {
 	onload: function(frm) {
+		frm.set_query("ashbee_attribute_fetch", "items", function(doc, cdt, cdn) {
+			var attribute_type = locals[cdt][cdn].ashbee_attribute_type;
+			return { filters: { parent: attribute_type } };
+		});
 		frm.set_query("item_code", "items", function() {
 			return { query: "ashbee.queries.item_query" };
 		});
+		frm.set_df_property("ashbee_attribute_fetch", "ignore_link_validation", 1, frm.doc.name, "items");
 	},
 	setup: function(frm) {
 		frm.set_query("ashbee_issue_items", function() {
@@ -44,11 +49,20 @@ frappe.ui.form.on('Stock Entry', {
 	},
 	naming_series: function(frm) {
 		const series = ['MI-.YY.-.#####', 'MR-.YY.-.#####'];
+
 		frm.set_df_property(
 			'project',
 			'reqd',
 			series.includes(frm.doc.naming_series) ? 1 : 0
 		);
+
+		frm.set_df_property(
+			'ashbee_project_ref',
+			'hidden',
+			series.includes(frm.doc.naming_series) ? 1 : 0
+		);
+
+		_setup_project_field(frm);
 	},
 	ashbee_issue_items: function(frm) {
 		var args = {"stock_entry":frm.doc.ashbee_issue_items};
@@ -85,6 +99,9 @@ frappe.ui.form.on('Stock Entry Detail', {
 	ashbee_attribute_type: function(frm, cdt, cdn) {
 		ashbee.populate_attribute_values(frm, cdt, cdn);
 	},
+	ashbee_attribute_fetch: function(frm, cdt, cdn) {
+		_set_attribute_value(frm, cdt, cdn);
+	},
 	ashbee_attribute_value: function(frm, cdt, cdn) {
 		_set_ashbee_finished_item(frm, cdt, cdn);
 	},
@@ -108,7 +125,49 @@ var extract_ashbee_attribute_value = function(ashbee_attribute_value){
 };
 
 
-var _set_ashbee_finished_item = function(frm, cdt, cdn){
+var _set_attribute_value = function(frm, cdt, cdn) {
+	var child = locals[cdt][cdn];
+
+	frappe.call({
+		method: "ashbee.ashbee.customs.stock_entry.get_attribute_values_by_name",
+		args: { name: child.ashbee_attribute_fetch },
+		callback: function(r) {
+			if(r.message) {
+				const { attribute_value, abbr } = r.message;
+
+				if (child.ashbee_attribute_type === "Colour") {
+					child.ashbee_attribute_value = `${abbr} | ${attribute_value}`;
+				}
+				if (child.ashbee_attribute_type === "Length") {
+					child.ashbee_attribute_value = `${attribute_value} | ${attribute_value}`;
+				}
+
+				refresh_field("ashbee_attribute_value", child.name, "items");
+			}
+		}
+	});
+};
+
+
+var _setup_project_field = function(frm) {
+	const series = ['MTSOUT-.YY.-.#####', 'MTSIN-.YY.-.#####'];
+
+	frm.set_df_property(
+		'project',
+		'hidden',
+		series.includes(frm.doc.naming_series) ? 1 : 0
+	);
+
+	frm.set_df_property(
+		'ashbee_project_ref',
+		'reqd',
+		series.includes(frm.doc.naming_series) ? 1 : 0
+	);
+
+};
+
+
+var _set_ashbee_finished_item = function(frm, cdt, cdn) {
 	var child = locals[cdt][cdn];
 	child.ashbee_finished_item = "";
 

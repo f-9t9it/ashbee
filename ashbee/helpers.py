@@ -18,3 +18,10 @@ def new_column(label, fieldname, fieldtype, width, options=None):
     if options:
         column.update({'options': options})
     return column
+
+
+def round_off_rows(data, fields, decimals=3):
+    for row in data:
+        for field in fields:
+            rounded = round(row.get(field), decimals)
+            row[field] = rounded

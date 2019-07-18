@@ -9,6 +9,7 @@ from ashbee.utils import get_central_entry
 def stock_entry_save(doc, method):
     _check_receipt_existed(doc)
     _set_finished_items(doc)
+    _set_total_weight(doc)
     if doc.naming_series == "SE-PI-.#####":
         any(_set_item_recipient_task_color_coating(item) for item in doc.items)
 
@@ -47,6 +48,13 @@ def _check_receipt_existed(doc):
 def _set_finished_items(doc):
     for item in doc.items:
         _set_finished_item(item)
+
+
+def _set_total_weight(doc):
+    total_weight = 0.00
+    for item in doc.items:
+        total_weight = total_weight + float(item.item_weight)
+    doc.ashbee_total_weight = total_weight
 
 
 def _set_finished_item(item):
@@ -328,3 +336,13 @@ def get_issue_items(**kwargs):
         data.append(new_entry_item)
 
     return data
+
+
+@frappe.whitelist()
+def get_attribute_values_by_name(name):
+    item_attribute = frappe.db.sql("""
+        SELECT attribute_value, abbr
+        FROM `tabItem Attribute Value`
+        WHERE name=%s
+    """, name, as_dict=1)
+    return item_attribute[0] if item_attribute else None

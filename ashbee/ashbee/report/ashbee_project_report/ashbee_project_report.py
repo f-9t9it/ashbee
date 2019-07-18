@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import itertools
 from frappe import _
+from ashbee.helpers import round_off_rows
 from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_all_material_issues,\
     get_all_indirect_costs, get_central_expenses, get_central_labour, get_all_material_returns
 
@@ -14,6 +15,17 @@ def execute(filters=None):
     if data:
         _fill_rows_total(data)
         _fill_totals(data)
+
+        round_off_rows(data, [
+            'material_issue',
+            'direct_cost',
+            'labour',
+            'central_labour',
+            'central_expenses',
+            'indirect_expenses',
+            'overhead_charges',
+            'total'
+        ])
 
     return columns, data
 
@@ -104,13 +116,13 @@ def get_data(filters):
     costs_by_projects = itertools.groupby(data, key=keyfunc)
 
     for project, costs in costs_by_projects:
+        if project == '':
+            continue
+
         project_data = {}
 
         for cost in costs:
             project_data.update(cost)
-
-        if project is None:
-            project_data.update({'project': 'Other Projects'})
 
         res_data.append(project_data)
 

@@ -31,6 +31,7 @@ def get_all_material_issues(filters):
         AND project != %(project)s
         AND purpose = 'Material Issue'
         AND ashbee_is_return = 0
+        AND ashbee_production_issue = 0
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         GROUP BY project
     """, filters, as_dict=1)
