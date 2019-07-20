@@ -15,7 +15,8 @@ class CentralExpense(Document):
 		self.items = []
 		self.projects = []
 
-		date_range = get_month_date_range(self.posting_date)
+		# date_range = get_month_date_range(self.posting_date)
+		date_range = {'from_date': self.from_date, 'to_date': self.to_date}
 
 		central_entries = _get_central_entries(date_range)
 		self._set_central_entries(central_entries)
