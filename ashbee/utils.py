@@ -28,7 +28,7 @@ def get_all_material_issues(filters):
         SELECT project, SUM(total_outgoing_value) AS sum_total_outgoing_value
         FROM `tabStock Entry`
         WHERE docstatus = 1
-        AND project != %(project)s
+        AND (project != %(project)s AND project<>'')
         AND purpose = 'Material Issue'
         AND ashbee_is_return = 0
         AND ashbee_production_issue = 0
@@ -43,7 +43,7 @@ def get_all_timesheet_details(filters):
         SELECT project, SUM(costing_amount) AS sum_costing_amount
         FROM `tabTimesheet Detail`
         WHERE docstatus = 1
-        AND project != %(project)s
+        AND (project != %(project)s AND project<>'')
         AND DATE(from_time) <= %(to_date)s
         AND DATE(to_time) >= %(from_date)s
         GROUP BY project
