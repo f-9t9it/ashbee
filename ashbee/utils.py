@@ -171,6 +171,19 @@ def create_central_entry(stock_entry):
     }).insert()
 
 
+def get_central_costs(filters):
+    res = frappe.db.sql("""
+        SELECT cep.project, cep.allocation, cep.labor_allocation
+        FROM `tabCentral Expense Project` AS cep
+        INNER JOIN `tabCentral Expense` AS ce
+        ON cep.parent = ce.name
+        WHERE ce.docstatus = 1
+        AND ce.from_date <= %(to_date)s
+        AND ce.to_date >= %(from_date)s
+    """, filters, as_dict=True)
+    return res
+
+
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
     projects = {}
 

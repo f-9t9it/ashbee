@@ -6,7 +6,7 @@ import itertools
 from frappe import _
 from ashbee.helpers import round_off_rows
 from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_all_material_issues,\
-    get_all_indirect_costs, get_central_expenses, get_central_labour, get_all_material_returns
+    get_all_indirect_costs, get_all_material_returns, get_central_costs
 
 
 def execute(filters=None):
@@ -134,21 +134,54 @@ def get_data(filters):
     _sum_costs(res_data)
 
     # Add central formula
-    central_labour = get_central_labour(filters)
-    central_expenses = get_central_expenses(filters)
-    total_sum_costs = _sum_costs(res_data)
+    # central_labour = get_central_labour(filters)
+    # central_expenses = get_central_expenses(filters)
+    # total_sum_costs = _sum_costs(res_data)
 
-    _fill_central_fields(
-        res_data,
-        central_labour,
-        central_expenses,
-        total_sum_costs
+    central_costs = _group_centrals(
+        get_central_costs(filters)
     )
+
+    _fill_central_costs(res_data, central_costs)
+
+    # _fill_central_fields(
+    #     res_data,
+    #     central_labour,
+    #     central_expenses,
+    #     total_sum_costs
+    # )
 
     return res_data
 
 
+def _group_centrals(data):
+    centrals = {}
+
+    for row in data:
+        project = row.get('project')
+        cost = row.get('allocation')
+        labor = row.get('labor_allocation')
+
+        if not(project in centrals):
+            centrals[project] = {'cost': cost, 'labor': labor}
+        else:
+            total_cost = centrals[project].get('cost') + cost
+            total_labor = centrals[project].get('labor') + total_labor
+            centrals[project]['cost'] = total_cost
+            centrals[project]['labor'] = total_labor
+
+    return centrals
+
+
+def _fill_central_costs(data, central_costs):
+    for row in data:
+        project = row.get('project')
+        row['central_labour'] = central_costs[project].get('labor')
+        row['central_expenses'] = central_costs[project].get('cost')
+
+
 def _fill_central_fields(data, labour, expenses, sum_costs):
+    # TODO: deprecated
     if not labour:
         labour = 0.00
     if not expenses:
