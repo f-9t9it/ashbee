@@ -45,7 +45,7 @@ class IndirectCost(Document):
 			})
 
 	def _check_allocation(self):
-		total = reduce(lambda x, y: x.allocated + y.allocated, self.items)
+		total = reduce(lambda x, y: x + y.allocated, self.items, 0.00)
 
 		if total != self.allocation:
 			frappe.throw(_('Allocated values is not the same with allocated indirect expense'))
