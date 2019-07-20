@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from ashbee.utils import get_costs_by_projects, get_month_date_range
+from ashbee.utils import get_costs_by_projects
 
 from toolz import partial
 
@@ -61,6 +61,7 @@ def _get_central_entries(date_range):
 		SELECT name AS central_entry, voucher_type AS entry_type, allocation
 		FROM `tabCentral Entry`
 		WHERE posting_date BETWEEN %(from_date)s AND %(to_date)s
+		AND docstatus = 1
 	""", date_range, as_dict=1)
 
 
@@ -93,10 +94,11 @@ def _set_project_costing(items, cancel=False):
 		central_labor = _get_project_central_value(item.project, 'Timesheet')
 		central_cost = _get_project_central_value(item.project, 'Stock Entry')
 
-		allocated = item.allocated if not cancel else -item.allocated
+		allocation = item.allocation if not cancel else -item.allocation
+		labor_allocation = item.labor_allocation if not cancel else -item.labor_allocation
 
-		_set_project_central_value(item.project, 'Timesheet', central_labor + allocated)
-		_set_project_central_value(item.project, 'Stock Entry', central_cost + allocated)
+		_set_project_central_value(item.project, 'Timesheet', central_labor + labor_allocation)
+		_set_project_central_value(item.project, 'Stock Entry', central_cost + allocation)
 
 	frappe.db.commit()
 
