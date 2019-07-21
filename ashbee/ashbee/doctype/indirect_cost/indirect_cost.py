@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import math
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -12,6 +13,7 @@ from ashbee.utils import get_costs_by_projects
 
 class IndirectCost(Document):
 	def validate(self):
+		self._set_fraction_total()
 		if not self.items:
 			filters = {
 				'from_date': self.start_date,
@@ -33,6 +35,11 @@ class IndirectCost(Document):
 	def on_cancel(self):
 		self._update_project_indirect_cost(cancel=True)
 
+	def _set_fraction_total(self):
+		allocation = float(self.allocation)
+		fractional, rounded = math.modf(allocation)
+		self.fraction_total = fractional
+
 	def _allocate_items(self, projects):
 		# Get the sum of all material issues
 		total_mi_value = reduce(lambda x, y: x + y, projects.values())
@@ -47,7 +54,7 @@ class IndirectCost(Document):
 	def _check_allocation(self):
 		total = reduce(lambda x, y: x + y.allocated, self.items, 0.00)
 
-		if total != self.allocation:
+		if math.floor(total) != math.floor(self.allocation):
 			frappe.throw(_('Allocated values is not the same with allocated indirect expense'))
 
 	def _update_project_indirect_cost(self, cancel=False):
