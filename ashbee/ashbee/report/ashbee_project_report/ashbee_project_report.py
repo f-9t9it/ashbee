@@ -176,6 +176,10 @@ def _group_centrals(data):
 def _fill_central_costs(data, central_costs):
     for row in data:
         project = row.get('project')
+
+        row['central_labour'] = 0.00
+        row['central_expenses'] = 0.00
+
         if central_costs.get(project, None):
             row['central_labour'] = central_costs[project].get('labor')
             row['central_expenses'] = central_costs[project].get('cost')
