@@ -176,8 +176,9 @@ def _group_centrals(data):
 def _fill_central_costs(data, central_costs):
     for row in data:
         project = row.get('project')
-        row['central_labour'] = central_costs[project].get('labor')
-        row['central_expenses'] = central_costs[project].get('cost')
+        if project in central_costs:
+            row['central_labour'] = central_costs[project].get('labor')
+            row['central_expenses'] = central_costs[project].get('cost')
 
 
 def _fill_central_fields(data, labour, expenses, sum_costs):
