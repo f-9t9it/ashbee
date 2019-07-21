@@ -81,8 +81,11 @@ def _get_timesheet_details(filters):
 	timesheet_details = frappe.db.sql("""
 		SELECT sum(costing_amount) AS rate
 		FROM `tabTimesheet Detail`
-		WHERE project=%(project)s
-		AND DATE(from_time) BETWEEN %(from_date)s AND %(to_date)s
+		INNER JOIN `tabTimesheet`
+		ON `tabTimesheet Detail`.parent = `tabTimesheet`.name
+		WHERE `tabTimesheet Detail`.project=%(project)s
+		AND `tabTimesheet Detail`.docstatus=1
+		AND start_date BETWEEN %(from_date)s AND %(to_date)s
 	""", filters, as_dict=1)
 
 	if timesheet_details:
