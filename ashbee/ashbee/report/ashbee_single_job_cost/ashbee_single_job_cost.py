@@ -22,7 +22,8 @@ def get_columns():
 		new_column("Rate", "rate", "Currency", 90),
 		new_column("Material+Direct", "material_direct", "Currency", 120),
 		new_column("Labor Expenses", "labor_expenses", "Currency", 120),
-		new_column("Central", "central", "Currency", 120),
+		new_column("Central Labour", "central_labour", "Currency", 120),
+		new_column("Central Expenses", "central_expenses", "Currency", 120),
 		new_column("Indirect", "indirect", "Currency", 120)
 	]
 
@@ -30,12 +31,14 @@ def get_columns():
 def get_data(filters):
 	data = []
 
+	# TODO: know if project_expenses is by date range filters(?)
 	project_expenses = _get_project_expenses(filters)
 	data.append({
-		'material_direct': project_expenses['material'] + project_expenses['direct'],
-		'labor_expenses': project_expenses['labor'],
-		'central': project_expenses['central_labor'] + project_expenses['central_cost'],
-		'indirect': project_expenses['indirect_cost']
+		'material_direct': project_expenses.get('material') + project_expenses.get('direct'),
+		'labor_expenses': project_expenses.get('labor'),
+		'central_labour': project_expenses.get('central_labour'),
+		'central_expenses': project_expenses.get('central_expenses'),
+		'indirect': project_expenses.get('indirect_cost')
 	})
 
 	entries = [
@@ -55,8 +58,8 @@ def _get_project_expenses(filters):
 			total_costing_amount AS labor,
 			(ashbee_total_direct_cost + total_purchase_cost) AS direct,
 			total_consumed_material_cost AS material,
-			ashbee_total_central_cost AS central_cost,
-			ashbee_total_central_labor AS central_labor,
+			ashbee_total_central_cost AS central_expenses,
+			ashbee_total_central_labor AS central_labour,
 			ashbee_total_indirect_cost AS indirect_cost
 		FROM `tabProject`
 		WHERE name=%(project)s
