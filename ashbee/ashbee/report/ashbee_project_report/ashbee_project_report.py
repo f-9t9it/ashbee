@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import itertools
+import frappe
 from frappe import _
 from frappe.utils.data import formatdate, now_datetime
 from ashbee.helpers import round_off_rows
@@ -32,11 +33,19 @@ def execute(filters=None):
             _get_print_details_row(filters)
         )
 
+        _fill_rows_project_code(data)
+
     return columns, data
 
 
 def get_columns(filters):
     return [
+        {
+            "label": _("Project Code"),
+            "fieldname": "project_code",
+            "fieldtype": "Data",
+            "width": 100
+        },
         {
             "label": _("Project"),
             "fieldname": "project",
@@ -288,3 +297,16 @@ def _fill_rows_total(data):
 
     for row in data:
         row['total'] = sum([row.get(field) for field in compute_fields])
+
+
+def _fill_rows_project_code(data):
+    filters = {'is_active': 'Yes'}
+    fields = ['name', 'ashbee_project_code']
+
+    projects = frappe.get_all('Project', filters=filters, fields=fields)
+    project_codes = {project.get('name'): project.get('ashbee_project_code') for project in projects}
+
+    for row in data:
+        project = row.get('project')
+        if project_codes.get(project, None):
+            row['project_code'] = project_codes[project]
