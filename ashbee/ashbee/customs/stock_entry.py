@@ -10,7 +10,10 @@ def stock_entry_save(doc, method):
     check_central_expense(doc.posting_date)
     _check_receipt_existed(doc)
     _set_finished_items(doc)
+
+    _set_item_weight(doc)
     _set_total_weight(doc)
+
     if doc.naming_series == "SE-PI-.#####":
         any(_set_item_recipient_task_color_coating(item) for item in doc.items)
 
@@ -49,6 +52,25 @@ def _check_receipt_existed(doc):
 def _set_finished_items(doc):
     for item in doc.items:
         _set_finished_item(item)
+
+
+def _set_item_weight(doc):
+    for item in doc.items:
+        weight = frappe.db.get_value('Item', item.item_code, 'ashbee_weight')
+        length = _get_item_length(item.item_code)
+        item.item_weight = weight * length
+
+
+def _get_item_length(item):
+    filters = {'parent': item, 'attribute': 'Length'}
+
+    item_length = frappe.db.sql("""
+        SELECT attribute_value
+        FROM `tabItem Variant Attribute`
+        WHERE parent = %(parent)s AND attribute = %(attribute)s
+    """, filters, as_list=True)
+
+    return float(item_length[0][0]) if item_length else 0.00
 
 
 def _set_total_weight(doc):
