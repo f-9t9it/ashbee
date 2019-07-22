@@ -122,11 +122,18 @@ def get_costs_by_projects(filters):
     material_issues = get_all_material_issues(filters)
     timesheet_details = get_all_timesheet_details(filters)
 
-    return _sum_costs_by_projects(
+    projects = _sum_costs_by_projects(
         direct_costs,
         material_issues,
         timesheet_details
     )
+
+    excluded_projects = get_excluded_projects()
+
+    for excluded_project in excluded_projects:
+        projects.pop(excluded_project, None)
+
+    return projects
 
 
 def get_month_date_range(posting_date):
@@ -182,6 +189,11 @@ def get_central_costs(filters):
         AND ce.to_date >= %(from_date)s
     """, filters, as_dict=True)
     return res
+
+
+def get_excluded_projects():
+    projects = frappe.get_all('Ashbee Settings Project', fields=['project'])
+    return [project.get('project') for project in projects]
 
 
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
