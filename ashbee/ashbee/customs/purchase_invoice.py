@@ -26,6 +26,11 @@ def _cancel_central_entry(doc):
 
 
 def _create_central_entry(doc, item):
+    central_entry = frappe.db.get_single_value('Ashbee Settings', 'central_project')
+
+    if item.project != central_entry:
+        return
+
     central_entry = frappe.get_doc({
         'doctype': 'Central Entry',
         'posting_date': doc.posting_date,
