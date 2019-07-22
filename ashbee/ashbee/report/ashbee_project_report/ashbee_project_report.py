@@ -12,7 +12,6 @@ from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_al
 
 def execute(filters=None):
     columns, data = get_columns(filters), get_data(filters)
-    res_data = []
 
     if data:
         _fill_rows_total(data)
@@ -64,14 +63,14 @@ def get_columns(filters):
             "width": 120
         },
         {
-            "label": _("Central Labour"),
-            "fieldname": "central_labour",
+            "label": _("Central Expenses"),
+            "fieldname": "central_expenses",
             "fieldtype": "Currency",
             "width": 120
         },
         {
-            "label": _("Central Expenses"),
-            "fieldname": "central_expenses",
+            "label": _("Central Labour"),
+            "fieldname": "central_labour",
             "fieldtype": "Currency",
             "width": 120
         },
