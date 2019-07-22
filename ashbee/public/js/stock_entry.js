@@ -9,7 +9,6 @@ frappe.ui.form.on('Stock Entry', {
 		frm.set_query("item_code", "items", function() {
 			return { query: "ashbee.queries.item_query" };
 		});
-		frm.set_df_property("ashbee_attribute_fetch", "ignore_link_validation", 1, frm.doc.name, "items");
 	},
 	setup: function(frm) {
 		frm.set_query("ashbee_issue_items", function() {
