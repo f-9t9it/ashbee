@@ -25,6 +25,24 @@ def patch_trailing_space():
     frappe.db.commit()
 
 
+def patch_attribute_value():
+    attrs = {
+        '076': 'RAL-9003',
+        '079': 'RAL-7004',
+        '028': 'RAL-9005 Black'
+    }
+
+    for abbr, value in attrs.items():
+        print('Processing {}...'.format(abbr))
+        frappe.db.sql("""
+            UPDATE `tabItem Attribute Value`
+            SET attribute_value = %(attribute_value)s
+            WHERE abbr = %(abbr)s
+        """, {'abbr': abbr, 'attribute_value': value})
+
+    frappe.db.commit()
+
+
 def generate_central_entries_from_purchase_invoices():
     central_project = frappe.db.get_single_value('Ashbee Settings', 'central_project')
 
