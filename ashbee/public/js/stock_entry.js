@@ -51,12 +51,6 @@ frappe.ui.form.on('Stock Entry', {
 		const series = ['MI-.YY.-.#####', 'MR-.YY.-.#####'];
 
 		frm.set_df_property(
-			'project',
-			'reqd',
-			series.includes(frm.doc.naming_series) ? 1 : 0
-		);
-
-		frm.set_df_property(
 			'ashbee_project_ref',
 			'hidden',
 			series.includes(frm.doc.naming_series) ? 1 : 0
@@ -159,11 +153,10 @@ var _setup_project_field = function(frm) {
 	);
 
 	frm.set_df_property(
-		'ashbee_project_ref',
+		'project',
 		'reqd',
-		series.includes(frm.doc.naming_series) ? 1 : 0
+		frm.doc.naming_series === 'MI-.YY.-.#####' ? 1 : 0
 	);
-
 };
 
 

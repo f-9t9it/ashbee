@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import itertools
 from frappe import _
+from frappe.utils.data import formatdate, now_datetime
 from ashbee.helpers import round_off_rows
 from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_all_material_issues,\
     get_all_indirect_costs, get_all_material_returns, get_central_costs
@@ -26,6 +27,10 @@ def execute(filters=None):
             'overhead_charges',
             'total'
         ])
+
+        data.extend(
+            _get_print_details_row(filters)
+        )
 
     return columns, data
 
@@ -58,14 +63,14 @@ def get_columns(filters):
             "width": 120
         },
         {
-            "label": _("Central Labour"),
-            "fieldname": "central_labour",
+            "label": _("Central Expenses"),
+            "fieldname": "central_expenses",
             "fieldtype": "Currency",
             "width": 120
         },
         {
-            "label": _("Central Expenses"),
-            "fieldname": "central_expenses",
+            "label": _("Central Labour"),
+            "fieldname": "central_labour",
             "fieldtype": "Currency",
             "width": 120
         },
@@ -152,6 +157,19 @@ def get_data(filters):
     # )
 
     return res_data
+
+
+def _get_print_details_row(filters):
+    from_date = formatdate(filters.get('from_date'), 'dd-mm-yyyy')
+    to_date = formatdate(filters.get('to_date'), 'dd-mm-yyyy')
+    printed_on = now_datetime().strftime('%d-%m-%Y %H:%M:%S')
+
+    return [
+        {},
+        {'project': 'From Date: {}'.format(from_date)},
+        {'project': 'To Date: {}'.format(to_date)},
+        {'project': 'Printed On: {}'.format(printed_on)}
+    ]
 
 
 def _group_centrals(data):
