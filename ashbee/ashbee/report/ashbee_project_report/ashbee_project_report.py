@@ -128,9 +128,10 @@ def get_data(filters):
 
     data = sorted(data, key=keyfunc)
     costs_by_projects = itertools.groupby(data, key=keyfunc)
+    excluded_projects = _get_excluded_projects()
 
     for project, costs in costs_by_projects:
-        if project == '':
+        if project in excluded_projects or project == '':
             continue
 
         project_data = {}
@@ -310,3 +311,8 @@ def _fill_rows_project_code(data):
         project = row.get('project')
         if project_codes.get(project, None):
             row['project_code'] = project_codes[project]
+
+
+def _get_excluded_projects():
+    projects = frappe.get_all('Ashbee Settings Project', fields=['project'])
+    return [project.get('project') for project in projects]
