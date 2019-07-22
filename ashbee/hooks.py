@@ -120,7 +120,8 @@ fixtures = [
                     "Stock Entry Detail-item_weight",
                     "Stock Entry-ashbee_total_weight",
                     "Stock Entry-ashbee_project_ref",
-                    "Stock Entry Detail-ashbee_attribute_fetch"
+                    "Stock Entry Detail-ashbee_attribute_fetch",
+                    "Purchase Invoice Item-ashbee_central_entry"
                 ]
             ]
         ]
