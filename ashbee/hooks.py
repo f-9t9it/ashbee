@@ -138,7 +138,8 @@ fixtures = [
                     "Material Request-naming_series-options",
                     "Stock Entry-purpose-options",
                     "Material Request-material_request_type-default",
-                    "Batch-expiry_date-bold"
+                    "Batch-expiry_date-bold",
+                    "Item Attribute Value-search_fields"
                 ]
             ]
         ]
