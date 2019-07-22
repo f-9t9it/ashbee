@@ -1,4 +1,9 @@
 import frappe
+from ashbee.utils import check_central_expense
+
+
+def purchase_invoice_save(doc, method):
+    check_central_expense(doc.posting_date)
 
 
 def purchase_invoice_submit(doc, method):

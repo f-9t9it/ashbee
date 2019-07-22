@@ -211,6 +211,7 @@ doc_events = {
         "validate": "ashbee.ashbee.customs.project.project_save"
     },
     "Purchase Invoice": {
+        "validate": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_save",
         "on_submit": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_submit",
         "on_cancel": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_cancel"
     }

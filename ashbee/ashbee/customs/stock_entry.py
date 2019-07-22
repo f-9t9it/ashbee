@@ -3,10 +3,11 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from erpnext.controllers.item_variant import get_variant, create_variant
-from ashbee.utils import get_central_entry
+from ashbee.utils import get_central_entry, check_central_expense
 
 
 def stock_entry_save(doc, method):
+    check_central_expense(doc.posting_date)
     _check_receipt_existed(doc)
     _set_finished_items(doc)
     _set_total_weight(doc)
