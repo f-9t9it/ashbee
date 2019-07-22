@@ -80,11 +80,11 @@ def _append_and_sum_central_entry(central_expense, x, y):
 	entry_type = y['entry_type']
 
 	if entry_type == 'Stock Entry':
-		labor_allocation = x['labor_allocation'] + allocation
-		x['labor_allocation'] = labor_allocation
-	elif entry_type == 'Timesheet':
 		cost_allocation = x['cost_allocation'] + allocation
 		x['cost_allocation'] = cost_allocation
+	elif entry_type == 'Timesheet':
+		labor_allocation = x['labor_allocation'] + allocation
+		x['labor_allocation'] = labor_allocation
 
 	return x
 
