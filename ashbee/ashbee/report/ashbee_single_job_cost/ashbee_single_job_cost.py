@@ -40,22 +40,23 @@ def get_columns():
         new_column("Labor Expenses", "labor_expenses", "Currency", 120),
         new_column("Central Labour", "central_labour", "Currency", 120),
         new_column("Central Expenses", "central_expenses", "Currency", 120),
-        new_column("Indirect", "indirect", "Currency", 120)
+        new_column("Indirect", "indirect", "Currency", 120),
+        new_column("Overhead Charges", "overhead_charges", "Currency", 120)
     ]
 
 
 def get_data(filters):
     data = []
+    overhead_percent = filters.get('overhead_percent') / 100.00
 
     # TODO: know if project_expenses is by date range filters(?)
     project_expenses = _get_project_expenses(filters)
-    data.append({
-        'material_direct': project_expenses.get('material') + project_expenses.get('direct'),
-        'labor_expenses': project_expenses.get('labor'),
-        'central_labour': project_expenses.get('central_labour'),
-        'central_expenses': project_expenses.get('central_expenses'),
-        'indirect': project_expenses.get('indirect_cost')
-    })
+    project_expenses['overhead_charges'] = _fill_overhead_charges(
+        project_expenses,
+        overhead_percent
+    )
+
+    data.append(project_expenses)
 
     entries = [
         _get_stock_ledger_entries(filters)
@@ -70,12 +71,12 @@ def get_data(filters):
 def _get_project_expenses(filters):
     return frappe.db.sql("""
         SELECT 
-            total_costing_amount AS labor,
-            (ashbee_total_direct_cost + total_purchase_cost) AS direct,
-            total_consumed_material_cost AS material,
+            total_costing_amount AS labor_expenses,
+            (total_consumed_material_cost + ashbee_total_direct_cost + total_purchase_cost)
+            AS material_direct,
             ashbee_total_central_cost AS central_expenses,
             ashbee_total_central_labor AS central_labour,
-            ashbee_total_indirect_cost AS indirect_cost
+            ashbee_total_indirect_cost AS indirect
         FROM `tabProject`
         WHERE name=%(project)s
     """, filters, as_dict=1)[0]
@@ -131,6 +132,14 @@ def _get_total_row(data, description='Total'):
         'qty': total_qty,
         'rate': total_rate
     }
+
+
+def _fill_overhead_charges(project_expenses, overhead_percent):
+    material_direct = project_expenses.get('material_direct')
+    labor_expenses = project_expenses.get('labor_expenses')
+    indirect = project_expenses.get('indirect')
+
+    return (material_direct + labor_expenses + indirect) * overhead_percent
 
 
 def _fill_blank(data):

@@ -2,15 +2,23 @@ const OVERHEAD_MULTIPLIER = 0.20;
 
 frappe.ui.form.on('Project', {
     refresh: function(frm) {
-        _set_overhead_charges(frm);
+        _hide_overhead_charges(frm);
+        // _set_overhead_charges(frm);
         _set_project_code_read_only(frm);
     }
 });
+
 
 var _set_project_code_read_only = function(frm) {
     if (_check_form_for_read_only(frm)) return;
     frm.set_df_property('ashbee_project_code', 'read_only', 1);
 };
+
+
+var _hide_overhead_charges = function(frm) {
+    frm.set_df_property('ashbee_total_overhead_charges', 'hidden', 1);
+};
+
 
 var _set_overhead_charges = function(frm) {
     const costs = [
