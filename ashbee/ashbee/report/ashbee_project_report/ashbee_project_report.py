@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils.data import formatdate, now_datetime
 from ashbee.helpers import round_off_rows
 from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_all_material_issues,\
-    get_all_indirect_costs, get_all_material_returns, get_central_costs
+    get_all_indirect_costs, get_all_material_returns, get_central_costs, get_excluded_projects
 
 
 def execute(filters=None):
@@ -128,9 +128,10 @@ def get_data(filters):
 
     data = sorted(data, key=keyfunc)
     costs_by_projects = itertools.groupby(data, key=keyfunc)
+    excluded_projects = get_excluded_projects()
 
     for project, costs in costs_by_projects:
-        if project == '':
+        if project in excluded_projects or project == '':
             continue
 
         project_data = {}

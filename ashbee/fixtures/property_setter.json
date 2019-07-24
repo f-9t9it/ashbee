@@ -118,5 +118,25 @@
   "property": "bold", 
   "property_type": "Check", 
   "value": "1"
+ }, 
+ {
+  "_assign": null, 
+  "_comments": null, 
+  "_liked_by": null, 
+  "_user_tags": null, 
+  "default_value": null, 
+  "doc_type": "Item Attribute Value", 
+  "docstatus": 0, 
+  "doctype": "Property Setter", 
+  "doctype_or_field": "DocType", 
+  "field_name": null, 
+  "modified": "2019-07-22 18:44:46.722868", 
+  "name": "Item Attribute Value-search_fields", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "property": "search_fields", 
+  "property_type": "Data", 
+  "value": "attribute_value, abbr"
  }
 ]

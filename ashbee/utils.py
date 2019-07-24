@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.utils.data import get_first_day, get_last_day
 
 
@@ -122,11 +123,18 @@ def get_costs_by_projects(filters):
     material_issues = get_all_material_issues(filters)
     timesheet_details = get_all_timesheet_details(filters)
 
-    return _sum_costs_by_projects(
+    projects = _sum_costs_by_projects(
         direct_costs,
         material_issues,
         timesheet_details
     )
+
+    excluded_projects = get_excluded_projects()
+
+    for excluded_project in excluded_projects:
+        projects.pop(excluded_project, None)
+
+    return projects
 
 
 def get_month_date_range(posting_date):
@@ -182,6 +190,33 @@ def get_central_costs(filters):
         AND ce.to_date >= %(from_date)s
     """, filters, as_dict=True)
     return res
+
+
+def get_excluded_projects():
+    projects = frappe.get_all('Ashbee Settings Project', fields=['project'])
+    return [project.get('project') for project in projects]
+
+
+def check_central_expense(posting_date):
+    central_expense = _get_central_expense(posting_date)
+
+    if central_expense:
+        frappe.throw(_('Unable to transact. This month is closed with Central Expense.'))
+
+
+def testing():
+    check_central_expense('2019-06-01')
+
+
+def _get_central_expense(posting_date):
+    central_expense = frappe.db.sql("""
+        SELECT name FROM `tabCentral Expense`
+        WHERE docstatus = 1
+        AND from_date <= %(posting_date)s
+        AND to_date >= %(posting_date)s
+    """, {'posting_date': posting_date}, as_dict=True)
+
+    return central_expense[0] if central_expense else None
 
 
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):

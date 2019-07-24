@@ -121,7 +121,8 @@ fixtures = [
                     "Stock Entry-ashbee_total_weight",
                     "Stock Entry-ashbee_project_ref",
                     "Stock Entry Detail-ashbee_attribute_fetch",
-                    "Purchase Invoice Item-ashbee_central_entry"
+                    "Purchase Invoice Item-ashbee_central_entry",
+                    "Stock Entry Detail-ashbee_item_weight"
                 ]
             ]
         ]
@@ -138,7 +139,8 @@ fixtures = [
                     "Material Request-naming_series-options",
                     "Stock Entry-purpose-options",
                     "Material Request-material_request_type-default",
-                    "Batch-expiry_date-bold"
+                    "Batch-expiry_date-bold",
+                    "Item Attribute Value-search_fields"
                 ]
             ]
         ]
@@ -209,6 +211,11 @@ doc_events = {
     },
     "Project": {
         "validate": "ashbee.ashbee.customs.project.project_save"
+    },
+    "Purchase Invoice": {
+        "validate": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_save",
+        "on_submit": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_submit",
+        "on_cancel": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_cancel"
     }
 }
 

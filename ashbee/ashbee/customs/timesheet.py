@@ -1,9 +1,10 @@
 import frappe
 from frappe.utils import flt
-from ashbee.utils import get_central_entry
+from ashbee.utils import get_central_entry, check_central_expense
 
 
 def timesheet_save(doc, d):
+    check_central_expense(doc.start_date)
     for detail in doc.time_logs:
         if not detail.billable:
             continue
