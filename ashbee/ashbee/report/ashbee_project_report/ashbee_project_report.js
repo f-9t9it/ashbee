@@ -28,10 +28,9 @@ frappe.query_reports["Ashbee Project Report"] = {
 		},
 		{
 			"fieldname":"overhead_percent",
-			"label": __("Calculate Overhead Charge"),
+			"label": __("Overhead Charge"),
 			"fieldtype": "Percent",
 			"default": 20
 		},
-
 	]
 }

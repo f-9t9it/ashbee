@@ -24,6 +24,12 @@ frappe.query_reports["Ashbee Single Job Cost"] = {
 			"fieldtype": "Link",
 			"options": "Project",
 			"reqd": 1
+		},
+		{
+			"fieldname": "overhead_percent",
+			"label": __("Overhead Charge"),
+			"fieldtype": "Percent",
+			"default": 20
 		}
 	]
 }
