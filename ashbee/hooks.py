@@ -117,7 +117,6 @@ fixtures = [
                     "Stock Entry-ashbee_dummy_items",
                     "Stock Entry-ashbee_material_issue",
                     "Stock Entry-ashbee_central_entry",
-                    "Stock Entry Detail-item_weight",
                     "Stock Entry-ashbee_total_weight",
                     "Stock Entry-ashbee_project_ref",
                     "Stock Entry Detail-ashbee_attribute_fetch",

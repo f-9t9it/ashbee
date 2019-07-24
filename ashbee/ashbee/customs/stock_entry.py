@@ -58,8 +58,7 @@ def _set_item_weight(doc):
     for item in doc.items:
         weight = frappe.db.get_value('Item', item.item_code, 'ashbee_weight')
         length = _get_item_length(item.item_code)
-        item.item_weight = weight * length
-        item.ashbee_item_weight = item.item_weight * item.qty
+        item.ashbee_item_weight = item.qty * (weight * length)
 
 
 def _get_item_length(item):
