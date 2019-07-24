@@ -11,7 +11,19 @@ def execute(filters=None):
     columns, data = get_columns(), get_data(filters)
 
     if data:
-        _fill_totals(data)
+        material_total = _get_total_row(data)
+        data.append(material_total)
+
+        _fill_blank(data)
+
+        timesheet_details = _get_timesheet_details(filters)
+        data.append(timesheet_details)
+
+        grand_total = _get_total_row(
+            [material_total, timesheet_details],
+            '<b>Grand Total</b>'
+        )
+        data.append(grand_total)
 
     return columns, data
 
@@ -46,8 +58,7 @@ def get_data(filters):
     })
 
     entries = [
-        _get_stock_ledger_entries(filters),
-        _get_timesheet_details(filters)
+        _get_stock_ledger_entries(filters)
     ]
 
     for entry in entries:
@@ -85,6 +96,12 @@ def _get_stock_ledger_entries(filters):
 
 
 def _get_timesheet_details(filters):
+    timesheet_row = {
+        'description': 'Timesheet',
+        'qty': 0,
+        'rate': 0.00
+    }
+
     timesheet_details = frappe.db.sql("""
         SELECT sum(costing_amount) AS rate, count(*) AS qty
         FROM `tabTimesheet Detail`
@@ -97,19 +114,24 @@ def _get_timesheet_details(filters):
 
     if timesheet_details:
         timesheet_detail = timesheet_details[0]
-        timesheet_detail['description'] = '<i>Timesheets</i>'
+        timesheet_row['qty'] = timesheet_detail.get('qty')
+        timesheet_row['rate'] = timesheet_detail.get('rate')
 
-    return timesheet_details
+    return timesheet_row
 
 
-def _fill_totals(data):
+def _get_total_row(data, description='Total'):
     total_qty = 0
     total_rate = 0.00
     for row in data:
         total_qty = total_qty + row.get('qty', 0)
         total_rate = total_rate + row.get('rate', 0.00)
-    data.append({
-        'description': '<b>Total</b>',
+    return {
+        'description': description,
         'qty': total_qty,
         'rate': total_rate
-    })
+    }
+
+
+def _fill_blank(data):
+    data.append({})
