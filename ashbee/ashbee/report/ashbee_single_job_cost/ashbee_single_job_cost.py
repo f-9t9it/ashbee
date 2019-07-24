@@ -18,7 +18,7 @@ def get_columns():
 		new_column("Date", "date", "Date", 95),
 		new_column("Description", "description", "Data", 200),
 		new_column("Income", "income", "Currency", 90),
-		new_column("Qty", "qty", "Currency", 90),
+		new_column("Qty", "qty", "Int", 90),
 		new_column("Rate", "rate", "Currency", 90),
 		new_column("Material+Direct", "material_direct", "Currency", 120),
 		new_column("Labor Expenses", "labor_expenses", "Currency", 120),
@@ -82,7 +82,7 @@ def _get_stock_ledger_entries(filters):
 
 def _get_timesheet_details(filters):
 	timesheet_details = frappe.db.sql("""
-		SELECT sum(costing_amount) AS rate
+		SELECT sum(costing_amount) AS rate, count(*) AS qty
 		FROM `tabTimesheet Detail`
 		INNER JOIN `tabTimesheet`
 		ON `tabTimesheet Detail`.parent = `tabTimesheet`.name
@@ -93,6 +93,6 @@ def _get_timesheet_details(filters):
 
 	if timesheet_details:
 		timesheet_detail = timesheet_details[0]
-		timesheet_detail['description'] = '<b>Timesheet Cost</b>'
+		timesheet_detail['reference'] = 'Timesheets'
 
 	return timesheet_details
