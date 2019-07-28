@@ -3,7 +3,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from erpnext.controllers.item_variant import get_variant, create_variant
-from ashbee.utils import get_central_entry, check_central_expense
+from ashbee.utils import get_central_entry, check_central_expense, set_item_weight, set_total_weight
 
 
 def stock_entry_save(doc, method):
@@ -11,8 +11,8 @@ def stock_entry_save(doc, method):
     _check_receipt_existed(doc)
     _set_finished_items(doc)
 
-    _set_item_weight(doc)
-    _set_total_weight(doc)
+    set_item_weight(doc)
+    set_total_weight(doc)
 
     if doc.naming_series == "SE-PI-.#####":
         any(_set_item_recipient_task_color_coating(item) for item in doc.items)
@@ -54,32 +54,32 @@ def _set_finished_items(doc):
         _set_finished_item(item)
 
 
-def _set_item_weight(doc):
-    # TODO: use the utils.py
-    for item in doc.items:
-        weight = frappe.db.get_value('Item', item.item_code, 'ashbee_weight')
-        length = _get_item_length(item.item_code)
-        item.ashbee_item_weight = item.qty * (weight * length)
+# def _set_item_weight(doc):
+#     # TODO: use the utils.py
+#     for item in doc.items:
+#         weight = frappe.db.get_value('Item', item.item_code, 'ashbee_weight')
+#         length = _get_item_length(item.item_code)
+#         item.ashbee_item_weight = item.qty * (weight * length)
 
 
-def _get_item_length(item):
-    filters = {'parent': item, 'attribute': 'Length'}
+# def _get_item_length(item):
+#     filters = {'parent': item, 'attribute': 'Length'}
+#
+#     item_length = frappe.db.sql("""
+#         SELECT attribute_value
+#         FROM `tabItem Variant Attribute`
+#         WHERE parent = %(parent)s AND attribute = %(attribute)s
+#     """, filters, as_list=True)
+#
+#     return float(item_length[0][0]) if item_length else 0.00
 
-    item_length = frappe.db.sql("""
-        SELECT attribute_value
-        FROM `tabItem Variant Attribute`
-        WHERE parent = %(parent)s AND attribute = %(attribute)s
-    """, filters, as_list=True)
 
-    return float(item_length[0][0]) if item_length else 0.00
-
-
-def _set_total_weight(doc):
-    # TODO: set_total_weight
-    total_weight = 0.00
-    for item in doc.items:
-        total_weight = total_weight + item.ashbee_item_weight
-    doc.ashbee_total_weight = total_weight
+# def _set_total_weight(doc):
+#     # TODO: set_total_weight
+#     total_weight = 0.00
+#     for item in doc.items:
+#         total_weight = total_weight + item.ashbee_item_weight
+#     doc.ashbee_total_weight = total_weight
 
 
 def _set_finished_item(item):
