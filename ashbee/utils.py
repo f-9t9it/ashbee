@@ -204,8 +204,39 @@ def check_central_expense(posting_date):
         frappe.throw(_('Unable to transact. This month is closed with Central Expense.'))
 
 
+def set_item_weight(doc):
+    """
+    Set the item weight
+    :param doc:
+    :return:
+    """
+    for item in doc.items:
+        weight = frappe.db.get_value('Item', item.item_code, 'ashbee_weight')
+        length = _get_item_length(item.item_code)
+        item.ashbee_item_weight = item.qty * (weight * length)
+
+
+def set_total_weight(doc):
+    total_weight = 0.00
+    for item in doc.items:
+        total_weight = total_weight + item.ashbee_item_weight
+    doc.ashbee_total_weight = total_weight
+
+
 def testing():
     check_central_expense('2019-06-01')
+
+
+def _get_item_length(item):
+    filters = {'parent': item, 'attribute': 'Length'}
+
+    item_length = frappe.db.sql("""
+        SELECT attribute_value
+        FROM `tabItem Variant Attribute`
+        WHERE parent = %(parent)s AND attribute = %(attribute)s
+    """, filters, as_list=True)
+
+    return float(item_length[0][0]) if item_length else 0.00
 
 
 def _get_central_expense(posting_date):
