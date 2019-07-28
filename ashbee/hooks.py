@@ -121,7 +121,9 @@ fixtures = [
                     "Stock Entry-ashbee_project_ref",
                     "Stock Entry Detail-ashbee_attribute_fetch",
                     "Purchase Invoice Item-ashbee_central_entry",
-                    "Stock Entry Detail-ashbee_item_weight"
+                    "Stock Entry Detail-ashbee_item_weight",
+                    "Purchase Receipt Item-ashbee_item_weight",
+                    "Purchase Receipt-ashbee_total_weight"
                 ]
             ]
         ]
@@ -215,6 +217,9 @@ doc_events = {
         "validate": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_save",
         "on_submit": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_submit",
         "on_cancel": "ashbee.ashbee.customs.purchase_invoice.purchase_invoice_cancel"
+    },
+    "Purchase Receipt": {
+        "validate": "ashbee.ashbee.customs.purchase_receipt.purchase_receipt_save"
     }
 }
 
