@@ -155,11 +155,6 @@ def _fill_employees_basic(timesheets, basics):
 		employee = timesheet.get('employee')
 		timesheet['basic'] = basics.get(employee)
 
-#
-# def _fill_employees_absent(timesheets):
-# 	for timesheet in timesheets:
-# 		timesheet['absent'] = timesheet.get('hourly_cost') * timesheet.get('absent_hours')
-
 
 def _fill_employees_total(timesheets):
 	for timesheet in timesheets:
@@ -188,10 +183,11 @@ def _fill_totals(data):
 
 
 def _sum_employee_timesheets(employee_timesheets):
-	sorted_keys = sorted(employee_timesheets.keys())
+	sorted_keys = _get_sorted_keys(
+		employee_timesheets.keys()
+	)
 
 	timesheets_data = []
-
 	for employee in sorted_keys:
 		timesheets = employee_timesheets[employee]
 
@@ -209,6 +205,30 @@ def _sum_employee_timesheets(employee_timesheets):
 		timesheets_data.append(timesheet_row)
 
 	return timesheets_data
+
+
+def _get_sorted_keys(keys):
+	number_keys = []
+	letter_keys = []
+
+	for key in keys:
+		if key.isdigit():
+			number_keys.append(int(key))
+		else:
+			letter_keys.append(key)
+
+	number_keys = sorted(number_keys)
+	letter_keys = sorted(letter_keys)
+
+	def convert_to_str(row):
+		return str(row)
+
+	number_keys = map(
+		convert_to_str,
+		number_keys
+	)
+
+	return number_keys + letter_keys
 
 
 def _sum_timesheets(_, timesheet):
