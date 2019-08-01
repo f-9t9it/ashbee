@@ -136,7 +136,10 @@ def get_data(filters):
 		groupby('employee', timesheets)
 	)
 
+	basics = _get_employees_basic()
+
 	# _fill_employees_absent(timesheets_data)
+	_fill_employees_basic(timesheets_data, basics)
 	_fill_employees_total(timesheets_data)
 
 	return timesheets_data
