@@ -230,13 +230,26 @@ def testing():
 def _get_item_length(item):
     filters = {'parent': item, 'attribute': 'Length'}
 
-    item_length = frappe.db.sql("""
+    item_attribute_value = frappe.db.sql("""
         SELECT attribute_value
         FROM `tabItem Variant Attribute`
         WHERE parent = %(parent)s AND attribute = %(attribute)s
     """, filters, as_list=True)
 
-    return float(item_length[0][0]) if item_length else 0.00
+    item_length = 0.00
+
+    if item_attribute_value:
+        item_length = _float_or_zero(item_attribute_value[0][0])
+
+    return item_length
+
+
+def _float_or_zero(value):
+    try:
+        attr_value = float(value)
+    except:
+        attr_value = 0.00
+    return attr_value
 
 
 def _get_central_expense(posting_date):
