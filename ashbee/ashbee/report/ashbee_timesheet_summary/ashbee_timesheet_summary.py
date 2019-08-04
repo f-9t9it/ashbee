@@ -127,8 +127,9 @@ def get_data(filters):
 			hourly_cost, status
 		FROM `tabBulk Timesheet Details`
 		WHERE 
-			DATE(start_date_time) BETWEEN %(from_date)s AND %(to_date)s
-			AND docstatus = 1
+			DATE(start_date_time) >= %(from_date)s
+		AND DATE(start_date_time) <= %(to_date)s
+		AND docstatus = 1
 		ORDER BY idx
 	""", filters, as_dict=1)
 
