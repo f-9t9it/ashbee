@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import date_diff
 from toolz import groupby
 
 from ashbee.helpers import round_off_rows
@@ -112,12 +113,6 @@ def get_columns():
 
 
 def get_data(filters):
-	# calendar_days = date_diff(
-	# 	filters.get('to_date'),
-	# 	filters.get('from_date')
-	# )
-	# working_hours = (calendar_days + 1) * 8
-
 	timesheets = frappe.db.sql("""
 		SELECT
 			employee, employee_name, 
@@ -133,17 +128,40 @@ def get_data(filters):
 		ORDER BY idx
 	""", filters, as_dict=1)
 
+	basics = _get_employees_basic()
+
+	if filters.get('calculate_hourly_by_days'):
+		_recalculate_timesheets(timesheets, filters, basics)
+
 	timesheets_data = _sum_employee_timesheets(
 		groupby('employee', timesheets)
 	)
 
-	basics = _get_employees_basic()
-
-	# _fill_employees_absent(timesheets_data)
 	_fill_employees_basic(timesheets_data, basics)
 	_fill_employees_total(timesheets_data)
 
 	return timesheets_data
+
+
+def _recalculate_timesheets(timesheets, filters, basics):
+	calendar_days = date_diff(
+		filters.get('to_date'),
+		filters.get('from_date')
+	) + 1.00
+
+	hourly_costs = {
+		basic: basics[basic] / calendar_days / 8.00
+		for basic in basics.keys()
+	}
+
+	for timesheet in timesheets:
+		employee = timesheet.get('employee')
+		hourly_cost = hourly_costs.get(employee)
+
+		timesheet['hourly_cost'] = hourly_cost
+		timesheet['normal_cost'] = hourly_cost * timesheet.get('normal_hours')
+		timesheet['ot1'] = hourly_cost * timesheet.get('ot1_hours') * 1.25
+		timesheet['ot2'] = hourly_cost * timesheet.get('ot2_hours') * 1.50
 
 
 def _get_employees_basic():
