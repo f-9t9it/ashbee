@@ -328,10 +328,12 @@ var _make_receipt_button = function(frm) {
     if(frm.doc.docstatus === 1 && frm.doc.purpose === "Material Issue") {
         frm.add_custom_button(__('Make Receipt'), function() {
             frappe.model.with_doctype('Stock Entry', function() {
-                var se = frappe.model.get_new_doc('Stock Entry');
+            	var se = frappe.model.get_new_doc('Stock Entry');
                 se.naming_series = "MTSIN-.YY.-.#####";
                 se.purpose = "Material Receipt";
 				se.ashbee_material_issue = frm.doc.name;
+				se.ashbee_project_ref = frm.doc.ashbee_project_ref;
+				se.remarks = frm.doc.remarks;
 
                 var items = frm.get_field('items').grid.get_selected_children();
                 if(!items.length) {

@@ -37,7 +37,7 @@ def _check_receipt_existed(doc):
     if not validate_material_issue:
         return
 
-    if doc.purpose == 'Material Receipt':
+    if doc.purpose == 'Material Receipt' and doc.ashbee_material_issue:
         filters = {
             'ashbee_material_issue': doc.ashbee_material_issue,
             'docstatus': 1

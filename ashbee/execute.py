@@ -135,3 +135,31 @@ def unlink_central_entry_from_direct_cost():
         """, item.get('name'))
 
     frappe.db.commit()
+
+
+def remove_trailing_space():
+    corrections = []
+
+    attributes = frappe.get_all('Item Variant Attribute', fields=['name', 'attribute_value'])
+    for attribute in attributes:
+        value = attribute.get('attribute_value')
+        if value and value[-1] == ' ':
+            corrections.append({
+                'name': attribute.get('name'),
+                'attribute_value': value.strip()
+            })
+
+    processed = 0
+    total = len(corrections)
+
+    for correction in corrections:
+        frappe.db.sql("""
+            UPDATE `tabItem Variant Attribute`
+            SET attribute_value = %(attribute_value)s
+            WHERE name = %(name)s
+        """, correction)
+
+        processed = processed + 1
+        print("Processed {}/{}".format(processed, total))
+
+    frappe.db.commit()
