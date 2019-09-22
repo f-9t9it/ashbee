@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from toolz import merge
 import frappe
 
+from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost
 from ashbee.helpers import new_column
 
 
@@ -69,17 +71,27 @@ def get_data(filters):
 
 
 def _get_project_expenses(filters):
-    return frappe.db.sql("""
-        SELECT 
-            total_costing_amount AS labor_expenses,
-            (total_consumed_material_cost + ashbee_total_direct_cost + total_purchase_cost)
-            AS material_direct,
-            ashbee_total_central_cost AS central_expenses,
-            ashbee_total_central_labor AS central_labour,
-            ashbee_total_indirect_cost AS indirect
-        FROM `tabProject`
-        WHERE name=%(project)s
-    """, filters, as_dict=1)[0]
+    labour_expenses = get_labour_expenses(filters)
+    material_direct = {
+        'material_direct': sum(
+            merge(
+                get_consumed_material_cost(filters),
+                get_purchase_cost(filters)
+            ).values()
+        )
+    }
+
+    central_expenses = {'central_expenses': 0.00}
+    central_labour = {'central_labour': 0.00}
+    indirect = {'indirect': 0.00}
+
+    return merge(
+        labour_expenses,
+        material_direct,
+        central_expenses,
+        central_labour,
+        indirect
+    )
 
 
 def _get_stock_ledger_entries(filters):

@@ -282,46 +282,46 @@ var confirm_variant_create_with_rate = function(frm, child, attrs_and_valuation)
 //
 // };
 
-
-var create_variants_and_save = function(frm){
-	var attrs = [];
-	$.each(frm.doc.items, (i, v)=>{
-		if(v.ashbee_recipient_task != "" && v.ashbee_attribute_type != "" && v.ashbee_attribute_value != ""
-				&& v.ashbee_finished_item == "" && v.item_code != ""){
-			attrs.push({
-						'cdn':v.name,
-						'item_code':v.item_code, 
-						'attr_type':v.ashbee_attribute_type, 
-						'attr_value':extract_ashbee_attribute_value(v.ashbee_attribute_value)
-					});
-		}
-		if((i+1) >= frm.doc.items.length && attrs.length > 0){
-			frappe.call({
-				method:"ashbee.ashbee.customs.stock_entry.create_multiple_variants",
-				args:attrs,
-				callback:function(r){
-					if(r.message){
-						$(r.message).each(function(i){
-							var child = locals[v.doctype][this.cdn];
-							child.ashbee_finished_item = this.variant.name;
-							child.ashbee_finished_item_valuation = this.variant.valuation_rate
-							refresh_field("ashbee_finished_item_valuation", child.name, "items");
-							refresh_field("ashbee_finished_item", child.name, "items");
-							if((i+1) >= r.message.length){
-								frappe.show_alert("Items Updated!");
-								frm.save();
-								window.location.reload();
-							}
-
-						});
-
-					}
-				}
-			});
-		}
-		
-	});
-};
+// DEPRECATED
+// var create_variants_and_save = function(frm){
+// 	var attrs = [];
+// 	$.each(frm.doc.items, (i, v)=>{
+// 		if(v.ashbee_recipient_task != "" && v.ashbee_attribute_type != "" && v.ashbee_attribute_value != ""
+// 				&& v.ashbee_finished_item == "" && v.item_code != ""){
+// 			attrs.push({
+// 						'cdn':v.name,
+// 						'item_code':v.item_code,
+// 						'attr_type':v.ashbee_attribute_type,
+// 						'attr_value':extract_ashbee_attribute_value(v.ashbee_attribute_value)
+// 					});
+// 		}
+// 		if((i+1) >= frm.doc.items.length && attrs.length > 0){
+// 			frappe.call({
+// 				method:"ashbee.ashbee.customs.stock_entry.create_multiple_variants",
+// 				args:attrs,
+// 				callback:function(r){
+// 					if(r.message){
+// 						$(r.message).each(function(i){
+// 							var child = locals[v.doctype][this.cdn];
+// 							child.ashbee_finished_item = this.variant.name;
+// 							child.ashbee_finished_item_valuation = this.variant.valuation_rate
+// 							refresh_field("ashbee_finished_item_valuation", child.name, "items");
+// 							refresh_field("ashbee_finished_item", child.name, "items");
+// 							if((i+1) >= r.message.length){
+// 								frappe.show_alert("Items Updated!");
+// 								frm.save();
+// 								window.location.reload();
+// 							}
+//
+// 						});
+//
+// 					}
+// 				}
+// 			});
+// 		}
+//
+// 	});
+// };
 
 
 var _make_receipt_button = function(frm) {
