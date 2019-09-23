@@ -20,6 +20,12 @@ frappe.query_reports["Ashbee Timesheet Summary"] = {
 			"fieldname": "calculate_hourly_by_days",
 			"label": __("Calculate Hourly by Days"),
 			"fieldtype": "Check"
+		},
+		{
+			"fieldname": "salary_structures_on_date",
+			"label": __("Salary Structures On Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today()
 		}
 	]
 }
