@@ -128,7 +128,7 @@ def get_data(filters):
 		ORDER BY idx
 	""", filters, as_dict=1)
 
-	basics = _get_employees_basic()
+	basics = _get_employees_basic(filters)
 
 	if filters.get('calculate_hourly_by_days'):
 		_recalculate_timesheets(timesheets, filters, basics)
@@ -164,8 +164,21 @@ def _recalculate_timesheets(timesheets, filters, basics):
 		timesheet['ot2'] = hourly_cost * timesheet.get('ot2_hours') * 1.50
 
 
-def _get_employees_basic():
-	basics = frappe.get_all('Salary Structure Assignment', fields=['employee', 'base'])
+def _get_employees_basic(filters):
+	on_date = filters.get("salary_structures_on_date")
+
+	query_filters = [
+		["from_date", "<=", on_date],
+		["docstatus", "=", 1]
+	]
+
+	basics = frappe.get_all(
+		'Salary Structure Assignment',
+		fields=['employee', 'base'],
+		filters=query_filters,
+		order_by="from_date asc",
+	)
+
 	return {basic['employee']: basic['base'] for basic in basics}
 
 
