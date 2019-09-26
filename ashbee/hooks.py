@@ -123,7 +123,11 @@ fixtures = [
                     "Purchase Invoice Item-ashbee_central_entry",
                     "Stock Entry Detail-ashbee_item_weight",
                     "Purchase Receipt Item-ashbee_item_weight",
-                    "Purchase Receipt-ashbee_total_weight"
+                    "Purchase Receipt-ashbee_total_weight",
+                    "Salary Slip-ashbee_ot1",
+                    "Salary Slip-ashbee_cb",
+                    "Salary Slip-ashbee_ot2",
+                    "Salary Slip-ashbee_sb"
                 ]
             ]
         ]
