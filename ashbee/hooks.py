@@ -224,6 +224,9 @@ doc_events = {
     },
     "Purchase Receipt": {
         "validate": "ashbee.ashbee.customs.purchase_receipt.purchase_receipt_save"
+    },
+    "Salary Slip": {
+        "validate": "ashbee.ashbee.customs.salary_slip.salary_slip_save"
     }
 }
 
