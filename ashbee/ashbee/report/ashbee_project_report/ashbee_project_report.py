@@ -194,7 +194,7 @@ def _group_centrals(data):
             centrals[project] = {'cost': cost, 'labor': labor}
         else:
             total_cost = centrals[project].get('cost') + cost
-            total_labor = centrals[project].get('labor') + total_labor
+            total_labor = centrals[project].get('labor') + labor
             centrals[project]['cost'] = total_cost
             centrals[project]['labor'] = total_labor
 
