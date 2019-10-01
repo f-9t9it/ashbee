@@ -255,7 +255,7 @@ def _rename_fieldnames_for_report(data):
     }
 
     for row in data:
-        for current, new in fieldnames.iteritems():
+        for current, new in fieldnames.items():
             if current in row:
                 row[new] = row.pop(current)
             else:
