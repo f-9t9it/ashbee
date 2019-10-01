@@ -163,3 +163,23 @@ def remove_trailing_space():
         print("Processed {}/{}".format(processed, total))
 
     frappe.db.commit()
+
+
+def set_total_direct_costs():
+    direct_costs = frappe.db.sql("""
+        SELECT sum(direct_cost) as total_direct_cost, parent
+        FROM `tabDirect Cost Item`
+        GROUP BY parent
+    """, as_dict=1)
+
+    computed = 0
+    max_direct_cost = len(direct_costs)
+
+    for direct_cost in direct_costs:
+        name = direct_cost.get('parent')
+        total_direct_cost = direct_cost.get('total_direct_cost')
+
+        frappe.db.set_value('Direct Cost', name, 'total_direct_cost', total_direct_cost)
+        computed = computed + 1
+
+        print('Processed {}/{}'.format(computed, max_direct_cost))
