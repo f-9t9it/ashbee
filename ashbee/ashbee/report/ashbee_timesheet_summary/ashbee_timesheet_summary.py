@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import date_diff
-from toolz import groupby
+from toolz import groupby, concatv, reduce
 
 from ashbee.helpers import round_off_rows
 
@@ -260,7 +260,7 @@ def _get_sorted_keys(keys):
 		number_keys
 	)
 
-	return number_keys + letter_keys
+	return concatv(number_keys, letter_keys)
 
 
 def _sum_timesheets(_, timesheet):
