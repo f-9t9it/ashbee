@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from toolz import merge
+from toolz import merge, partial, compose
 import frappe
 
 from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost
@@ -72,8 +72,9 @@ def get_data(filters):
 
 def _get_project_expenses(filters):
     labour_expenses = get_labour_expenses(filters)
+    filtered_sum = compose(sum, partial(filter, lambda x: x))
     material_direct = {
-        'material_direct': sum(
+        'material_direct': filtered_sum(
             merge(
                 get_consumed_material_cost(filters),
                 get_purchase_cost(filters)
@@ -137,8 +138,8 @@ def _get_total_row(data, description='Total'):
     total_qty = 0
     total_rate = 0.00
     for row in data:
-        total_qty = total_qty + row.get('qty', 0)
-        total_rate = total_rate + row.get('rate', 0.00)
+        total_qty = total_qty + (row.get('qty') or 0)
+        total_rate = total_rate + (row.get('rate') or 0)
     return {
         'description': description,
         'qty': total_qty,
@@ -147,9 +148,9 @@ def _get_total_row(data, description='Total'):
 
 
 def _fill_overhead_charges(project_expenses, overhead_percent):
-    material_direct = project_expenses.get('material_direct')
-    labor_expenses = project_expenses.get('labor_expenses')
-    indirect = project_expenses.get('indirect')
+    material_direct = project_expenses.get('material_direct') or 0
+    labor_expenses = project_expenses.get('labor_expenses') or 0
+    indirect = project_expenses.get('indirect') or 0
 
     return (material_direct + labor_expenses + indirect) * overhead_percent
 

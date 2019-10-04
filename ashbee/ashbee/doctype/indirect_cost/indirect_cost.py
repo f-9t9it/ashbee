@@ -36,7 +36,7 @@ class IndirectCost(Document):
 		self._update_project_indirect_cost(cancel=True)
 
 	def _set_fraction_total(self):
-		allocation = float(self.allocation)
+		allocation = float(self.allocation or 0)
 		fractional, rounded = math.modf(allocation)
 		self.fraction_total = fractional
 
@@ -44,7 +44,7 @@ class IndirectCost(Document):
 		# Get the sum of all material issues
 		total_mi_value = reduce(lambda x, y: x + y, projects.values())
 
-		for project, mi_value in projects.iteritems():
+		for project, mi_value in projects.tems():
 			allocated = self.allocation * (mi_value / total_mi_value)
 			self.append('items', {
 				'project': project,
@@ -52,9 +52,9 @@ class IndirectCost(Document):
 			})
 
 	def _check_allocation(self):
-		total = reduce(lambda x, y: x + y.allocated, self.items, 0.00)
+		total = reduce(lambda x, y: x + (y.allocated or 0), self.items, 0.00)
 
-		if math.floor(total) != math.floor(self.allocation):
+		if math.floor(total) != math.floor(self.allocation or 0):
 			frappe.throw(_('Allocated values is not the same with allocated indirect expense'))
 
 	def _update_project_indirect_cost(self, cancel=False):

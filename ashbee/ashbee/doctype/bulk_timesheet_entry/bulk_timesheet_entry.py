@@ -122,7 +122,7 @@ class BulkTimesheetEntry(Document):
     def delete_timesheet(self, timesheet):
         if not timesheet:
             return
-        if isinstance(timesheet, str) or isinstance(timesheet, unicode):
+        if isinstance(timesheet, str):
             timesheet = frappe.get_doc("Timesheet", timesheet)
         timesheet.cancel()
         timesheet.delete()
@@ -186,13 +186,13 @@ def _calculate_cost_details(detail):
 
 
 def _validate_cost_details(detail):
-    if isinstance(detail.hourly_cost, unicode):
+    if isinstance(detail.hourly_cost, str):
         detail.hourly_cost = float(detail.hourly_cost)
-    if isinstance(detail.normal_hours, unicode):
+    if isinstance(detail.normal_hours, str):
         detail.normal_hours = float(detail.normal_hours)
-    if isinstance(detail.ot1_hours, unicode):
+    if isinstance(detail.ot1_hours, str):
         detail.ot1_hours = float(detail.ot1_hours)
-    if isinstance(detail.ot2_hours, unicode):
+    if isinstance(detail.ot2_hours, str):
         detail.ot2_hours = float(detail.ot2_hours)
 
 
