@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from ashbee.utils import get_costs_by_projects
 
-from toolz import partial
+from toolz import partial, reduce
 
 
 class CentralExpense(Document):
@@ -42,7 +42,7 @@ class CentralExpense(Document):
 
     def _set_projects(self, projects):
         total_cost = reduce(lambda x, y: x + y, projects.values())
-        for project, cost in projects.iteritems():
+        for project, cost in projects.items():
             ratio = cost / total_cost
             allocation = self.cost_allocation * ratio
             labor_allocation = self.labor_allocation * ratio
