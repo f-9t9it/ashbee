@@ -137,8 +137,8 @@ def _get_total_row(data, description='Total'):
     total_qty = 0
     total_rate = 0.00
     for row in data:
-        total_qty = total_qty + row.get('qty', 0)
-        total_rate = total_rate + row.get('rate', 0.00)
+        total_qty = total_qty + (row.get('qty') or 0)
+        total_rate = total_rate + (row.get('rate') or 0.00)
     return {
         'description': description,
         'qty': total_qty,
