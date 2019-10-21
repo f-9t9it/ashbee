@@ -7,7 +7,7 @@ import frappe
 
 def get_labour_expenses(filters):
     return frappe.db.sql("""
-        SELECT SUM(costing_amount) AS labor_expenses
+        SELECT COALESCE(SUM(costing_amount), 0) AS labor_expenses
         FROM `tabTimesheet Detail`
         WHERE docstatus = 1
         AND project = %(project)s
@@ -18,7 +18,7 @@ def get_labour_expenses(filters):
 
 def get_consumed_material_cost(filters):
     return frappe.db.sql("""
-        SELECT SUM(total_amount) AS total_consumed_material_cost
+        SELECT COALESCE(SUM(total_amount), 0) AS total_consumed_material_cost
         FROM `tabStock Entry`
         WHERE docstatus = 1
         AND project = %(project)s
@@ -29,7 +29,7 @@ def get_consumed_material_cost(filters):
 
 def get_purchase_cost(filters):
     return frappe.db.sql("""
-        SELECT SUM(amount) AS total_purchase_cost
+        SELECT COALESCE(SUM(amount), 0) AS total_purchase_cost
         FROM `tabPurchase Invoice Item`
         INNER JOIN `tabPurchase Invoice`
         ON `tabPurchase Invoice Item`.parent = `tabPurchase Invoice`.name
@@ -37,4 +37,32 @@ def get_purchase_cost(filters):
         AND project = %(project)s
         AND posting_date
         BETWEEN %(from_date)s AND %(to_date)s
+    """, filters, as_dict=1)[0]
+
+
+def get_central_allocations(filters):
+    return frappe.db.sql("""
+        SELECT
+            COALESCE(SUM(cep.allocation), 0) AS central_expenses,
+            COALESCE(SUM(cep.labor_allocation), 0) AS central_labour
+        FROM `tabCentral Expense Project` cep
+        INNER JOIN `tabCentral Expense`
+        ON cep.parent = `tabCentral Expense`.name
+        WHERE `tabCentral Expense`.docstatus = 1
+        AND project = %(project)s
+        AND from_date <= %(to_date)s
+        AND to_date >= %(from_date)s
+    """, filters, as_dict=1)[0]
+
+
+def get_indirect_costs(filters):
+    return frappe.db.sql("""
+        SELECT COALESCE(SUM(item.allocated), 0) AS indirect
+        FROM `tabIndirect Cost Item` item
+        INNER JOIN `tabIndirect Cost`
+        ON item.parent = `tabIndirect Cost`.name
+        WHERE `tabIndirect Cost`.docstatus = 1
+        AND project = %(project)s
+        AND start_date <= %(to_date)s
+        AND end_date >= %(from_date)s
     """, filters, as_dict=1)[0]

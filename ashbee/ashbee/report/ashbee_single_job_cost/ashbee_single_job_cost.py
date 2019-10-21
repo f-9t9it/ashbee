@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 from toolz import merge, partial, compose
 import frappe
 
-from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost
 from ashbee.helpers import new_column
+from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost, \
+    get_central_allocations, get_indirect_costs
 
 
 def execute(filters=None):
@@ -82,15 +83,13 @@ def _get_project_expenses(filters):
         )
     }
 
-    central_expenses = {'central_expenses': 0.00}
-    central_labour = {'central_labour': 0.00}
-    indirect = {'indirect': 0.00}
+    central_allocations = get_central_allocations(filters)
+    indirect = get_indirect_costs(filters)
 
     return merge(
         labour_expenses,
         material_direct,
-        central_expenses,
-        central_labour,
+        central_allocations,
         indirect
     )
 
