@@ -38,3 +38,18 @@ def get_purchase_cost(filters):
         AND posting_date
         BETWEEN %(from_date)s AND %(to_date)s
     """, filters, as_dict=1)[0]
+
+
+def get_central_allocations(filters):
+    return frappe.db.sql("""
+        SELECT
+            COALESCE(SUM(cep.allocation), 0) AS central_expenses,
+            COALESCE(SUM(cep.labor_allocation), 0) AS central_labour
+        FROM `tabCentral Expense Project` cep
+        INNER JOIN `tabCentral Expense`
+        ON cep.parent = `tabCentral Expense`.name
+        WHERE `tabCentral Expense`.docstatus = 1
+        AND project = %(project)s
+        AND from_date <= %(to_date)s
+        AND to_date >= %(from_date)s
+    """, filters, as_dict=1)[0]
