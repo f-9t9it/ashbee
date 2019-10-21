@@ -7,7 +7,7 @@ import frappe
 
 def get_labour_expenses(filters):
     return frappe.db.sql("""
-        SELECT SUM(costing_amount) AS labor_expenses
+        SELECT COALESCE(SUM(costing_amount), 0) AS labor_expenses
         FROM `tabTimesheet Detail`
         WHERE docstatus = 1
         AND project = %(project)s
@@ -18,7 +18,7 @@ def get_labour_expenses(filters):
 
 def get_consumed_material_cost(filters):
     return frappe.db.sql("""
-        SELECT SUM(total_amount) AS total_consumed_material_cost
+        SELECT COALESCE(SUM(total_amount), 0) AS total_consumed_material_cost
         FROM `tabStock Entry`
         WHERE docstatus = 1
         AND project = %(project)s
