@@ -37,4 +37,4 @@ def get_purchase_cost(filters):
         AND project = %(project)s
         AND posting_date
         BETWEEN %(from_date)s AND %(to_date)s
-    """, filters, as_dict=1)
+    """, filters, as_dict=1)[0]
