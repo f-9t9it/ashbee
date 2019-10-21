@@ -53,3 +53,16 @@ def get_central_allocations(filters):
         AND from_date <= %(to_date)s
         AND to_date >= %(from_date)s
     """, filters, as_dict=1)[0]
+
+
+def get_indirect_costs(filters):
+    return frappe.db.sql("""
+        SELECT COALESCE(SUM(item.allocated), 0) AS indirect
+        FROM `tabIndirect Cost Item` item
+        INNER JOIN `tabIndirect Cost`
+        ON item.parent = `tabIndirect Cost`.name
+        WHERE `tabIndirect Cost`.docstatus = 1
+        AND project = %(project)s
+        AND start_date <= %(to_date)s
+        AND end_date >= %(from_date)s
+    """, filters, as_dict=1)[0]

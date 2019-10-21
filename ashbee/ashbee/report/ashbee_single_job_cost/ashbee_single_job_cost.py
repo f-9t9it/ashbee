@@ -7,7 +7,7 @@ import frappe
 
 from ashbee.helpers import new_column
 from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost, \
-    get_central_allocations
+    get_central_allocations, get_indirect_costs
 
 
 def execute(filters=None):
@@ -84,7 +84,7 @@ def _get_project_expenses(filters):
     }
 
     central_allocations = get_central_allocations(filters)
-    indirect = {'indirect': 0.00}
+    indirect = get_indirect_costs(filters)
 
     return merge(
         labour_expenses,
