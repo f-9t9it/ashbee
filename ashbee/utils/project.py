@@ -29,7 +29,7 @@ def get_consumed_material_cost(filters):
 
 def get_purchase_cost(filters):
     return frappe.db.sql("""
-        SELECT SUM(amount) AS total_purchase_cost
+        SELECT COALESCE(SUM(amount), 0) AS total_purchase_cost
         FROM `tabPurchase Invoice Item`
         INNER JOIN `tabPurchase Invoice`
         ON `tabPurchase Invoice Item`.parent = `tabPurchase Invoice`.name
@@ -37,4 +37,4 @@ def get_purchase_cost(filters):
         AND project = %(project)s
         AND posting_date
         BETWEEN %(from_date)s AND %(to_date)s
-    """, filters, as_dict=1)[0]
+    """, filters, as_dict=1)
