@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from toolz import pluck
 
 
 def salary_slip_save(doc, method):
@@ -36,6 +37,11 @@ def _set_ot_salary_component(doc):
     if not overtime:
         frappe.throw(_('Set Overtime salary component under Ashbee Settings'))
 
+    salary_components = map(lambda x: x.salary_component, doc.earnings)
+
+    if overtime in salary_components:
+        return
+
     ot1_rate = 1.25
     ot2_rate = 1.50
 
@@ -46,3 +52,6 @@ def _set_ot_salary_component(doc):
         'salary_component': overtime,
         'amount': ot1_amount + ot2_amount
     })
+
+    # Update the net pay from here
+    doc.calculate_net_pay()
