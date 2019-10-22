@@ -1,6 +1,5 @@
 import frappe
 from frappe import _
-from toolz import pluck
 
 
 def salary_slip_save(doc, method):
