@@ -44,7 +44,7 @@ class IndirectCost(Document):
 		# Get the sum of all material issues
 		total_mi_value = reduce(lambda x, y: x + y, projects.values())
 
-		for project, mi_value in projects.tems():
+		for project, mi_value in projects.items():
 			allocated = self.allocation * (mi_value / total_mi_value)
 			self.append('items', {
 				'project': project,
