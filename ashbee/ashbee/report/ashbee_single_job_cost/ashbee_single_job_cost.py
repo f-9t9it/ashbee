@@ -13,6 +13,8 @@ from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost
 def execute(filters=None):
     columns, data = get_columns(), get_data(filters)
 
+    header = _get_header(filters)
+
     if data:
         material_total = _get_total_row(data)
         data.append(material_total)
@@ -28,12 +30,12 @@ def execute(filters=None):
         )
         data.append(grand_total)
 
-    return columns, data
+    return columns, header + data
 
 
 def get_columns():
     return [
-        new_column("Reference", "reference", "Data", 150),
+        new_column("Reference", "reference", "Data", 380),
         new_column("Date", "date", "Date", 95),
         new_column("Description", "description", "Data", 200),
         new_column("Income", "income", "Currency", 90),
@@ -156,3 +158,24 @@ def _fill_overhead_charges(project_expenses, overhead_percent):
 
 def _fill_blank(data):
     data.append({})
+
+
+def _get_header(filters):
+    project = filters.get('project')
+    from_date = filters.get('from_date')
+    to_date = filters.get('to_date')
+
+    project_code = _get_project_code(project)
+
+    return [
+        {'reference': '<b>ASHBEE METAL CLADDING WILL</b>'},
+        {'reference': '<i>Job Income Expense Report</i>'},
+        {},
+        {'reference': '{} - {}'.format(project_code, project)},
+        {'reference': '<i>From {} To {}</i>'.format(from_date, to_date)},
+        {}
+    ]
+
+
+def _get_project_code(project):
+    return frappe.db.get_value('Project', project, 'ashbee_project_code')
