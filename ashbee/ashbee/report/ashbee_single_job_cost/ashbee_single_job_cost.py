@@ -13,7 +13,7 @@ from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost
 def execute(filters=None):
     columns, data = get_columns(), get_data(filters)
 
-    header = _get_header(filters)
+    # header = _get_header(filters)
 
     if data:
         material_total = _get_total_row(data)
@@ -30,7 +30,7 @@ def execute(filters=None):
         )
         data.append(grand_total)
 
-    return columns, header + data
+    return columns, data
 
 
 def get_columns():

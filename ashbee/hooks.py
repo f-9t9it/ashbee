@@ -259,7 +259,7 @@ doc_events = {
 # Overriding Whitelisted Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "ashbee.event.get_events"
-# }
+override_whitelisted_methods = {
+    "frappe.desk.query_report.export_query": "ashbee.whitelisted_methods.query_report.export_query_override"
+}
 
