@@ -1,4 +1,6 @@
+import frappe
 from frappe import _
+from toolz import pluck
 
 
 def new_column(label, fieldname, fieldtype, width, options=None):
@@ -25,3 +27,31 @@ def round_off_rows(data, fields, decimals=3):
         for field in fields:
             rounded = round(row.get(field), decimals)
             row[field] = rounded
+
+
+def fill_item_name(func):
+    """
+    Accepts any function that have an array of data with description
+    Outputs together with item and item name
+    :param func:
+    :return:
+    """
+    def inner(*args):
+        data = func(*args)
+
+        items = list(pluck('description', data))
+        items_sql = list(map(lambda x: "'{}'".format(x), items))
+        in_items = ', '.join(items_sql)
+        item_names = frappe.db.sql("""
+            SELECT name, item_name
+            FROM `tabItem`
+            WHERE name IN ({})
+        """.format(in_items), as_dict=True)
+
+        items_dict = {item['name']: item['item_name'] for item in item_names}
+        for row in data:
+            name = row.get('description')
+            row['description'] = '{} ({})'.format(name, items_dict[name])
+
+        return data
+    return inner
