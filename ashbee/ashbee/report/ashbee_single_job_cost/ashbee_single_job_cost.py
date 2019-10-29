@@ -64,7 +64,11 @@ def get_data(filters):
     data.append(project_expenses)
 
     entries = [
-        _get_stock_ledger_entries(filters)
+        _get_stock_ledger_entries(filters),
+        _get_purchase_cost_items(filters),
+        _get_central_labor_items(filters),
+        _get_central_expense_items(filters),
+        _get_indirect_cost_items(filters)
     ]
 
     for entry in entries:
@@ -180,3 +184,75 @@ def _get_header(filters):
 
 def _get_project_code(project):
     return frappe.db.get_value('Project', project, 'ashbee_project_code')
+
+
+def _get_purchase_cost_items(filters):
+    return frappe.db.sql("""
+        SELECT
+            doc.posting_date AS date,
+            doc.name AS reference,
+            item.item_code AS description,
+            item.rate,
+            item.qty
+        FROM `tabPurchase Invoice Item` item
+        INNER JOIN `tabPurchase Invoice` doc
+        ON item.parent = doc.name
+        WHERE doc.docstatus = 1
+        AND project = %(project)s
+        AND posting_date
+        BETWEEN %(from_date)s AND %(to_date)s
+    """, filters, as_dict=1)
+
+
+def _get_central_labor_items(filters):
+    return frappe.db.sql("""
+        SELECT
+            ce.posting_date AS date,
+            ce.name AS reference,
+            'Labor Allocation' AS description,
+            cep.labor_allocation AS rate,
+            1 AS qty           
+        FROM `tabCentral Expense Project` cep
+        INNER JOIN `tabCentral Expense` ce
+        ON cep.parent = ce.name
+        WHERE ce.docstatus = 1
+        AND project = %(project)s
+        AND from_date <= %(to_date)s
+        AND to_date >= %(from_date)s
+    """, filters, as_dict=1)
+
+
+def _get_central_expense_items(filters):
+    return frappe.db.sql("""
+        SELECT
+            ce.posting_date AS date,
+            ce.name AS reference,
+            'Cost Allocation' AS description,
+            cep.allocation AS rate,
+            1 AS qty           
+        FROM `tabCentral Expense Project` cep
+        INNER JOIN `tabCentral Expense` ce
+        ON cep.parent = ce.name
+        WHERE ce.docstatus = 1
+        AND project = %(project)s
+        AND from_date <= %(to_date)s
+        AND to_date >= %(from_date)s
+    """, filters, as_dict=1)
+
+
+def _get_indirect_cost_items(filters):
+    return frappe.db.sql("""
+        SELECT 
+            doc.posting_date AS date,
+            doc.name AS reference,
+            'Indirect Cost Allocation' AS description,
+            item.allocated AS rate,
+            1 AS qty
+        FROM `tabIndirect Cost Item` item
+        INNER JOIN `tabIndirect Cost` doc
+        ON item.parent = doc.name
+        WHERE doc.docstatus = 1
+        AND project = %(project)s
+        AND start_date <= %(to_date)s
+        AND end_date >= %(from_date)s
+    """, filters, as_dict=1)
