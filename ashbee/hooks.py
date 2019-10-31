@@ -127,7 +127,9 @@ fixtures = [
                     "Salary Slip-ashbee_ot1",
                     "Salary Slip-ashbee_cb",
                     "Salary Slip-ashbee_ot2",
-                    "Salary Slip-ashbee_sb"
+                    "Salary Slip-ashbee_sb",
+                    "Employee-ashbee_gratuity_details",
+                    "Employee-ashbee_gratuity_till_date"
                 ]
             ]
         ]
@@ -233,23 +235,23 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"ashbee.tasks.all"
-# 	],
-# 	"daily": [
-# 		"ashbee.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"ashbee.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"ashbee.tasks.weekly"
-# 	]
-# 	"monthly": [
-# 		"ashbee.tasks.monthly"
-# 	]
-# }
+scheduler_events = {
+    # "all": [
+    # 	"ashbee.tasks.all"
+    # ],
+    # "daily": [
+    # 	"ashbee.tasks.daily"
+    # ],
+    "hourly": [
+        "ashbee.scheduler_events.employee.calculate_gross_gratuity"
+    ]
+    # "weekly": [
+    # 	"ashbee.tasks.weekly"
+    # ]
+    # "monthly": [
+    # 	"ashbee.tasks.monthly"
+    # ]
+}
 
 # Testing
 # -------
