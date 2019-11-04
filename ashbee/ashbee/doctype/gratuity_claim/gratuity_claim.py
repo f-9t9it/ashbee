@@ -4,10 +4,17 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
 class GratuityClaim(Document):
+	def validate(self):
+		gratuity_till_date = frappe.db.get_value('Employee', self.employee, 'ashbee_gratuity_till_date')
+		expected_gratuity = gratuity_till_date - self.claimed_amount
+		if expected_gratuity <= 0:
+			frappe.throw(_("Unable to claim more than calculated gratuity amount"))
+
 	def on_submit(self):
 		total_gratuity_paid = _get_total_gratuity_paid(self.employee, self.claimed_amount)
 		frappe.db.set_value('Employee', self.employee, 'ashbee_gratuity_paid_till_date', total_gratuity_paid)
