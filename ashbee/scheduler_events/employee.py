@@ -13,7 +13,7 @@ def calculate_gross_gratuity():
     """
 
     employees = frappe.db.sql("""
-        SELECT name, employee_name, date_of_joining, nationality
+        SELECT name, employee_name, date_of_joining, nationality, ashbee_gratuity_paid_till_date
         FROM `tabEmployee`
         WHERE status = 'Active'
     """, as_dict=1)
@@ -31,7 +31,8 @@ def calculate_gross_gratuity():
         salary = salaries.get(name, 0.00)
         total_gratuity = sum([
             _get_gross_gratuity(working_years, salary),
-            _get_per_day_gratuity(working_years, last_working_year_days, salary)
+            _get_per_day_gratuity(working_years, last_working_year_days, salary),
+            -employee.get('ashbee_gratuity_paid_till_date', 0)
         ])
 
         frappe.db.set_value('Employee', name, 'ashbee_gratuity_till_date', total_gratuity)
