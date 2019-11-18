@@ -55,3 +55,23 @@ def fill_item_name(func):
 
         return data
     return inner
+
+
+def total_to_column(column):
+    """
+    Accepts any function that have an array of data with `rate` and `qty` columns and computes it to specific column
+    :param column: Column total
+    :return: decorator function
+    """
+    def total_to_column_decorator(func):
+        def total(row):
+            row_with_total = row
+            row_with_total[column] = row.get('rate') * abs(row.get('qty'))
+            return row_with_total
+
+        def inner(*args):
+            return list(map(total, func(*args)))
+
+        return inner
+
+    return total_to_column_decorator
