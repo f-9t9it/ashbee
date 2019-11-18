@@ -54,7 +54,6 @@ def get_data(filters):
     data = []
     overhead_percent = filters.get('overhead_percent') / 100.00
 
-    # TODO: know if project_expenses is by date range filters(?)
     project_expenses = _get_project_expenses(filters)
     project_expenses['overhead_charges'] = _fill_overhead_charges(
         project_expenses,
@@ -209,7 +208,7 @@ def _get_central_labor_items(filters):
         SELECT
             ce.posting_date AS date,
             ce.name AS reference,
-            'Labor Allocation' AS description,
+            'Direct Labour' AS description,
             cep.labor_allocation AS rate,
             1 AS qty           
         FROM `tabCentral Expense Project` cep
@@ -227,7 +226,7 @@ def _get_central_expense_items(filters):
         SELECT
             ce.posting_date AS date,
             ce.name AS reference,
-            'Cost Allocation' AS description,
+            'Direct Cost Allocation' AS description,
             cep.allocation AS rate,
             1 AS qty           
         FROM `tabCentral Expense Project` cep
