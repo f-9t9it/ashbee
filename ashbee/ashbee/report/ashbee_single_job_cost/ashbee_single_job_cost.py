@@ -141,8 +141,8 @@ def _get_timesheet_details(filters):
     return frappe.db.sql("""
         SELECT 
             'Timesheet' AS description,
-            sum(costing_amount) AS labor_expenses, 
-            count(*) AS qty
+            COALESCE(SUM(costing_amount), 0) AS labor_expenses, 
+            COALESCE(COUNT(*), 0) AS qty
         FROM `tabTimesheet Detail`
         INNER JOIN `tabTimesheet`
         ON `tabTimesheet Detail`.parent = `tabTimesheet`.name
