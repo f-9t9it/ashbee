@@ -16,8 +16,12 @@ def execute(filters=None):
     # header = _get_header(filters)
 
     if data:
-        data.append(
-            _get_total_row(data, '<b>Grand Total</b>')
+        total_row = _get_total_row(data, '<b>Grand Total</b>')
+        overhead_charges = _fill_overhead_charges(total_row, filters.get('overhead_percent') / 100.00)
+        total_row['overhead_charges'] = overhead_charges
+        data.append(total_row)
+        data = list(
+            map(_compute_row_wise_total, data)
         )
 
     return columns, data
@@ -36,21 +40,22 @@ def get_columns():
         new_column("Central Labour", "central_labour", "Currency", 120),
         new_column("Central Expenses", "central_expenses", "Currency", 120),
         new_column("Indirect", "indirect", "Currency", 120),
-        new_column("Overhead Charges", "overhead_charges", "Currency", 120)
+        new_column("Overhead Charges", "overhead_charges", "Currency", 120),
+        new_column("Total", "total", "Currency", 120)
     ]
 
 
 def get_data(filters):
     data = []
-    overhead_percent = filters.get('overhead_percent') / 100.00
+    # overhead_percent = filters.get('overhead_percent') / 100.00
 
-    project_expenses = _get_project_expenses(filters)
-    project_expenses['overhead_charges'] = _fill_overhead_charges(
-        project_expenses,
-        overhead_percent
-    )
-
-    data.append(project_expenses)
+    # project_expenses = _get_project_expenses(filters)
+    # project_expenses['overhead_charges'] = _fill_overhead_charges(
+    #     project_expenses,
+    #     overhead_percent
+    # )
+    #
+    # data.append(project_expenses)
 
     entries = [
         _get_stock_ledger_entries(filters),
@@ -171,9 +176,9 @@ def _get_total_row(data, description='Total'):
 
 
 def _fill_overhead_charges(project_expenses, overhead_percent):
-    material_direct = project_expenses.get('material_direct') or 0
-    labor_expenses = project_expenses.get('labor_expenses') or 0
-    indirect = project_expenses.get('indirect') or 0
+    material_direct = project_expenses.get('material_direct', 0.00)
+    labor_expenses = project_expenses.get('labor_expenses', 0.00)
+    indirect = project_expenses.get('indirect', 0.00)
 
     return (material_direct + labor_expenses + indirect) * overhead_percent
 
@@ -290,3 +295,20 @@ def _get_columns_for_total():
         'indirect',
         'overhead_charges'
     ]
+
+
+def _compute_row_wise_total(row):
+    columns = [
+        'material_direct',
+        'labor_expenses',
+        'central_labour',
+        'central_expenses',
+        'indirect',
+        'overhead_charges'
+    ]
+
+    values = [row.get(column, 0.00) for column in columns]
+
+    row['total'] = sum(values)
+
+    return row
