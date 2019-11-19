@@ -75,3 +75,21 @@ def total_to_column(column):
         return inner
 
     return total_to_column_decorator
+
+
+def exclude_items(items):
+    """
+    Accepts any function that have an array of data and excludes the items
+    :param items: Excluded items
+    :return:
+    """
+    def exclude_items_decorator(func):
+        def filter_item(row):
+            return row['description'] not in items
+
+        def inner(*args):
+            return list(filter(filter_item, func(*args)))
+
+        return inner
+
+    return exclude_items_decorator

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from toolz import merge, partial, compose
 import frappe
 
-from ashbee.helpers import new_column, fill_item_name, total_to_column
+from ashbee.helpers import new_column, fill_item_name, total_to_column, exclude_items
 from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost, \
     get_central_allocations, get_indirect_costs
 
@@ -97,6 +97,7 @@ def _get_project_expenses(filters):
 
 @fill_item_name
 @total_to_column(column='material_direct')
+@exclude_items(items=['Othr-000-0'])
 def _get_stock_ledger_entries(filters):
     return frappe.db.sql("""
         SELECT 
