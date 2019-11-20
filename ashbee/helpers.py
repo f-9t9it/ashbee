@@ -93,3 +93,23 @@ def exclude_items(items):
         return inner
 
     return exclude_items_decorator
+
+
+def fill_timesheet_month(func):
+    """
+    Accepts any function that have an array of timesheets with column `description` and `timesheet_month'
+    :param func:
+    :return:
+    """
+    def apply_timesheet_month(row):
+        timesheet_row = row
+        timesheet_row['description'] = '{} ({})'.format(
+            row.get('description'),
+            row.get('timesheet_month')
+        )
+        return timesheet_row
+
+    def inner(*args):
+        return list(map(apply_timesheet_month, func(*args)))
+
+    return inner

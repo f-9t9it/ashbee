@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from toolz import merge, partial, compose
 import frappe
 
-from ashbee.helpers import new_column, fill_item_name, total_to_column, exclude_items
+from ashbee.helpers import new_column, fill_item_name, total_to_column, exclude_items, fill_timesheet_month
 from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost, \
     get_central_allocations, get_indirect_costs
 
@@ -112,36 +112,12 @@ def _get_stock_ledger_entries(filters):
     """, filters, as_dict=1)
 
 
+@fill_timesheet_month
 def _get_timesheet_details(filters):
-    # timesheet_row = {
-    #     'description': 'Timesheet',
-    #     'qty': 0,
-    #     'rate': 0.00
-    # }
-
-    # timesheet_details = frappe.db.sql("""
-    #     SELECT
-    #         sum(costing_amount) AS rate,
-    #         count(*) AS qty,
-    #         'Timesheet' AS description,
-    #     FROM `tabTimesheet Detail`
-    #     INNER JOIN `tabTimesheet`
-    #     ON `tabTimesheet Detail`.parent = `tabTimesheet`.name
-    #     WHERE `tabTimesheet Detail`.project=%(project)s
-    #     AND `tabTimesheet Detail`.docstatus=1
-    #     AND start_date BETWEEN %(from_date)s AND %(to_date)s
-    # """, filters, as_dict=1)
-
-    # if timesheet_details:
-    #     timesheet_detail = timesheet_details[0]
-    #     timesheet_row['qty'] = timesheet_detail.get('qty')
-    #     timesheet_row['rate'] = timesheet_detail.get('rate')
-
-    # return timesheet_row
-
     return frappe.db.sql("""
         SELECT 
             'Timesheet' AS description,
+            MONTHNAME(start_date) AS timesheet_month,
             COALESCE(SUM(costing_amount), 0) AS labor_expenses, 
             COALESCE(COUNT(*), 0) AS qty
         FROM `tabTimesheet Detail`
@@ -150,6 +126,7 @@ def _get_timesheet_details(filters):
         WHERE `tabTimesheet Detail`.project=%(project)s
         AND `tabTimesheet Detail`.docstatus=1
         AND start_date BETWEEN %(from_date)s AND %(to_date)s
+        GROUP BY MONTH(start_date)
     """, filters, as_dict=1)
 
 
