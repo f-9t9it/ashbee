@@ -105,7 +105,7 @@ def get_central_labour(filters):
 def get_all_material_returns(filters):
     filters.update({'project': frappe.db.get_single_value('Ashbee Settings', 'central_project')})
     return frappe.db.sql("""
-        SELECT project, SUM(qty) AS material_return
+        SELECT project, SUM(amount) AS material_return
         FROM `tabStock Entry Detail`
         INNER JOIN `tabStock Entry`
         ON `tabStock Entry Detail`.parent = `tabStock Entry`.name

@@ -98,8 +98,8 @@ def get_columns(filters):
         {
             "label": _("Material Return"),
             "fieldname": "material_return",
-            "fieldtype": "Integer",
-            "width": 60
+            "fieldtype": "Currency",
+            "width": 120
         },
         {
             "label": _("Total"),
@@ -158,6 +158,7 @@ def get_data(filters):
     )
 
     _fill_central_costs(res_data, central_costs)
+    _fill_zeros('material_return', res_data)
 
     # _fill_central_fields(
     #     res_data,
@@ -271,7 +272,7 @@ def _fill_totals(data):
         'central_expenses': 0.000,
         'indirect_expenses': 0.000,
         'overhead_charges': 0.000,
-        'material_return': 0,
+        'material_return': 0.000,
         'total': 0.00
     }
 
@@ -293,7 +294,8 @@ def _fill_rows_total(data):
         'central_labour',
         'central_expenses',
         'indirect_expenses',
-        'overhead_charges'
+        'overhead_charges',
+        'material_return'
     ]
 
     for row in data:
@@ -311,3 +313,8 @@ def _fill_rows_project_code(data):
         project = row.get('project')
         if project_codes.get(project, None):
             row['project_code'] = project_codes[project]
+
+
+def _fill_zeros(column, data):
+    for row in data:
+        row[column] = row.get(column) or 0.000
