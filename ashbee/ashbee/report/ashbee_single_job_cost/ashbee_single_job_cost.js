@@ -30,6 +30,12 @@ frappe.query_reports["Ashbee Single Job Cost"] = {
 			"label": __("Overhead Charge"),
 			"fieldtype": "Percent",
 			"default": 20
+		},
+		{
+			"fieldname": "date_ascending",
+			"label": __("Date Ascending"),
+			"fieldtype": "Check",
+			"default": 1
 		}
 	]
 }

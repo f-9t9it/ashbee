@@ -1,9 +1,9 @@
 # Copyright (c) 2013, 9t9IT and contributors
 # For license information, please see license.txt
-
 from __future__ import unicode_literals
 from toolz import merge, partial, compose
 import frappe
+import pprint
 
 from ashbee.helpers import new_column, fill_item_name, total_to_column, exclude_items, fill_timesheet_month
 from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost, \
@@ -63,11 +63,18 @@ def get_data(filters):
         _get_central_labor_items(filters),
         _get_central_expense_items(filters),
         _get_indirect_cost_items(filters),
-        _get_timesheet_details(filters)
     ]
 
     for entry in entries:
         data.extend(entry)
+
+    data.sort(
+        key=lambda x: x['date'],
+        reverse=filters.get('date_ascending', False)
+    )
+
+    # Separated as timesheet has no date for sort
+    data.extend(_get_timesheet_details(filters))
 
     return data
 
