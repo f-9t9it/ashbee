@@ -5,7 +5,7 @@ from toolz import merge, partial, compose
 import frappe
 import pprint
 
-from ashbee.helpers import new_column, fill_item_name, total_to_column, exclude_items, fill_timesheet_month
+from ashbee.helpers import new_column, fill_item_name, total_to_column, exclude_items, fill_timesheet_month, sort_timesheet
 from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost, \
     get_central_allocations, get_indirect_costs
 
@@ -119,6 +119,7 @@ def _get_stock_ledger_entries(filters):
     """, filters, as_dict=1)
 
 
+@sort_timesheet
 @fill_timesheet_month
 def _get_timesheet_details(filters):
     return frappe.db.sql("""
@@ -126,7 +127,8 @@ def _get_timesheet_details(filters):
             'Timesheet' AS description,
             MONTHNAME(start_date) AS timesheet_month,
             COALESCE(SUM(costing_amount), 0) AS labor_expenses, 
-            COALESCE(COUNT(*), 0) AS qty
+            COALESCE(COUNT(*), 0) AS qty,
+            start_date
         FROM `tabTimesheet Detail`
         INNER JOIN `tabTimesheet`
         ON `tabTimesheet Detail`.parent = `tabTimesheet`.name

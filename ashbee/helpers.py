@@ -95,6 +95,21 @@ def exclude_items(items):
     return exclude_items_decorator
 
 
+def sort_timesheet(func):
+    """
+    Accepts any timesheet that have an array of timesheets with column `start_date`
+    :param func:
+    :return:
+    """
+    def inner(*args):
+        filters = args[0]
+        data = func(*args)
+        data.sort(key=lambda x: x['start_date'], reverse=filters.get('date_ascending', False))
+        return data
+
+    return inner
+
+
 def fill_timesheet_month(func):
     """
     Accepts any function that have an array of timesheets with column `description` and `timesheet_month'
