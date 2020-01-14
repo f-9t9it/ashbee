@@ -66,3 +66,19 @@ def get_indirect_costs(filters):
         AND start_date <= %(to_date)s
         AND end_date >= %(from_date)s
     """, filters, as_dict=1)[0]
+
+
+def get_direct_costs(filters):
+    return frappe.db.sql("""
+        SELECT 
+            COALESCE(SUM(item.direct_cost), 0) AS material_direct,
+            COUNT(*) AS qty
+        FROM `tabDirect Cost Item` item
+        INNER JOIN `tabDirect Cost`
+        ON item.parent = `tabDirect Cost`.name
+        WHERE `tabDirect Cost`.docstatus = 1
+        AND job_no = %(project)s
+        AND item.posting_date
+        BETWEEN %(from_date)s AND %(to_date)s
+    """, filters, as_dict=1)[0]
+
