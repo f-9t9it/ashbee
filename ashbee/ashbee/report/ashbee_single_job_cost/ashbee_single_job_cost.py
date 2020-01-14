@@ -7,7 +7,7 @@ import pprint
 
 from ashbee.helpers import new_column, fill_item_name, total_to_column, exclude_items, fill_timesheet_month, sort_timesheet
 from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost, \
-    get_central_allocations, get_indirect_costs
+    get_central_allocations, get_indirect_costs, get_direct_costs
 
 
 def execute(filters=None):
@@ -75,6 +75,11 @@ def get_data(filters):
 
     # Separated as timesheet has no date for sort
     data.extend(_get_timesheet_details(filters))
+
+    # Direct Cost
+    direct_costs = get_direct_costs(filters)
+    direct_costs.update({'description': 'Direct Cost'})
+    data.append(direct_costs)
 
     return data
 
