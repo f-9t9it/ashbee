@@ -25,14 +25,18 @@ class LPO(Document):
 	def _calculate_items_total(self):
 		total_qty = 0
 		total_amount = 0.00
+		total_vat = 0.00
 
 		for item in self.items:
 			item.amount = item.qty * item.rate
+			item.vat_amount = item.amount * (item.vat_percentage / 100.00)
 			total_qty = total_qty + item.qty
 			total_amount = total_amount + item.amount
+			total_vat = total_vat + item.vat_amount
 
 		self.total_qty = total_qty
 		self.total = total_amount
+		self.vat_total = total_vat
 		self.net_total = total_amount
 		self.base_total = total_amount
 		self.base_net_total = total_amount
