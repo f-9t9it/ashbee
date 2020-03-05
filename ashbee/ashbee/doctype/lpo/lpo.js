@@ -56,15 +56,22 @@ frappe.ui.form.on('LPO', {
 frappe.ui.form.on('LPO Item', {
 	rate: function(frm, cdt, cdn) {
 		_update_amount(frm, cdt, cdn);
+		_update_vat_amount(frm, cdt, cdn);
 		_update_total_amount(frm);
 		_update_total_qty(frm);
 		frm.refresh();
 	},
 	qty: function(frm, cdt, cdn) {
 		_update_amount(frm, cdt, cdn);
+		_update_vat_amount(frm, cdt, cdn);
 		_update_total_amount(frm);
 		_update_total_qty(frm);
 		frm.refresh();
+	},
+	vat_percentage: function(frm, cdt, cdn) {
+	    _update_vat_amount(frm, cdt, cdn);
+	    _update_total_amount(frm);
+	    frm.refresh();
 	},
 	account_head: function(frm, cdt, cdn) {
 		_update_description(frm, cdt, cdn);
@@ -97,15 +104,18 @@ var _update_amount = function(frm, cdt, cdn) {
 
 var _update_total_amount = function(frm) {
 	var total = 0.00;
+    var vat_total = 0.00;
 
 	$.each(frm.doc.items, function(i, v) {
 		total = total + v.amount;
+		vat_total = vat_total + v.vat_amount;
 	});
 
 	frm.set_value('total', total);
-	frm.set_value('net_total', total);
 	frm.set_value('base_total', total);
-	frm.set_value('base_net_total', total);
+	frm.set_value('vat_total', vat_total);
+	frm.set_value('net_total', total + vat_total);
+	frm.set_value('base_net_total', total + vat_total);
 };
 
 var _update_total_qty = function(frm) {
@@ -116,4 +126,10 @@ var _update_total_qty = function(frm) {
 	});
 
 	frm.set_value('total_qty', total);
-}
+};
+
+var _update_vat_amount = function(frm, cdt, cdn) {
+	var item = locals[cdt][cdn];
+	frappe.model.set_value(cdt, cdn, 'vat_amount', item.rate * item.qty * (item.vat_percentage / 100.00));
+	frm.refresh_field('items');
+};

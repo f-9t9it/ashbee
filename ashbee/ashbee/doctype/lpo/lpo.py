@@ -11,10 +11,6 @@ from frappe.utils.data import money_in_words
 class LPO(Document):
 	def validate(self):
 		self._calculate_items_total()
-
-		self.base_net_total = self.base_total
-		self.net_total = self.total
-
 		self._set_taxes_and_charges()
 		self._calculate_taxes_and_charges()
 		self._apply_discount()
@@ -36,9 +32,9 @@ class LPO(Document):
 
 		self.total_qty = total_qty
 		self.total = total_amount
+		self.base_total = total_amount
 		self.vat_total = total_vat
 		self.net_total = total_amount
-		self.base_total = total_amount
 		self.base_net_total = total_amount
 
 	def _calculate_taxes_after_discount(self):
@@ -100,6 +96,8 @@ class LPO(Document):
 		self.total_taxes_and_charges = self.base_total_taxes_and_charges
 
 	def _calculate_totals(self):
+		self.base_net_total = self.base_net_total + self.vat_total
+		self.net_total = self.net_total + self.vat_total
 		self.base_grand_total = self.base_net_total + self.base_total_taxes_and_charges
 		self.grand_total = self.net_total + self.total_taxes_and_charges
 
