@@ -16,13 +16,12 @@ def get_latest_valuation_rate(item_code):
             filters={'variant_of': item_code}
         )
     )
-    latest_valuation_rate = first(
-        frappe.get_all(
-            'Stock Ledger Entry',
-            filters=[['item_code', 'in', variants]],
-            fields=['valuation_rate'],
-        )
+    sl_entries = frappe.get_all(
+        'Stock Ledger Entry',
+        filters=[['item_code', 'in', variants]],
+        fields=['valuation_rate'],
     )
-    if latest_valuation_rate:
+    if sl_entries:
+        latest_valuation_rate = first(sl_entries)
         valuation_rate = latest_valuation_rate.get('valuation_rate')
     return valuation_rate
