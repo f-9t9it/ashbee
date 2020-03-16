@@ -17,6 +17,7 @@ frappe.ui.form.on('LPO', {
 	},
 	supplier: function(frm) {
 		frm.trigger('setup_queries');
+		erpnext.utils.get_party_details(frm, null, null, function() {});
 	},
 	refresh: function(frm) {
 		if (frm.doc.taxes[0]) {
