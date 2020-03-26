@@ -206,7 +206,7 @@ def _get_purchase_cost_items(filters):
         SELECT
             doc.posting_date AS date,
             doc.name AS reference,
-            item.item_code AS description,
+            'Purchase Invoice' AS description,
             item.rate,
             item.qty
         FROM `tabPurchase Invoice Item` item
