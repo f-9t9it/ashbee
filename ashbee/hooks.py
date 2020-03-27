@@ -130,7 +130,8 @@ fixtures = [
                     "Salary Slip-ashbee_sb",
                     "Employee-ashbee_gratuity_details",
                     "Employee-ashbee_gratuity_till_date",
-                    "Employee-ashbee_gratuity_paid_till_date"
+                    "Employee-ashbee_gratuity_paid_till_date",
+                    "Purchase Order-project"
                 ]
             ]
         ]

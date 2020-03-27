@@ -73,13 +73,11 @@ def get_data(filters):
         reverse=filters.get('date_ascending', False)
     )
 
+    # Direct Cost
+    data.extend(_get_direct_cost_items(filters))
+
     # Separated as timesheet has no date for sort
     data.extend(_get_timesheet_details(filters))
-
-    # Direct Cost
-    direct_costs = get_direct_costs(filters)
-    direct_costs.update({'description': 'Direct Cost'})
-    data.append(direct_costs)
 
     return data
 
@@ -206,7 +204,7 @@ def _get_purchase_cost_items(filters):
         SELECT
             doc.posting_date AS date,
             doc.name AS reference,
-            item.item_code AS description,
+            'Purchase Invoice' AS description,
             item.rate,
             item.qty
         FROM `tabPurchase Invoice Item` item
@@ -273,6 +271,24 @@ def _get_indirect_cost_items(filters):
         AND project = %(project)s
         AND start_date <= %(to_date)s
         AND end_date >= %(from_date)s
+    """, filters, as_dict=1)
+
+
+def _get_direct_cost_items(filters):
+    return frappe.db.sql("""
+        SELECT 
+            item.posting_date AS date,
+            `tabDirect Cost`.name AS reference,
+            item.direct_cost AS material_direct,
+            item.narration AS description,
+            1 AS qty
+        FROM `tabDirect Cost Item` item
+        INNER JOIN `tabDirect Cost`
+        ON item.parent = `tabDirect Cost`.name
+        WHERE `tabDirect Cost`.docstatus = 1
+        AND job_no = %(project)s
+        AND item.posting_date
+        BETWEEN %(from_date)s AND %(to_date)s
     """, filters, as_dict=1)
 
 
