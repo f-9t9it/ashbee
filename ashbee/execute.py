@@ -183,3 +183,27 @@ def set_total_direct_costs():
         computed = computed + 1
 
         print('Processed {}/{}'.format(computed, max_direct_cost))
+
+
+def set_central_expense_company():
+    """
+    Set Central Expense company
+    :return:
+    """
+    projects = list(map(lambda x: x['name'], frappe.get_all('Company')))
+
+    print('Set Central Expenses company:')
+    for i, project in enumerate(projects):
+        print('({}) {}'.format(i, project))
+    company_selected = int(input())
+
+    confirm = input('Would you like to update Central Expenses with {} as company (y/n): '.format(projects[company_selected]))
+
+    if confirm == 'y':
+        frappe.db.sql("""
+            UPDATE `tabCentral Expense`
+            SET company = %s
+        """, projects[company_selected])
+        print('Updated all Central Expenses.')
+    else:
+        print('Aborted.')

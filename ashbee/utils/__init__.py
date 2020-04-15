@@ -197,6 +197,7 @@ def get_excluded_projects():
     return [project.get('project') for project in projects]
 
 
+# TODO: add company field
 def check_central_expense(posting_date):
     central_expense = _get_central_expense(posting_date)
 
@@ -252,6 +253,7 @@ def _float_or_zero(value):
     return attr_value
 
 
+# TODO: check for any usage
 def _get_central_expense(posting_date):
     central_expense = frappe.db.sql("""
         SELECT name FROM `tabCentral Expense`
