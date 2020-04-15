@@ -28,6 +28,19 @@ def stock_entry_cancel(doc, method):
     _cancel_central_entry(doc)
 
 
+def _check_central_expense(doc):
+    central_expense = frappe.db.sql("""
+            SELECT name FROM `tabCentral Expense`
+            WHERE docstatus = 1
+            AND from_date <= %(posting_date)s
+            AND to_date >= %(posting_date)s
+            AND company = %(company)s
+        """, {'posting_date': doc.posting_date, 'company': doc.company}, as_dict=True)
+
+    if central_expense:
+        frappe.throw(_('Unable to transact. This month is closed with Central Expense.'))
+
+
 def _check_receipt_existed(doc):
     validate_material_issue = frappe.db.get_single_value(
         'Ashbee Settings',
