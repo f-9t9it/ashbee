@@ -29,6 +29,10 @@ def stock_entry_cancel(doc, method):
 
 
 def _check_central_expense(doc):
+    validate_central_expense = frappe.db.get_single_value('Ashbee Settings', 'validate_central_expense')
+    if not validate_central_expense:
+        return
+
     central_expense = frappe.db.sql("""
             SELECT name FROM `tabCentral Expense`
             WHERE docstatus = 1
