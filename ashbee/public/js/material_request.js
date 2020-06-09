@@ -10,7 +10,14 @@ frappe.ui.form.on('Material Request', {
     },
     ashbee_warehouse: function(frm) {
         _set_items_warehouse(frm);
-    }
+    },
+    company: function(frm) {
+        frm.set_query("project", function() {
+          return {
+            filters: { company: frm.doc.company }
+          };
+        });
+    },
 });
 
 
