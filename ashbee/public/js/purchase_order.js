@@ -7,6 +7,13 @@ ashbee.buying.PurchaseOrderController = erpnext.buying.PurchaseOrderController.e
             return { query: 'ashbee.queries.item_query' };
         });
     },
+    company: function(frm) {
+      this.frm.set_query("project", () => {
+          return {
+            filters: { company: this.frm.doc.company }
+          };
+        });
+    },
     items_add: function(doc, cdt, cdn) {
         if (!doc.project) {
             return;
