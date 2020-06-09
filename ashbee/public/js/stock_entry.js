@@ -57,6 +57,13 @@ frappe.ui.form.on('Stock Entry', {
 
 		_setup_project_field(frm);
 	},
+	company: function(frm) {
+		frm.set_query("project", function() {
+			return {
+				filters: { company: frm.doc.company }
+			};
+		});
+	},
 	ashbee_issue_items: function(frm) {
 		var args = {"stock_entry":frm.doc.ashbee_issue_items};
 		return frappe.call({
