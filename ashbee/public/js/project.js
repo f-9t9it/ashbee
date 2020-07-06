@@ -5,6 +5,7 @@ frappe.ui.form.on('Project', {
         _hide_overhead_charges(frm);
         // _set_overhead_charges(frm);
         _set_project_code_read_only(frm);
+        _move_company_field(frm);
     }
 });
 
@@ -19,17 +20,22 @@ var _hide_overhead_charges = function(frm) {
     frm.set_df_property('ashbee_total_overhead_charges', 'hidden', 1);
 };
 
-
-var _set_overhead_charges = function(frm) {
-    const costs = [
-        frm.doc.total_costing_amount, // labour
-        frm.doc.ashbee_total_direct_cost,
-        frm.doc.total_consumed_material_cost, // stock entry
-        frm.doc.ashbee_total_indirect_cost
-    ];
-
-    frm.set_value('ashbee_total_overhead_charges', costs.reduce(_compute_sum) * OVERHEAD_MULTIPLIER);
+var _move_company_field = function(frm) {
+    const company = frm.fields_dict['company'].$wrapper;
+    const department = frm.fields_dict['department'].$wrapper;
+    company.insertBefore(department);
 };
+
+// var _set_overhead_charges = function(frm) {
+//     const costs = [
+//         frm.doc.total_costing_amount, // labour
+//         frm.doc.ashbee_total_direct_cost,
+//         frm.doc.total_consumed_material_cost, // stock entry
+//         frm.doc.ashbee_total_indirect_cost
+//     ];
+//
+//     frm.set_value('ashbee_total_overhead_charges', costs.reduce(_compute_sum) * OVERHEAD_MULTIPLIER);
+// };
 
 // helpers
 var _compute_sum = function(total, num) {
