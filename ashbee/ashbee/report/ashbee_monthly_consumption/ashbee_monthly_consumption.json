@@ -1,0 +1,34 @@
+{
+ "add_total_row": 0,
+ "creation": "2020-07-06 16:33:25.082539",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "Ashbee - New",
+ "modified": "2020-07-06 16:33:27.401585",
+ "modified_by": "Administrator",
+ "module": "Ashbee",
+ "name": "Ashbee Monthly Consumption",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Stock Entry",
+ "report_name": "Ashbee Monthly Consumption",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Manufacturing Manager"
+  }
+ ]
+}

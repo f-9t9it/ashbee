@@ -307,6 +307,7 @@ def _get_columns_for_total():
 
 def _compute_row_wise_total(row):
     columns = [
+        'rate',
         'material_direct',
         'labor_expenses',
         'central_labour',
