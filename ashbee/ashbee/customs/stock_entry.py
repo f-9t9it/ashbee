@@ -137,8 +137,8 @@ def _check_item_already_issued(doc):
             SELECT count(*) AS items_count FROM `tabStock Ledger Entry` AS sle
             WHERE sle.item_code=%s AND sle.project=%s
         """, (item.item_code, doc.project), as_dict=1)
-
-        if sle['items_count'] == 0:
+        
+        if sle and sle[0].get('items_count') == 0:
             frappe.throw(
                 _('Item {} was not issued to Project {}'.format(item.item_code, doc.project))
             )
