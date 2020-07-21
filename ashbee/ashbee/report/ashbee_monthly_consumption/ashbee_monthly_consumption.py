@@ -49,6 +49,19 @@ def _get_data(filters):
 		{}
 	)
 
+	pr_data = reduce(
+		make_data,
+		frappe.db.sql("""
+			SELECT
+				1 as is_return,
+				grand_total as total_amount
+			FROM `tabPurchase Receipt`
+			WHERE posting_date BETWEEN %(from_date)s AND %(to_date)s
+			AND set_warehouse = %(warehouse)s AND docstatus = 1
+		""", filters, as_dict=1),
+		{}
+	)
+
 	opening_se_data = reduce(
 		make_data,
 		frappe.db.sql("""
@@ -62,7 +75,25 @@ def _get_data(filters):
 		{}
 	)
 
-	return [_merge_closing_opening(se_data, opening_se_data)]
+	opening_pr_data = reduce(
+		make_data,
+		frappe.db.sql("""
+				SELECT
+					1 as is_return,
+					grand_total as total_amount
+				FROM `tabPurchase Receipt`
+				WHERE posting_date < %(from_date)s
+				AND set_warehouse = %(warehouse)s AND docstatus = 1
+			""", filters, as_dict=1),
+		{}
+	)
+
+	return [
+		_merge_closing_opening(
+			_merge_dict([se_data, pr_data]),
+			_merge_dict([opening_se_data, opening_pr_data])
+		)
+	]
 
 
 def _merge_closing_opening(closing, opening):
@@ -73,3 +104,14 @@ def _merge_closing_opening(closing, opening):
 		'stock_issued': closing['stock_issued'],
 		'closing_stock': opening_balance + closing['purchase_return'] - closing['stock_issued']
 	}
+
+
+def _merge_dict(data):
+	def make_data(rdata, row):
+		for key, value in row.items():
+			if key not in rdata:
+				rdata[key] = value
+			else:
+				rdata[key] = rdata[key] + value
+		return rdata
+	return reduce(make_data, data, {})
