@@ -26,8 +26,8 @@ def _set_ots(doc):
         filters=[['name', 'in', timesheets], ['docstatus', '=', '1']]
     )[0]
 
-    doc.ashbee_ot1 = timesheets_ots.get('ashbee_ot1', 0)
-    doc.ashbee_ot2 = timesheets_ots.get('ashbee_ot2', 0)
+    doc.ashbee_ot1 = timesheets_ots.get('ashbee_ot1', 0) or 0
+    doc.ashbee_ot2 = timesheets_ots.get('ashbee_ot2', 0) or 0
 
 
 def _set_ot_salary_component(doc):
