@@ -156,7 +156,7 @@ def _recalculate_timesheets(timesheets, filters, basics):
 
 	for timesheet in timesheets:
 		employee = timesheet.get('employee')
-		hourly_cost = hourly_costs.get(employee)
+		hourly_cost = hourly_costs.get(employee, 0) or 0
 
 		timesheet['hourly_cost'] = hourly_cost
 		timesheet['normal_cost'] = hourly_cost * timesheet.get('normal_hours')
