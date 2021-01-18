@@ -9,7 +9,7 @@ from frappe.utils.data import formatdate, now_datetime
 from ashbee.helpers import round_off_rows
 from ashbee.utils import get_all_timesheet_details, get_all_direct_costs, get_all_material_issues,\
     get_all_indirect_costs, get_all_material_returns, get_central_costs, get_excluded_projects
-
+from toolz import pluck
 
 def execute(filters=None):
     columns, data = get_columns(filters), get_data(filters)
@@ -167,7 +167,10 @@ def get_data(filters):
     #     total_sum_costs
     # )
 
-    return res_data
+    projects = list(pluck("name", frappe.get_all("Project", filters={"company": filters.get("company")})))
+    projects_data = list(filter(lambda x: x.get("project") in projects, res_data))
+
+    return projects_data
 
 
 def _get_print_details_row(filters):
