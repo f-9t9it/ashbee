@@ -16,12 +16,12 @@ class CentralExpense(Document):
         self.projects = []
 
         # date_range = get_month_date_range(self.posting_date)
-        date_range = {'from_date': self.from_date, 'to_date': self.to_date}
+        filters = {'from_date': self.from_date, 'to_date': self.to_date, 'company': self.company}
 
-        central_entries = _get_central_entries(date_range)
+        central_entries = _get_central_entries(filters)
         self._set_central_entries(central_entries)
 
-        projects = get_costs_by_projects(date_range)
+        projects = get_costs_by_projects(filters)
         self._set_projects(projects)
 
     def on_submit(self):
@@ -56,13 +56,14 @@ class CentralExpense(Document):
         self.total_cost = total_cost
 
 
-def _get_central_entries(date_range):
+def _get_central_entries(filters):
     return frappe.db.sql("""
 		SELECT name AS central_entry, voucher_type AS entry_type, allocation
 		FROM `tabCentral Entry`
 		WHERE posting_date BETWEEN %(from_date)s AND %(to_date)s
 		AND docstatus = 1
-	""", date_range, as_dict=1)
+        AND company = %(company)s
+	""", filters, as_dict=1)
 
 
 def _append_and_sum_central_entry(central_expense, x, y):
