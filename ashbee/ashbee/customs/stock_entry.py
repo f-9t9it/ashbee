@@ -166,7 +166,8 @@ def _create_central_entry(doc):
         'posting_date': doc.posting_date,
         'voucher_type': 'Stock Entry',
         'voucher_no': doc.name,
-        'allocation': doc.total_amount
+        'allocation': doc.total_amount,
+        'company': doc.company,
     }).insert()
 
 

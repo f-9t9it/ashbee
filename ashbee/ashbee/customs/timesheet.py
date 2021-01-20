@@ -44,5 +44,6 @@ def _create_central_entry(doc, detail):
         'voucher_type': 'Timesheet',
         'voucher_no': doc.name,
         'voucher_detail_no': detail.name,
-        'allocation': detail.costing_amount
+        'allocation': detail.costing_amount,
+        'company': doc.company,
     }).insert()

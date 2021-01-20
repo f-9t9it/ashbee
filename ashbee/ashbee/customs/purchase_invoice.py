@@ -42,7 +42,8 @@ def _create_central_entry(doc, item):
         'voucher_type': 'Purchase Invoice',
         'voucher_no': doc.name,
         'voucher_detail_no': item.name,
-        'allocation': item.amount
+        'allocation': item.amount,
+        'company': doc.company, 
     }).insert()
 
     central_entry.submit()
