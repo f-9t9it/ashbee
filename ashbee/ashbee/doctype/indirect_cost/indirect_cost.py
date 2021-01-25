@@ -17,7 +17,8 @@ class IndirectCost(Document):
 		if not self.items:
 			filters = {
 				'from_date': self.start_date,
-				'to_date': self.end_date
+				'to_date': self.end_date,
+				'company': self.company,
 			}
 
 			projects = get_costs_by_projects(filters)
@@ -79,42 +80,3 @@ def _get_total_cost(project, is_central):
 def _set_total_cost(project, total_cost, is_central):
 	field = 'ashbee_total_central_cost' if is_central else 'ashbee_total_indirect_cost'
 	frappe.db.set_value('Project', project, field, total_cost)
-
-
-# def _sum_material_issues_by_projects(_, material_issues):
-# 	"""
-# 	A reducer; sum all project-related material issues.
-# 	:param _: a reduced object
-# 	:param material_issues: all material issues
-# 	:return _: summed material i
-# ssues group by projects
-# 	"""
-# 	project = material_issues['project']
-# 	value = material_issues['total_outgoing_value']
-#
-# 	if project in _:
-# 		_[project] = _[project] + value
-# 	else:
-# 		_.update({project: value})
-#
-# 	return _
-
-
-# def _get_material_issues(start_date, end_date, is_central):
-# 	"""
-# 	Get all submitted Stock Entry material issues
-# 	 with project where project is active
-# 	:param start_date:
-# 	:param end_date:
-# 	:return: list
-# 	"""
-# 	return frappe.db.sql("""
-# 		SELECT `tabStock Entry`.name, `tabStock Entry`.total_outgoing_value, project
-# 		FROM `tabStock Entry`
-# 		INNER JOIN `tabProject` ON `tabProject`.name = `tabStock Entry`.project
-# 		WHERE `tabStock Entry`.posting_date BETWEEN %s AND %s
-# 		AND `tabStock Entry`.purpose = 'Material Issue'
-# 		AND `tabStock Entry`.docstatus = 1
-# 		AND `tabProject`.is_active = 'Yes'
-# 		AND `tabStock Entry`.ashbee_production_issue = %i
-# 	""", (start_date, end_date, is_central), as_dict=1)

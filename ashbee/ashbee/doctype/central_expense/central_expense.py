@@ -41,7 +41,7 @@ class CentralExpense(Document):
         self.total_allocation = self.labor_allocation + self.cost_allocation
 
     def _set_projects(self, projects):
-        total_cost = reduce(lambda x, y: x + y, projects.values())
+        total_cost = reduce(lambda x, y: x + y, projects.values(), 0)
         for project, cost in projects.items():
             ratio = cost / total_cost
             allocation = self.cost_allocation * ratio

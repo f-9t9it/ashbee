@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.utils.data import get_first_day, get_last_day
+from toolz import pluck, concatv
 
 
 def calculate_overhead_charges(project):
@@ -13,19 +14,24 @@ def calculate_overhead_charges(project):
     :param project: Project doctype
     :return:
     """
-    costing_sum = sum([
-        project.total_costing_amount,
-        project.ashbee_total_direct_cost,
-        project.total_consumed_material_cost,
-        project.ashbee_total_indirect_cost
-    ])
+    costing_sum = sum(
+        [
+            project.total_costing_amount,
+            project.ashbee_total_direct_cost,
+            project.total_consumed_material_cost,
+            project.ashbee_total_indirect_cost,
+        ]
+    )
 
     return costing_sum * 0.20
 
 
 def get_all_material_issues(filters):
-    filters.update({'project': frappe.db.get_single_value('Ashbee Settings', 'central_project')})
-    return frappe.db.sql("""
+    filters.update(
+        {"project": frappe.db.get_single_value("Ashbee Settings", "central_project")}
+    )
+    return frappe.db.sql(
+        """
         SELECT project, SUM(total_outgoing_value) AS sum_total_outgoing_value
         FROM `tabStock Entry`
         WHERE docstatus = 1
@@ -35,12 +41,18 @@ def get_all_material_issues(filters):
         AND ashbee_production_issue = 0
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         GROUP BY project
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
 def get_all_timesheet_details(filters):
-    filters.update({'project': frappe.db.get_single_value('Ashbee Settings', 'central_project')})
-    return frappe.db.sql("""
+    filters.update(
+        {"project": frappe.db.get_single_value("Ashbee Settings", "central_project")}
+    )
+    return frappe.db.sql(
+        """
         SELECT project, SUM(costing_amount) AS sum_costing_amount
         FROM `tabTimesheet Detail`
         WHERE docstatus = 1
@@ -48,23 +60,33 @@ def get_all_timesheet_details(filters):
         AND DATE(from_time) <= %(to_date)s
         AND DATE(to_time) >= %(from_date)s
         GROUP BY project
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
 def get_all_direct_costs(filters):
-    filters.update({'project': frappe.db.get_single_value('Ashbee Settings', 'central_project')})
-    return frappe.db.sql("""
+    filters.update(
+        {"project": frappe.db.get_single_value("Ashbee Settings", "central_project")}
+    )
+    return frappe.db.sql(
+        """
         SELECT job_no as project, SUM(direct_cost) AS sum_direct_cost
         FROM `tabDirect Cost Item`
         WHERE docstatus = 1
         AND job_no != %(project)s
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         GROUP BY job_no
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
 def get_all_indirect_costs(filters):
-    return frappe.db.sql("""
+    return frappe.db.sql(
+        """
         SELECT project, SUM(allocated) AS sum_allocated
         FROM `tabIndirect Cost Item`
         INNER JOIN `tabIndirect Cost`
@@ -72,12 +94,18 @@ def get_all_indirect_costs(filters):
         WHERE `tabIndirect Cost`.docstatus = 1
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         GROUP BY project
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
 def get_central_expenses(filters):
-    filters.update({'project': frappe.db.get_single_value('Ashbee Settings', 'central_project')})
-    res = frappe.db.sql("""
+    filters.update(
+        {"project": frappe.db.get_single_value("Ashbee Settings", "central_project")}
+    )
+    res = frappe.db.sql(
+        """
             SELECT SUM(total_outgoing_value)
             FROM `tabStock Entry`
             WHERE docstatus = 1
@@ -85,26 +113,36 @@ def get_central_expenses(filters):
             AND project = %(project)s
             AND ashbee_is_return = 0
             AND posting_date BETWEEN %(from_date)s AND %(to_date)s
-        """, filters)
+        """,
+        filters,
+    )
     return res[0][0] if res else 0.00
 
 
 def get_central_labour(filters):
-    filters.update({'project': frappe.db.get_single_value('Ashbee Settings', 'central_project')})
-    res = frappe.db.sql("""
+    filters.update(
+        {"project": frappe.db.get_single_value("Ashbee Settings", "central_project")}
+    )
+    res = frappe.db.sql(
+        """
             SELECT SUM(costing_amount)
             FROM `tabTimesheet Detail`
             WHERE docstatus = 1
             AND project = %(project)s
             AND DATE(from_time) <= %(to_date)s
             AND DATE(to_time) >= %(from_date)s
-        """, filters)
+        """,
+        filters,
+    )
     return res[0][0] if res else 0.00
 
 
 def get_all_material_returns(filters):
-    filters.update({'project': frappe.db.get_single_value('Ashbee Settings', 'central_project')})
-    return frappe.db.sql("""
+    filters.update(
+        {"project": frappe.db.get_single_value("Ashbee Settings", "central_project")}
+    )
+    return frappe.db.sql(
+        """
         SELECT project, SUM(amount) AS material_return
         FROM `tabStock Entry Detail`
         INNER JOIN `tabStock Entry`
@@ -115,7 +153,10 @@ def get_all_material_returns(filters):
         AND `tabStock Entry`.purpose = 'Material Issue'
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
         GROUP BY project
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
 def get_costs_by_projects(filters):
@@ -123,13 +164,19 @@ def get_costs_by_projects(filters):
     material_issues = get_all_material_issues(filters)
     timesheet_details = get_all_timesheet_details(filters)
 
-    projects = _sum_costs_by_projects(
-        direct_costs,
-        material_issues,
-        timesheet_details
-    )
+    projects = _sum_costs_by_projects(direct_costs, material_issues, timesheet_details)
 
     excluded_projects = get_excluded_projects()
+    projects_not_in_company = list(
+        pluck(
+            "name",
+            frappe.get_all(
+                "Project", filters=[["company", "!=", filters.get("company")]]
+            ),
+        )
+    )
+
+    excluded_projects = list(concatv(excluded_projects, projects_not_in_company))
 
     for excluded_project in excluded_projects:
         projects.pop(excluded_project, None)
@@ -139,48 +186,51 @@ def get_costs_by_projects(filters):
 
 def get_month_date_range(posting_date):
     return {
-        'from_date': get_first_day(posting_date),
-        'to_date': get_last_day(posting_date)
+        "from_date": get_first_day(posting_date),
+        "to_date": get_last_day(posting_date),
     }
 
 
 def get_central_entry(voucher_no, voucher_detail_no=None):
-    filters = {'voucher_no': voucher_no, 'docstatus': 1}
+    filters = {"voucher_no": voucher_no, "docstatus": 1}
 
     if voucher_detail_no:
-        filters.update({'voucher_detail_no': voucher_detail_no})
+        filters.update({"voucher_detail_no": voucher_detail_no})
 
     central_entry_doc = None
-    central_entry = frappe.get_all('Central Entry', filters=filters)
+    central_entry = frappe.get_all("Central Entry", filters=filters)
 
     if central_entry:
-        name = central_entry[0]['name']
-        central_entry_doc = frappe.get_doc('Central Entry', name)
+        name = central_entry[0]["name"]
+        central_entry_doc = frappe.get_doc("Central Entry", name)
 
     return central_entry_doc
 
 
 def get_color_variants():
     variants = frappe.get_all(
-        'Item Variant Attribute',
-        filters={'attribute': 'Colour'},
-        fields=['parent', 'attribute_value']
+        "Item Variant Attribute",
+        filters={"attribute": "Colour"},
+        fields=["parent", "attribute_value"],
     )
-    return {variant['parent']: variant['attribute_value'] for variant in variants}
+    return {variant["parent"]: variant["attribute_value"] for variant in variants}
 
 
 def create_central_entry(stock_entry):
-    return frappe.get_doc({
-        'doctype': 'Central Entry',
-        'voucher_type': 'Stock Entry',
-        'voucher_no': stock_entry.get('name'),
-        'posting_date': stock_entry.get('posting_date'),
-        'allocation': stock_entry.get('total_amount')
-    }).insert()
+    return frappe.get_doc(
+        {
+            "doctype": "Central Entry",
+            "voucher_type": "Stock Entry",
+            "voucher_no": stock_entry.get("name"),
+            "posting_date": stock_entry.get("posting_date"),
+            "allocation": stock_entry.get("total_amount"),
+        }
+    ).insert()
 
 
 def get_central_costs(filters):
-    res = frappe.db.sql("""
+    res = frappe.db.sql(
+        """
         SELECT cep.project, cep.allocation, cep.labor_allocation
         FROM `tabCentral Expense Project` AS cep
         INNER JOIN `tabCentral Expense` AS ce
@@ -188,13 +238,16 @@ def get_central_costs(filters):
         WHERE ce.docstatus = 1
         AND ce.from_date <= %(to_date)s
         AND ce.to_date >= %(from_date)s
-    """, filters, as_dict=True)
+    """,
+        filters,
+        as_dict=True,
+    )
     return res
 
 
 def get_excluded_projects():
-    projects = frappe.get_all('Ashbee Settings Project', fields=['project'])
-    return [project.get('project') for project in projects]
+    projects = frappe.get_all("Ashbee Settings Project", fields=["project"])
+    return [project.get("project") for project in projects]
 
 
 # TODO: add company field
@@ -202,7 +255,9 @@ def check_central_expense(posting_date):
     central_expense = _get_central_expense(posting_date)
 
     if central_expense:
-        frappe.throw(_('Unable to transact. This month is closed with Central Expense.'))
+        frappe.throw(
+            _("Unable to transact. This month is closed with Central Expense.")
+        )
 
 
 def set_item_weight(doc):
@@ -212,7 +267,7 @@ def set_item_weight(doc):
     :return:
     """
     for item in doc.items:
-        weight = frappe.db.get_value('Item', item.item_code, 'ashbee_weight')
+        weight = frappe.db.get_value("Item", item.item_code, "ashbee_weight")
         length = _get_item_length(item.item_code)
         item.ashbee_item_weight = item.qty * (weight * length)
 
@@ -225,17 +280,21 @@ def set_total_weight(doc):
 
 
 def testing():
-    check_central_expense('2019-06-01')
+    check_central_expense("2019-06-01")
 
 
 def _get_item_length(item):
-    filters = {'parent': item, 'attribute': 'Length'}
+    filters = {"parent": item, "attribute": "Length"}
 
-    item_attribute_value = frappe.db.sql("""
+    item_attribute_value = frappe.db.sql(
+        """
         SELECT attribute_value
         FROM `tabItem Variant Attribute`
         WHERE parent = %(parent)s AND attribute = %(attribute)s
-    """, filters, as_list=True)
+    """,
+        filters,
+        as_list=True,
+    )
 
     item_length = 0.00
 
@@ -255,12 +314,16 @@ def _float_or_zero(value):
 
 # TODO: check for any usage
 def _get_central_expense(posting_date):
-    central_expense = frappe.db.sql("""
+    central_expense = frappe.db.sql(
+        """
         SELECT name FROM `tabCentral Expense`
         WHERE docstatus = 1
         AND from_date <= %(posting_date)s
         AND to_date >= %(posting_date)s
-    """, {'posting_date': posting_date}, as_dict=True)
+    """,
+        {"posting_date": posting_date},
+        as_dict=True,
+    )
 
     return central_expense[0] if central_expense else None
 
@@ -268,9 +331,9 @@ def _get_central_expense(posting_date):
 def _sum_costs_by_projects(direct_costs, material_issues, timesheet_details):
     projects = {}
 
-    _set_summed_dict(direct_costs, 'project', 'sum_direct_cost', projects)
-    _set_summed_dict(material_issues, 'project', 'sum_total_outgoing_value', projects)
-    _set_summed_dict(timesheet_details, 'project', 'sum_costing_amount', projects)
+    _set_summed_dict(direct_costs, "project", "sum_direct_cost", projects)
+    _set_summed_dict(material_issues, "project", "sum_total_outgoing_value", projects)
+    _set_summed_dict(timesheet_details, "project", "sum_costing_amount", projects)
 
     return projects
 
@@ -289,14 +352,11 @@ def _set_summed_dict(sum_list, field_key, field_value, _):
 
 
 def test():
-    filters = {
-        'from_date': '2019-04-24',
-        'to_date': '2019-05-31'
-    }
+    filters = {"from_date": "2019-04-24", "to_date": "2019-05-31"}
 
     print(get_all_timesheet_details(filters))
     print(get_all_direct_costs(filters))
     print(get_all_indirect_costs(filters))
     print(get_all_material_issues(filters))
     print(get_all_material_returns(filters))
-    print(get_central_entry('MTSOUT-19-00007'))
+    print(get_central_entry("MTSOUT-19-00007"))
