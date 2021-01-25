@@ -17,7 +17,8 @@ class IndirectCost(Document):
 		if not self.items:
 			filters = {
 				'from_date': self.start_date,
-				'to_date': self.end_date
+				'to_date': self.end_date,
+				'company': self.company,
 			}
 
 			projects = get_costs_by_projects(filters)
