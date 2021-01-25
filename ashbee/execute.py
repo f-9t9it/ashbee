@@ -238,3 +238,18 @@ def set_central_entries_ts_company():
         frappe.db.set_value('Central Entry', row.get('name'), 'company', row.get('company'))
         x = x + 1
         print('Completed: {}/{}'.format(x, data_length))
+
+
+def set_central_entries_pi_company():
+    data = frappe.db.sql("""
+        SELECT ce.name, pi.company
+        FROM `tabCentral Entry` ce
+        JOIN `tabPurchase Invoice` pi ON pi.name = ce.voucher_no
+        WHERE ce.voucher_type = 'Purchase Invoice'
+    """, as_dict=True)
+    x = 0
+    data_length = len(data)
+    for row in data:
+        frappe.db.set_value('Central Entry', row.get('name'), 'company', row.get('company'))
+        x = x + 1
+        print('Completed: {}/{}'.format(x, data_length))
