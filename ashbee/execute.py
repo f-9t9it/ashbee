@@ -1,5 +1,6 @@
 import frappe
 from pprint import pprint
+from toolz import pluck
 
 
 def patch_trailing_space():
@@ -225,6 +226,7 @@ def set_central_entries_se_company():
         print('Completed: {}/{}'.format(x, data_length))
 
 
+# bench execute ashbee.execute.set_central_entries_ts_company
 def set_central_entries_ts_company():
     data = frappe.db.sql("""
         SELECT ce.name, ts.company
@@ -240,6 +242,7 @@ def set_central_entries_ts_company():
         print('Completed: {}/{}'.format(x, data_length))
 
 
+# bench execute ashbee.execute.set_central_entries_pi_company
 def set_central_entries_pi_company():
     data = frappe.db.sql("""
         SELECT ce.name, pi.company
@@ -253,3 +256,32 @@ def set_central_entries_pi_company():
         frappe.db.set_value('Central Entry', row.get('name'), 'company', row.get('company'))
         x = x + 1
         print('Completed: {}/{}'.format(x, data_length))
+
+
+# bench execute ashbee.execute.set_central_entries_dci_company
+def set_central_entries_dci_company():
+    data = frappe.db.sql("""
+        SELECT ce.name, dci.job_no
+        FROM `tabCentral Entry` ce
+        JOIN `tabDirect Cost Item` dci ON dci.parent = ce.voucher_no
+        WHERE ce.voucher_type = 'Direct Cost'
+    """, as_dict=True)
+    projects_from_data = list(set(pluck("job_no", data)))
+    companies_from_projects = _get_companies_from_projects(projects_from_data)
+    x = 0
+    data_length = len(data)
+    for row in data:
+        job_no = row.get('job_no')
+        company = companies_from_projects[job_no]
+        frappe.db.set_value('Central Entry', row.get('name'), 'company', company)
+        x = x + 1
+        print('Completed: {}/{}'.format(x, data_length))
+
+
+def _get_companies_from_projects(projects):
+    companies = frappe.db.sql("""
+        SELECT name, company
+        FROM `tabProject`
+        WHERE name IN %(projects)s
+    """, {'projects': projects}, as_dict=True)
+    return {x.get('name'): x.get('company') for x in companies}
