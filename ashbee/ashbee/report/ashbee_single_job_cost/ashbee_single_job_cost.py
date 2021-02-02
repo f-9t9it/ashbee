@@ -13,11 +13,10 @@ from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost
 def execute(filters=None):
     columns, data = get_columns(), get_data(filters)
 
-    # header = _get_header(filters)
-
     if data:
         total_row = _get_total_row(data, '<b>Grand Total</b>')
-        overhead_charges = _fill_overhead_charges(total_row, filters.get('overhead_percent') / 100.00)
+        overhead_value = filters.get('overhead_percent', 0.00) / 100.00
+        overhead_charges = _fill_overhead_charges(total_row, overhead_value)
         total_row['overhead_charges'] = overhead_charges
         data.append(total_row)
         data = list(
@@ -47,18 +46,11 @@ def get_columns():
 
 def get_data(filters):
     data = []
-    # overhead_percent = filters.get('overhead_percent') / 100.00
 
-    # project_expenses = _get_project_expenses(filters)
-    # project_expenses['overhead_charges'] = _fill_overhead_charges(
-    #     project_expenses,
-    #     overhead_percent
-    # )
-    #
-    # data.append(project_expenses)
+    sl_entries = _get_stock_ledger_entries(filters)
 
     entries = [
-        _get_stock_ledger_entries(filters),
+        sl_entries,
         _get_purchase_cost_items(filters),
         _get_central_labor_items(filters),
         _get_central_expense_items(filters),
