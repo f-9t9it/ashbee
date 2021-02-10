@@ -206,6 +206,9 @@ fixtures = [
 # Hook on document methods and events
 
 doc_events = {
+    "*": {
+        "validate": "ashbee.ashbee.customs.doc.doc_save"
+    },
     "Item": {
         "validate": "ashbee.ashbee.customs.items.item_save"
     },
