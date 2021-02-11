@@ -5,24 +5,34 @@ from toolz import merge, partial, compose
 import frappe
 import pprint
 
-from ashbee.helpers import new_column, fill_item_name, total_to_column, exclude_items, fill_timesheet_month, sort_timesheet
-from ashbee.utils.project import get_labour_expenses, get_consumed_material_cost, get_purchase_cost, \
-    get_central_allocations, get_indirect_costs, get_direct_costs
+from ashbee.helpers import (
+    new_column,
+    fill_item_name,
+    total_to_column,
+    exclude_items,
+    fill_timesheet_month,
+    sort_timesheet,
+)
+from ashbee.utils.project import (
+    get_labour_expenses,
+    get_consumed_material_cost,
+    get_purchase_cost,
+    get_central_allocations,
+    get_indirect_costs,
+    get_direct_costs,
+)
 
 
 def execute(filters=None):
     columns, data = get_columns(), get_data(filters)
 
-    # header = _get_header(filters)
-
     if data:
-        total_row = _get_total_row(data, '<b>Grand Total</b>')
-        overhead_charges = _fill_overhead_charges(total_row, filters.get('overhead_percent') / 100.00)
-        total_row['overhead_charges'] = overhead_charges
+        total_row = _get_total_row(data, "<b>Grand Total</b>")
+        overhead_value = filters.get("overhead_percent", 0.00) / 100.00
+        overhead_charges = _fill_overhead_charges(total_row, overhead_value)
+        total_row["overhead_charges"] = overhead_charges
         data.append(total_row)
-        data = list(
-            map(_compute_row_wise_total, data)
-        )
+        data = list(map(_compute_row_wise_total, data))
 
     return columns, data
 
@@ -41,24 +51,17 @@ def get_columns():
         new_column("Central Expenses", "central_expenses", "Currency", 120),
         new_column("Indirect", "indirect", "Currency", 120),
         new_column("Overhead Charges", "overhead_charges", "Currency", 120),
-        new_column("Total", "total", "Currency", 120)
+        new_column("Total", "total", "Currency", 120),
     ]
 
 
 def get_data(filters):
     data = []
-    # overhead_percent = filters.get('overhead_percent') / 100.00
 
-    # project_expenses = _get_project_expenses(filters)
-    # project_expenses['overhead_charges'] = _fill_overhead_charges(
-    #     project_expenses,
-    #     overhead_percent
-    # )
-    #
-    # data.append(project_expenses)
+    sl_entries = _get_stock_ledger_entries(filters)
 
     entries = [
-        _get_stock_ledger_entries(filters),
+        sl_entries,
         _get_purchase_cost_items(filters),
         _get_central_labor_items(filters),
         _get_central_expense_items(filters),
@@ -68,10 +71,7 @@ def get_data(filters):
     for entry in entries:
         data.extend(entry)
 
-    data.sort(
-        key=lambda x: x['date'],
-        reverse=filters.get('date_ascending', False)
-    )
+    data.sort(key=lambda x: x["date"], reverse=filters.get("date_ascending", False))
 
     # Direct Cost
     data.extend(_get_direct_cost_items(filters))
@@ -79,17 +79,18 @@ def get_data(filters):
     # Separated as timesheet has no date for sort
     data.extend(_get_timesheet_details(filters))
 
-    return data
+    project_openings = _get_project_openings(filters)
+
+    return [project_openings, *data]
 
 
 def _get_project_expenses(filters):
     labour_expenses = get_labour_expenses(filters)
     filtered_sum = compose(sum, partial(filter, lambda x: x))
     material_direct = {
-        'material_direct': filtered_sum(
+        "material_direct": filtered_sum(
             merge(
-                get_consumed_material_cost(filters),
-                get_purchase_cost(filters)
+                get_consumed_material_cost(filters), get_purchase_cost(filters)
             ).values()
         )
     }
@@ -97,19 +98,15 @@ def _get_project_expenses(filters):
     central_allocations = get_central_allocations(filters)
     indirect = get_indirect_costs(filters)
 
-    return merge(
-        labour_expenses,
-        material_direct,
-        central_allocations,
-        indirect
-    )
+    return merge(labour_expenses, material_direct, central_allocations, indirect)
 
 
 @fill_item_name
-@total_to_column(column='material_direct')
-@exclude_items(items=['Othr-000-0'])
+@total_to_column(column="material_direct")
+@exclude_items(items=["Othr-000-0"])
 def _get_stock_ledger_entries(filters):
-    return frappe.db.sql("""
+    return frappe.db.sql(
+        """
         SELECT 
             posting_date AS date, 
             voucher_no AS reference, 
@@ -119,13 +116,17 @@ def _get_stock_ledger_entries(filters):
         FROM `tabStock Ledger Entry`
         WHERE project=%(project)s 
         AND posting_date BETWEEN %(from_date)s AND %(to_date)s
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
 @sort_timesheet
 @fill_timesheet_month
 def _get_timesheet_details(filters):
-    return frappe.db.sql("""
+    return frappe.db.sql(
+        """
         SELECT 
             'Timesheet' AS description,
             MONTHNAME(start_date) AS timesheet_month,
@@ -139,36 +140,28 @@ def _get_timesheet_details(filters):
         AND `tabTimesheet Detail`.docstatus=1
         AND start_date BETWEEN %(from_date)s AND %(to_date)s
         GROUP BY MONTH(start_date)
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
-def _get_total_row(data, description='Total'):
+def _get_total_row(data, description="Total"):
     columns_for_total = _get_columns_for_total()
     total_row = {column: 0.00 for column in columns_for_total}
 
     for column in total_row.keys():
         total_row[column] = sum([abs(row.get(column, 0.00)) for row in data])
 
-    total_row['description'] = description
+    total_row["description"] = description
 
     return total_row
 
-    # total_qty = 0
-    # total_rate = 0.00
-    # for row in data:
-    #     total_qty = total_qty + (row.get('qty') or 0)
-    #     total_rate = total_rate + (row.get('rate') or 0)
-    # return {
-    #     'description': description,
-    #     'qty': total_qty,
-    #     'rate': total_rate
-    # }
-
 
 def _fill_overhead_charges(project_expenses, overhead_percent):
-    material_direct = project_expenses.get('material_direct', 0.00)
-    labor_expenses = project_expenses.get('labor_expenses', 0.00)
-    indirect = project_expenses.get('indirect', 0.00)
+    material_direct = project_expenses.get("material_direct", 0.00)
+    labor_expenses = project_expenses.get("labor_expenses", 0.00)
+    indirect = project_expenses.get("indirect", 0.00)
 
     return (material_direct + labor_expenses + indirect) * overhead_percent
 
@@ -178,29 +171,30 @@ def _fill_blank(data):
 
 
 def _get_header(filters):
-    project = filters.get('project')
-    from_date = filters.get('from_date')
-    to_date = filters.get('to_date')
+    project = filters.get("project")
+    from_date = filters.get("from_date")
+    to_date = filters.get("to_date")
 
     project_code = _get_project_code(project)
 
     return [
-        {'reference': '<b>ASHBEE METAL CLADDING WILL</b>'},
-        {'reference': '<i>Job Income Expense Report</i>'},
+        {"reference": "<b>ASHBEE METAL CLADDING WILL</b>"},
+        {"reference": "<i>Job Income Expense Report</i>"},
         {},
-        {'reference': '{} - {}'.format(project_code, project)},
-        {'reference': '<i>From {} To {}</i>'.format(from_date, to_date)},
-        {}
+        {"reference": "{} - {}".format(project_code, project)},
+        {"reference": "<i>From {} To {}</i>".format(from_date, to_date)},
+        {},
     ]
 
 
 def _get_project_code(project):
-    return frappe.db.get_value('Project', project, 'ashbee_project_code')
+    return frappe.db.get_value("Project", project, "ashbee_project_code")
 
 
-@total_to_column(column='material_direct')
+@total_to_column(column="material_direct")
 def _get_purchase_cost_items(filters):
-    return frappe.db.sql("""
+    return frappe.db.sql(
+        """
         SELECT
             doc.posting_date AS date,
             doc.name AS reference,
@@ -214,12 +208,16 @@ def _get_purchase_cost_items(filters):
         AND project = %(project)s
         AND posting_date
         BETWEEN %(from_date)s AND %(to_date)s
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
-@total_to_column(column='central_labour')
+@total_to_column(column="central_labour")
 def _get_central_labor_items(filters):
-    return frappe.db.sql("""
+    return frappe.db.sql(
+        """
         SELECT
             ce.posting_date AS date,
             ce.name AS reference,
@@ -233,12 +231,16 @@ def _get_central_labor_items(filters):
         AND project = %(project)s
         AND from_date <= %(to_date)s
         AND to_date >= %(from_date)s
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
-@total_to_column(column='central_expenses')
+@total_to_column(column="central_expenses")
 def _get_central_expense_items(filters):
-    return frappe.db.sql("""
+    return frappe.db.sql(
+        """
         SELECT
             ce.posting_date AS date,
             ce.name AS reference,
@@ -252,12 +254,16 @@ def _get_central_expense_items(filters):
         AND project = %(project)s
         AND from_date <= %(to_date)s
         AND to_date >= %(from_date)s
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
-@total_to_column(column='indirect')
+@total_to_column(column="indirect")
 def _get_indirect_cost_items(filters):
-    return frappe.db.sql("""
+    return frappe.db.sql(
+        """
         SELECT 
             doc.posting_date AS date,
             doc.name AS reference,
@@ -271,11 +277,15 @@ def _get_indirect_cost_items(filters):
         AND project = %(project)s
         AND start_date <= %(to_date)s
         AND end_date >= %(from_date)s
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
 def _get_direct_cost_items(filters):
-    return frappe.db.sql("""
+    return frappe.db.sql(
+        """
         SELECT 
             item.posting_date AS date,
             `tabDirect Cost`.name AS reference,
@@ -289,34 +299,67 @@ def _get_direct_cost_items(filters):
         AND job_no = %(project)s
         AND item.posting_date
         BETWEEN %(from_date)s AND %(to_date)s
-    """, filters, as_dict=1)
+    """,
+        filters,
+        as_dict=1,
+    )
 
 
 def _get_columns_for_total():
     return [
-        'qty',
-        'rate',
-        'material_direct',
-        'labor_expenses',
-        'central_labour',
-        'central_expenses',
-        'indirect',
-        'overhead_charges'
+        "qty",
+        "rate",
+        "material_direct",
+        "labor_expenses",
+        "central_labour",
+        "central_expenses",
+        "indirect",
+        "overhead_charges",
     ]
 
 
 def _compute_row_wise_total(row):
     columns = [
-        'material_direct',
-        'labor_expenses',
-        'central_labour',
-        'central_expenses',
-        'indirect',
-        'overhead_charges'
+        "material_direct",
+        "labor_expenses",
+        "central_labour",
+        "central_expenses",
+        "indirect",
+        "overhead_charges",
     ]
 
     values = [row.get(column, 0.00) for column in columns]
 
-    row['total'] = sum(values)
+    row["total"] = sum(values)
 
     return row
+
+
+def _get_column_types():
+    return {
+        "Material+Direct": "material_direct",
+        "Labor Expenses": "labor_expenses",
+        "Central Labour": "central_labour",
+        "Central Expenses": "central_expenses",
+        "Indirect": "indirect",
+    }
+
+
+def _get_project_openings(filters):
+    project_openings = frappe.db.sql(
+        """
+        SELECT 
+            opening_type, 
+            opening_amount
+        FROM `tabProject Opening`
+        WHERE parent = %(project)s
+        GROUP BY opening_type
+        """,
+        filters,
+        as_dict=1,
+    )
+    column_types = _get_column_types()
+    return {
+        column_types.get(x.get("opening_type")): x.get("opening_amount")
+        for x in project_openings
+    }

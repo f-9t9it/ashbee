@@ -131,7 +131,8 @@ fixtures = [
                     "Employee-ashbee_gratuity_details",
                     "Employee-ashbee_gratuity_till_date",
                     "Employee-ashbee_gratuity_paid_till_date",
-                    "Purchase Order-project"
+                    "Purchase Order-project",
+                    "Project-ashbee_openings"
                 ]
             ]
         ]
@@ -205,6 +206,9 @@ fixtures = [
 # Hook on document methods and events
 
 doc_events = {
+    "*": {
+        "validate": "ashbee.ashbee.customs.doc.doc_save"
+    },
     "Item": {
         "validate": "ashbee.ashbee.customs.items.item_save"
     },

@@ -40,6 +40,9 @@ def fill_item_name(func):
         data = func(*args)
 
         items = list(pluck('description', data))
+        if not items:
+            return data
+
         items_sql = list(map(lambda x: "'{}'".format(x), items))
         in_items = ', '.join(items_sql)
         item_names = frappe.db.sql("""
@@ -54,6 +57,7 @@ def fill_item_name(func):
             row['description'] = '{} ({})'.format(name, items_dict[name])
 
         return data
+
     return inner
 
 
