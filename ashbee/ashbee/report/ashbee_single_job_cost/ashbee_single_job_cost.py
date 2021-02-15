@@ -342,6 +342,7 @@ def _get_column_types():
         "Central Labour": "central_labour",
         "Central Expenses": "central_expenses",
         "Indirect": "indirect",
+        "Overhead Charges": "overhead_charges",
     }
 
 
