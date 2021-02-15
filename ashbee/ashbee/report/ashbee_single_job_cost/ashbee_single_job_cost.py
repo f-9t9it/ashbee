@@ -162,8 +162,8 @@ def _fill_overhead_charges(project_expenses, overhead_percent):
     material_direct = project_expenses.get("material_direct", 0.00)
     labor_expenses = project_expenses.get("labor_expenses", 0.00)
     indirect = project_expenses.get("indirect", 0.00)
-
-    return (material_direct + labor_expenses + indirect) * overhead_percent
+    overhead_charges = project_expenses.get("overhead_charges", 0.00)
+    return (material_direct + labor_expenses + indirect) * overhead_percent + overhead_charges
 
 
 def _fill_blank(data):
